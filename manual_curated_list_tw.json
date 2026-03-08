@@ -50,5 +50,17 @@
   {
     "website": "article19.org",
     "url": "https://www.article19.org"
+  },
+  {
+    "website": "perplexity.ai",
+    "url": "https://www.perplexity.ai"
+  },
+  {
+    "website": "eltaott.tv",
+    "url": "https://eltaott.tv"
+  },
+  {
+    "website": "hamivideo.hinet.net",
+    "url": "https://hamivideo.hinet.net"
   }
 ]
