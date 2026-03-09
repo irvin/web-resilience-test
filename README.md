@@ -293,7 +293,7 @@ node batch-test.js --debug --adblock-url https://filter.futa.gg/hosts_abp.txt --
 
 當你想要測試一個新的網站並將結果加入到結果庫時，可以按照以下步驟進行：
 
-### 步驟 1：執行單一網站測試並儲存結果
+### 步驟 1：執行單一網站檢測並儲存結果
 
 ```bash
 npm run check --save https://www.example.com
@@ -301,15 +301,18 @@ npm run check --save https://www.example.com
 
 **說明：**
 - `--save` 參數會將檢測結果儲存到 `test-results/` 目錄
-- 結果會以 JSON 格式儲存，檔名格式為 `{domain}.json`
+- 結果會以 JSON 格式儲存，檔名格式大致為 `{hostname+path}.json`
 - 例如：測試 `https://www.article19.org` 會產生 `test-results/www.article19.org.json`
 
 **可選參數：**
 - `--debug`：顯示詳細的檢測過程資訊
 - `--adblock false`：不使用 adblock 清單過濾
 - `--timeout N`：設定頁面載入 timeout（秒，預設 120）
+- `--headless false`：改用有頭模式（看得到瀏覽器）
 
-### 步驟 2：更新統計資料
+> 若你是一次新增多個網站，比較建議使用下方的 `batch-test.js` 批次腳本，會自動為每個網站呼叫 `checkWebsiteResilience(... --save)` 並在最後幫你跑統計。
+
+### 步驟 2：更新統計資料 (`test-results/statistic.tsv`)
 
 執行以下指令更新 `statistic.tsv`：
 
@@ -320,11 +323,13 @@ node generate_statistic.js
 **說明：**
 - 此腳本會讀取 `test-results/` 目錄下的所有 JSON 檔案
 - 生成或更新 `test-results/statistic.tsv` 統計檔案
-- 統計資料會按照 `top-traffic-list-taiwan/merged_lists_tw.json` 的順序排序
+- 統計資料會按照 `top-traffic-list-taiwan/merged_lists_tw.json` 的順序排序，不在清單中的網站會附加在最後
 
-### 步驟 3：提交結果到 Git
+> 使用 `batch-test.js` 時，腳本會在批次結束後自動呼叫 `generate_statistic.js`，不需要再手動多跑一次。
 
-`test-results/` 是一個 Git submodule，需要將結果提交並推送：
+### 步驟 3：提交結果到 Git（若有使用 submodule）
+
+在此專案中，`test-results/` 是一個 Git submodule，需要在該目錄內單獨提交並推送變更：
 
 ```bash
 cd test-results
@@ -332,6 +337,9 @@ git add .
 git commit -m "新增網站測試結果: example.com"
 git push
 ```
+
+> 若要在公開網站（例如 `https://resilience.ocf.tw/web/`）上看到這個新網站對應的頁面，  
+> 請參考 `web-resilience-test-profile` 專案的 README 中「從更新檢測結果到看到新網頁的流程」段落。
 
 ### 手動維護測試清單
 
@@ -353,14 +361,15 @@ git push
 **說明：**
 - `website`：網站的主要域名（用於識別）
 - `url`：要測試的完整 URL（可以是首頁或特定頁面）
-- 編輯後，執行 `generate_statistic.js` 時會自動包含這些網站
+- 編輯後，執行 `generate_statistic.js` 或透過 `batch-test.js` 產生統計時，這些網站都會一起被納入
 
 ### 注意事項
 
-1. **檔案命名**：結果檔案會根據 URL 自動命名，通常會移除 `https://` 和尾隨的 `/`
+1. **檔案命名**：結果檔案會根據 URL 自動命名，通常會移除 `https://` 和尾隨的 `/`，並將路徑 `/` 轉成 `_`
 2. **重複測試**：如果同一個網站已經有測試結果，新的結果會覆蓋舊的檔案
 3. **統計資料順序**：`generate_statistic.js` 會優先按照 `merged_lists_tw.json` 的順序排列，不在清單中的網站會附加在最後
-4. **Submodule 管理**：`test-results/` 是一個獨立的 Git repository（submodule），需要分別提交和推送
+4. **Submodule 管理**：如果 `test-results/` 是獨立的 Git repository（submodule），需要在該 repo 內單獨提交和推送
+5. **公開頁面更新**：產出/更新 `statistic.tsv` 並不會自動更新公開網站，需要在 `web-resilience-test-profile` 專案中重新建置並部署
 
 ### 範例輸出
 ```
