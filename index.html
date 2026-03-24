@@ -34,32 +34,30 @@
 <h1>海纜斷光會怎樣？認識台灣的國際網路中斷風險</h1>
 <h2>When Submarine Cables Go Dark: Understanding and Preparing for the Risks of Taiwan’s International Internet Disconnection</h2>
 <h3>作者</h3>
-<p>陳心一 Irvin Chen<br>開放文化基金會 (<a href="https://ocf.tw">ocf.tw</a>)<br>OCF, Open Culture Foundation
-MozTW, Mozilla 台灣社群 (<a href="https://moztw.org">moztw.org</a>)<br>Mozilla Taiwan Community</p>
+<p>陳心一 Irvin Chen<br>開放文化基金會 (<a href="https://ocf.tw">ocf.tw</a>) OCF, Open Culture Foundation<br>MozTW, Mozilla 台灣社群 (<a href="https://moztw.org">moztw.org</a>) Mozilla Taiwan Community  </p>
 <h3>更新日期</h3>
 <p>Published: 2026-03-23<br>Last Updated: 2026-03-23</p>
 <h3>Acknowledgement</h3>
 <p>This work was supported by a grant from the APNIC Foundation, via the Information Society Innovation Fund
 (ISIF Asia).</p>
-<h1>目錄</h1>
-<ul>
-<li><a href="#%E6%91%98%E8%A6%81">1. 摘要</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF">2. 研究背景</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E5%95%8F%E9%A1%8C">3. 研究問題</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E6%A8%99%E7%9A%84%E8%88%87%E7%92%B0%E5%A2%83">4. 研究標的與環境</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95">5. 研究方法</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E5%AF%A6%E4%BD%9C%E8%88%87%E8%B3%87%E6%96%99%E8%99%95%E7%90%86">6. 研究實作與資料處理</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E7%B5%90%E6%9E%9C">7. 研究結果</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E5%BB%BA%E8%AD%B0">8. 研究建議</a></li>
-<li><a href="#%E7%A0%94%E7%A9%B6%E9%99%90%E5%88%B6%E8%88%87%E5%BE%8C%E7%BA%8C%E6%96%B9%E5%90%91">9. 研究限制與後續方向</a></li>
-<li><a href="#%E8%AA%8C%E8%AC%9D">10. 誌謝</a></li>
-</ul>
 <h2>摘要</h2>
 <p>本研究探討當台灣發生大規模國際海底電纜中斷時，日常常用網路服務的可用性風險。透過瀏覽器觀測網站首頁資源要求，追蹤頁面依賴資源的來源，作為風險評估指標。研究聚焦兩項核心議題：</p>
 <p>（一）台灣常用網站對境外資源的依賴程度；
 （二）台灣常用網站對跨國雲服務境內節點的依賴程度，以及雲端依賴相關的韌性特徵。</p>
 <p>本研究發展一套量測的方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。</p>
 <p>經檢測 1832 個台灣常用網站，結果顯示，47% 的網站存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42% 的網站依賴跨國公有雲在台節點資源，其在境外連線中斷時的實際可用性，仍存在高度不確定性。</p>
+<h2>目錄</h2>
+<ul>
+<li><a href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF">1. 研究背景</a></li>
+<li><a href="#%E7%A0%94%E7%A9%B6%E5%95%8F%E9%A1%8C">2. 研究問題</a></li>
+<li><a href="#%E7%A0%94%E7%A9%B6%E6%A8%99%E7%9A%84%E8%88%87%E7%92%B0%E5%A2%83">3. 研究標的與環境</a></li>
+<li><a href="#%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95">4. 研究方法</a></li>
+<li><a href="#%E7%A0%94%E7%A9%B6%E5%AF%A6%E4%BD%9C%E8%88%87%E8%B3%87%E6%96%99%E8%99%95%E7%90%86">5. 研究實作與資料處理</a></li>
+<li><a href="#%E7%A0%94%E7%A9%B6%E7%B5%90%E6%9E%9C">6. 研究結果</a></li>
+<li><a href="#%E7%A0%94%E7%A9%B6%E5%BB%BA%E8%AD%B0">7. 研究建議</a></li>
+<li><a href="#%E7%A0%94%E7%A9%B6%E9%99%90%E5%88%B6%E8%88%87%E5%BE%8C%E7%BA%8C%E6%96%B9%E5%90%91">8. 研究限制與後續方向</a></li>
+<li><a href="#%E8%AA%8C%E8%AC%9D">9. 誌謝</a></li>
+</ul>
 <h2>研究背景</h2>
 <h3>日常網路服務如何依賴國際連線</h3>
 <p>全球資訊網（World Wide Web，WWW）是台灣社會運作的基礎。</p>
