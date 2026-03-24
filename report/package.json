@@ -1,0 +1,13 @@
+{
+  "name": "web-resilience-test-report-builder",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Build markdown reports under /report",
+  "scripts": {
+    "build": "node tools/build-report-root.js",
+    "publish": "node tools/publish-report.js"
+  },
+  "devDependencies": {
+    "marked": "^17.0.5"
+  }
+}
