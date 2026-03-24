@@ -3,35 +3,23 @@
 
 ### 作者
 
-陳心一 Irvin Chen  
-開放文化基金會 ([ocf.tw](https://ocf.tw))  
-OCF, Open Culture Foundation
+陳心一 Irvin Chen   
+開放文化基金會 Open Culture Foundation ([ocf.tw](https://ocf.tw))  
 MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))  
-Mozilla Taiwan Community
 
 ### 更新日期
 
 Published: 2026-03-23  
 Last Updated: 2026-03-23
 
-### Acknowledgement
+### 誌謝
 
-This work was supported by a grant from the APNIC Foundation, via the Information Society Innovation Fund
-(ISIF Asia).
+<img src="img/APNIC-Foundation-and-ISIF-Logo-CMYK-stacked-01-a.svg" alt="" style="height: 100px;" /><br>
+This work was supported by a grant from the [APNIC Foundation](https://apnic.foundation/), via the [Information Society Innovation Fund (ISIF Asia)](https://apnic.foundation/home/isifasia/).
 
-# 目錄
-
-- [1. 摘要](#摘要)
-- [2. 研究背景](#研究背景)
-- [3. 研究問題](#研究問題)
-- [4. 研究標的與環境](#研究標的與環境)
-- [5. 研究方法](#研究方法)
-- [6. 研究實作與資料處理](#研究實作與資料處理)
-- [7. 研究結果](#研究結果)
-- [8. 研究建議](#研究建議)
-- [9. 研究限制與後續方向](#研究限制與後續方向)
-- [10. 誌謝](#誌謝)
-
+<p><a title="g0v 數位韌性松" href="https://g0v.hackmd.io/@paulpengtw/DigiResiTh0n-home" target="_blank"><img src="img/g0v_logo.svg" alt="" style="height: 3em;"></a>
+</p>
+<p><a title="開放文化基金會" href="https://ocf.tw/" target="_blank"><img src="img/Logo_Compact-OCF_Purple.svg" alt="" style="height: 2em;"></a></p>
 
 ## 摘要
 
@@ -43,6 +31,17 @@ This work was supported by a grant from the APNIC Foundation, via the Informatio
 本研究發展一套量測的方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。
 
 經檢測 1832 個台灣常用網站，結果顯示，47% 的網站存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42% 的網站依賴跨國公有雲在台節點資源，其在境外連線中斷時的實際可用性，仍存在高度不確定性。
+
+## 目錄
+
+1. [研究背景](#研究背景)
+2. [研究問題](#研究問題)
+3. [研究標的與環境](#研究標的與環境)
+4. [研究方法](#研究方法)
+5. [研究實作與資料處理](#研究實作與資料處理)
+6. [研究結果](#研究結果)
+7. [研究建議](#研究建議)
+8. [研究限制與後續方向](#研究限制與後續方向)
 
 ## 研究背景
 
@@ -429,7 +428,7 @@ This work was supported by a grant from the APNIC Foundation, via the Informatio
 | 教育網站 | 219 | 36 | 16% |
 | 全部 | 1832 | 862 | 47% |
 
-<!-- FIXME: ### 失敗樣本分析 -->
+<!-- FIXME: add 失敗樣本分析 -->
 
 ## 研究建議
 
@@ -437,7 +436,7 @@ This work was supported by a grant from the APNIC Foundation, via the Informatio
 
 綜合本研究發現，台灣常用網站的主要風險，並非來自少數完全位於境外的服務，而廣泛存在於對境外資源、與跨國公有雲在台節點的依賴結構中。因此，提升韌性的策略不應限於聚焦「服務是否在台灣」，而應進一步檢驗其資源供應鏈、雲端控制面、與關鍵使用流程，是否具備本地持續運作能力。
 
-<!-- FIXME: 政策建議分眾： 政府採購與監管、關鍵基礎設施營運者、網站開發者 -->
+<!-- FIXME: add 政策建議分眾： 政府採購與監管、關鍵基礎設施營運者、網站開發者 -->
 
 ### 政策面建議
 
@@ -479,8 +478,3 @@ This work was supported by a grant from the APNIC Foundation, via the Informatio
 - 分析不同資源種類（document、script、image、xhr、font、stylesheet）間是否有依賴差異
 - 分析不同類型網站（新聞、電商、社群、搜尋引擎等）間的韌性差異
 - 鑑別「高流量但低韌性」的高風險網站
-
-## 誌謝
-
-This work was supported by a grant from the APNIC Foundation, via the Information Society Innovation Fund
-(ISIF Asia).
