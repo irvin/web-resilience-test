@@ -325,6 +325,26 @@ node generate_statistic.js
 - 生成或更新 `test-results/statistic.tsv` 統計檔案
 - 統計資料會按照 `top-traffic-list-taiwan/merged_lists_tw.json` 的順序排序，不在清單中的網站會附加在最後
 
+**圖表輸出（`report/img`）與日期規則：**
+- 會同步輸出：
+  - `overall-result-YYYY-MM-DD.svg`
+  - `resource-distribution-YYYY-MM-DD.svg`
+- `YYYY-MM-DD` 來源：
+  - 預設：取資料中 `timestamp` 最大值日期
+  - 指定 `--data YYYY-MM-DD`：只用該日期（含）以前資料，並以該日期作為 snapshot 與檔名日期
+- 若執行時**未帶 `--date` 且未帶 `--data`**，會額外輸出 latest 檔名：
+  - `overall-result.svg`
+  - `resource-distribution.svg`
+
+**常用範例：**
+```bash
+# 依目前資料自動判定 snapshot 日期（並額外產生 latest 無日期檔名）
+node generate_statistic.js
+
+# 產生「指定日期快照」：只使用該日期（含）以前資料
+node generate_statistic.js --data 2026-01-14
+```
+
 > 使用 `batch-test.js` 時，腳本會在批次結束後自動呼叫 `generate_statistic.js`，不需要再手動多跑一次。
 
 ### 步驟 3：提交結果到 Git（若有使用 submodule）
