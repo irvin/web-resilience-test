@@ -5,6 +5,7 @@ const path = require('path');
 const DIR = path.resolve(__dirname, 'test-results');
 const OUTPUT = path.join(DIR, 'statistic.tsv');
 const REPORT_IMG_DIR = path.resolve(__dirname, 'test-results', 'img');
+const RESOURCE_DISTRIBUTION_TSV = path.join(DIR, 'resource-distribution.tsv');
 const MERGED_LISTS_PATH = path.resolve(
   __dirname,
   'top-traffic-list-taiwan',
@@ -263,6 +264,7 @@ const PROVIDER_RULES = [
   { provider: 'Gamania', patterns: [/gamania/i] },
   { provider: 'Tencent', patterns: [/tencent/i] },
   { provider: 'Zhejiang Taobao', patterns: [/zhejiang taobao/i] },
+  { provider: 'Taiwan Fixed Network', patterns: [/taiwan fixed network/i] },
 ];
 
 function extractOrgName(org) {
@@ -368,6 +370,20 @@ function renderResourceDistributionSvg(distribution, reportDate, topN = 12) {
     `<text x="${width - right}" y="${height - 34}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="18" font-weight="400" fill="#9CA3AF">Data snapshot: ${reportDate}</text>`,
     `</svg>`,
   ].join('');
+}
+
+function renderResourceDistributionTsv(distribution) {
+  const lines = ['name\tcount\tpercent'];
+  for (const item of distribution.items) {
+    lines.push(
+      [
+        item.provider,
+        String(item.count),
+        `${item.percent.toFixed(1)}%`,
+      ].join('\t')
+    );
+  }
+  return `${lines.join('\n')}\n`;
 }
 
 async function main() {
@@ -542,6 +558,16 @@ async function main() {
   }
 
   const resourceDistribution = countResourceDistribution(jsonDataset);
+  const resourceDistributionTsv = renderResourceDistributionTsv(
+    resourceDistribution
+  );
+  await fs.promises.writeFile(
+    RESOURCE_DISTRIBUTION_TSV,
+    resourceDistributionTsv,
+    'utf8'
+  );
+  console.log(`已產生統計：${RESOURCE_DISTRIBUTION_TSV}`);
+
   const resourceSvg = renderResourceDistributionSvg(
     resourceDistribution,
     snapshotDate
