@@ -66,7 +66,7 @@ function extractWebsiteDomain(fileName, data) {
 }
 
 async function main() {
-  const DIR = path.resolve(__dirname, 'test_results');
+  const DIR = path.resolve(__dirname, 'test-results');
   const OUTPUT = path.join(DIR, 'asn_taiwan_ratio.tsv');
 
   // 統計每個 ASN 的請求數和網站數
