@@ -309,26 +309,39 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ### 研究資料快照
 
-本研究共測試了 2158 個網站，其中 1859 個網站完成測試。
+本研究共測試了 2157 個網站，其中 1859 個網站完成測試。
 
-- 資料彙整日期：2026 年 3 月 21 日
+- 資料彙整日期：2026 年 4 月 16 日
 - 測試網站清單： 
   - [merged_lists_tw.json@553b50a](https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json) 
-  - [manual_curated_list_tw.json@a4c53e3](https://github.com/irvin/web-resilience-test/blob/a4c53e30acda30fbf39dab2023a5fdb4d866ef2c/manual_curated_list_tw.json)
-- 測試結果總表： [statistic.tsv@b64a667](https://github.com/irvin/web-resilience-test-result/blob/b64a6676abc98b0b65145d7a9ff2360bd8090bc5/statistic.tsv)
-- 國際公有雲統計： [asn_taiwan_radio.tsv@189dabe](https://github.com/irvin/web-resilience-test-result/blob/189dabeda16da56aaf77f6585f95d1ec72f88259/asn_taiwan_ratio.tsv)
+  - [manual_curated_list_tw.json@28160ed](https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json)
+- 測試結果總表： [statistic.tsv@cb31d38](https://github.com/irvin/web-resilience-test-result/blob/cb31d388e9f0b24081b116bbc77d2a4064c5ad87/statistic.tsv)
+- 國際公有雲統計： [asn_taiwan_radio.tsv@cb31d38](https://github.com/irvin/web-resilience-test-result/blob/cb31d388e9f0b24081b116bbc77d2a4064c5ad87/asn_taiwan_ratio.tsv)
 
 ### 整體結果
 
-在本研究的分類框架下，47.0% 的網站呈現境外資源依賴暴露，顯示其在海纜斷光情境下，**具有較高的直接失效風險**；另有 48.0% 的網站雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性**具有高度不確定性**。整體而言，共有 95.0% 的網站屬於需進一步關注的高風險或高不確定性類型。
+在本研究的分類框架下，47.0% 的網站呈現境外資源依賴暴露，顯示其在海纜斷光情境下，**具有較高的直接失效風險**；另有 48.0% 的網站雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性**具有高度不確定性**，僅有 5.0% 的網站無呈現依賴暴露，能維持正常運作的可能性較高。整體而言，共有 95.0% 的網站屬於需進一步關注的高風險或高不確定性類型。
 
 ![](./img/overall-result-2026-03-21.svg)
 
 ### 結果說明
 
+<!--
+資料出處：web-resilience-test/test-results/overall_result.tsv
+-->
+
 第一個類型的網站，網站本身就來自境外，或有呼叫境外資源，故存在高度失效風險。
 
 第二類網站雖未直接連向境外資源，但其所擷取的資源，來自跨國公有雲在台灣的節點。這些節點在網路拓樸上雖位於台灣，但其控制面、來源架構、身份驗證或快取持續能力，仍可能依賴境外系統。因此，本研究將此類網站視為「雖具在地落點但可用性不確定」的類型。
+
+第三類網站無呈現依賴暴露，表示其網站本身位於境內，且未呼叫境外資源，故能維持正常運作的可能性較高。
+
+| 類型                                           | 網站數 | 百分比 |
+|------------------------------------------------|-------:|-------:|
+| 存在境外資源依賴暴露                           |    874 |  47.0% |
+| 無境外資源依賴<br>但存在跨國雲在台節點依賴暴露 |    892 |  48.0% |
+| 無呈現依賴暴露                                 |     93 |   5.0% |
+| 總計                                           |   1859 | 100.0% |
 
 ### 國際公有雲依賴狀態分析
 
