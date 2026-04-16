@@ -6,7 +6,10 @@
   "scripts": {
     "postinstall": "npx playwright install chromium",
     "check": "node no-global-connection-check.js",
-    "batch-test": "node batch-test.js"
+    "batch-test": "node batch-test.js",
+    "report:init": "npm --prefix report run init-worktree",
+    "report:build": "npm --prefix report run build",
+    "report:publish": "npm --prefix report run publish"
   },
   "dependencies": {
     "playwright": "^1.42.1",
