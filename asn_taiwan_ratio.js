@@ -65,6 +65,10 @@ function extractWebsiteDomain(fileName, data) {
   return fileName.replace(/\.json$/i, '').toLowerCase();
 }
 
+function isTargetDomain(hostname, suffix) {
+  return hostname === suffix || hostname.endsWith(`.${suffix}`);
+}
+
 async function main() {
   const DIR = path.resolve(__dirname, 'test-results');
   const OUTPUT = path.join(DIR, 'asn_taiwan_ratio.tsv');
@@ -103,6 +107,11 @@ async function main() {
   }
   const allResilientWebsites = new Set();
   const resilientWebsitesUsingPublicCloud = new Set();
+  const resilienceRiskStats = {
+    govTw: { total: 0, nonResilient: 0 },
+    eduTw: { total: 0, nonResilient: 0 },
+    overall: { total: 0, nonResilient: 0 },
+  };
 
   for (const file of jsonFiles) {
     const fullPath = path.join(DIR, file);
@@ -129,6 +138,24 @@ async function main() {
     const domesticTotal = (testResults.domestic?.cloud || 0) + (testResults.domestic?.direct || 0);
     const foreignTotal = (testResults.foreign?.cloud || 0) + (testResults.foreign?.direct || 0);
     const isResilient = domesticTotal > 0 && foreignTotal === 0;
+    const isNonResilient = !isResilient;
+
+    resilienceRiskStats.overall.total += 1;
+    if (isNonResilient) {
+      resilienceRiskStats.overall.nonResilient += 1;
+    }
+    if (isTargetDomain(fileHostname, 'gov.tw')) {
+      resilienceRiskStats.govTw.total += 1;
+      if (isNonResilient) {
+        resilienceRiskStats.govTw.nonResilient += 1;
+      }
+    }
+    if (isTargetDomain(fileHostname, 'edu.tw')) {
+      resilienceRiskStats.eduTw.total += 1;
+      if (isNonResilient) {
+        resilienceRiskStats.eduTw.nonResilient += 1;
+      }
+    }
 
     if (isResilient) {
       // 使用 fileHostname 來確保與 statistic.tsv 一致
@@ -174,6 +201,7 @@ async function main() {
 
   // 產生輸出
   const lines = [];
+  lines.push(['=== 雲端資源統計 ==='].join('\t'));
   lines.push(['ASN', 'Company Name', 'Total Requests', 'Taiwan Requests', 'Non-Taiwan Requests', 'Taiwan Ratio (%)', 'Total Websites', 'Websites (domestic node)', 'Websites (foreign node)'].join('\t'));
 
   // 按公司名稱分組統計
@@ -283,6 +311,22 @@ async function main() {
     console.log(`  ${company}: ${count} 個網站`);
     lines.push(`${company}\t${count}`);
   }
+
+  // 輸出 .gov.tw / .edu.tw 與整體的 resilience!=1 統計
+  lines.push('');
+  lines.push('=== 公共機關整體風險統計 ===');
+  lines.push('類型\t測試網站數量\tresilience != 1 網站數量\t比例');
+
+  function appendRiskLine(label, stat) {
+    const ratio = stat.total > 0
+      ? ((stat.nonResilient / stat.total) * 100).toFixed(1)
+      : '0.0';
+    lines.push(`${label}\t${stat.total}\t${stat.nonResilient}\t${ratio}%`);
+  }
+
+  appendRiskLine('政府網站 (.gov.tw)', resilienceRiskStats.govTw);
+  appendRiskLine('教育網站 (.edu.tw)', resilienceRiskStats.eduTw);
+  appendRiskLine('全部', resilienceRiskStats.overall);
 
   // 寫入檔案
   await fs.promises.writeFile(OUTPUT, lines.join('\n'), 'utf8');
