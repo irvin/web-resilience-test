@@ -37,7 +37,7 @@
 <h3 id="作者">作者</h3>
 <p>陳心一 Irvin Chen<br>開放文化基金會 Open Culture Foundation (<a href="https://ocf.tw">ocf.tw</a>)<br>MozTW, Mozilla 台灣社群 (<a href="https://moztw.org">moztw.org</a>)  </p>
 <h3 id="更新日期">更新日期</h3>
-<p>Published: 2026-03-23<br>Last Updated: 2026-03-23</p>
+<p>Published: 2026-03-23<br>Last Updated: 2026-04-16</p>
 <h3 id="誌謝">誌謝</h3>
 <p><img src="img/APNIC-Foundation-and-ISIF-Logo-CMYK-stacked-01-a.svg" alt="" style="height: 100px;" /><br>
 This work was supported by a grant from the <a href="https://apnic.foundation/">APNIC Foundation</a>, via the <a href="https://apnic.foundation/home/isifasia/">Information Society Innovation Fund (ISIF Asia)</a>.</p>
@@ -50,7 +50,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <p>（一）台灣常用網站對境外資源的依賴程度；
 （二）台灣常用網站對跨國雲服務境內節點的依賴程度，以及雲端依賴相關的韌性特徵。</p>
 <p>本研究發展一套量測的方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。</p>
-<p>經檢測 1832 個台灣常用網站，結果顯示，47% 的網站存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42% 的網站依賴跨國公有雲在台節點資源，其在境外連線中斷時的實際可用性，仍存在高度不確定性。</p>
+<p>經檢測 1859 個台灣常用網站，結果顯示，47% 的網站存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42% 的網站依賴跨國公有雲在台節點資源，其在境外連線中斷時的實際可用性，仍存在高度不確定性。</p>
 <h2 id="目錄">目錄</h2>
 <ol>
 <li><a href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF">研究背景</a></li>
@@ -140,7 +140,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </ul>
 <p>清單更新於 2026 年 1 月 6 日，共 2109 個網站 <a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json">ref</a>，並依照流量高低先後排序，可用以衡量特定網站重要性。</p>
 <p>相關清單與 script 開源於 <a href="https://github.com/irvin/top-traffic-website-list-taiwan/">top-traffic-website-list-taiwan</a> 專案。</p>
-<p>除以上 2109 網站外，本研究另加入 12 個手動指定測試站點（例如 OCF、SITCON、g0v 等）以涵蓋社群關注個案。<a href="https://github.com/irvin/web-resilience-test/commit/6f238af285d2db9be1b59134996a2a60793e5817">ref</a></p>
+<p>除以上 2109 網站外，本研究另加入數個手動指定測試站點（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。<a href="https://github.com/irvin/web-resilience-test/blob/a4c53e30acda30fbf39dab2023a5fdb4d866ef2c/manual_curated_list_tw.json">ref</a></p>
 <h3 id="測試環境">測試環境</h3>
 <p>本研究使用一般台灣常見的家用網路環境進行測試，包括以下屬性：</p>
 <ul>
@@ -269,34 +269,79 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <p>本工具從測試到編譯出結果頁面，在兩千個網站的數量級時，如以預設值平行測試 4 個網站，再平行編譯 8 個網站，需時約 30~60 分鐘。目前最新的測試結果，已公布於 <a href="https://github.com/irvin/web-resilience-test-result">web-resilience-test-result</a> 專案，以及 <a href="https://resilience.ocf.tw/">resilience.ocf.tw</a> 網站。</p>
 <h2 id="研究結果">研究結果</h2>
 <h3 id="研究資料快照">研究資料快照</h3>
-<p>本研究共測試了 2109 個網站，其中 1832 個網站完成測試。</p>
+<p>本研究共測試了 2157 個網站，其中 1859 個網站完成測試。</p>
 <ul>
-<li>測試日期：2026 年 1 月 15 日</li>
+<li>資料彙整日期：2026 年 4 月 16 日</li>
 <li>測試網站清單： <ul>
-<li><a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/eaa7ba4275d66e54391879f0c39cd3058f71dda6/merged_lists_tw.json">merged_lists_tw.json@eaa7ba4</a> </li>
-<li><a href="https://github.com/irvin/web-resilience-test/blob/60285a2fb442fbc74d3752288d5a449ec53b9092/manual_curated_list_tw.json">manual_curated_list_tw.json@60285a2</a></li>
+<li><a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json">merged_lists_tw.json@553b50a</a> </li>
+<li><a href="https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json">manual_curated_list_tw.json@28160ed</a></li>
 </ul>
 </li>
-<li>測試結果總表： <a href="https://github.com/irvin/web-resilience-test-result/blob/aa52e083f0e0734f05b8b637311f12d0cb900f4b/statistic.tsv">statistic.tsv@aa52e083</a></li>
+<li>測試結果總表： <a href="https://github.com/irvin/web-resilience-test-result/blob/cb31d388e9f0b24081b116bbc77d2a4064c5ad87/statistic.tsv">statistic.tsv@cb31d38</a></li>
+<li>國際公有雲統計： <a href="https://github.com/irvin/web-resilience-test-result/blob/cb31d388e9f0b24081b116bbc77d2a4064c5ad87/asn_taiwan_ratio.tsv">asn_taiwan_radio.tsv@cb31d38</a></li>
 </ul>
 <h3 id="整體結果">整體結果</h3>
-<p>在本研究的分類框架下，47% 的網站呈現境外資源依賴暴露，顯示其在海纜斷光情境下，<strong>具有較高的直接失效風險</strong>；另有 42% 的網站雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性<strong>具有高度不確定性</strong>。整體而言，共有 89% 的網站屬於需進一步關注的高風險或高不確定性類型。</p>
-<p><img src="./img/overall-result-2026-01-15.jpg" alt=""></p>
+<p>在本研究的分類框架下，47.0% 的網站呈現境外資源依賴暴露，顯示其在海纜斷光情境下，<strong>具有較高的直接失效風險</strong>；另有 48.0% 的網站雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性<strong>具有高度不確定性</strong>，僅有 5.0% 的網站無呈現依賴暴露，能維持正常運作的可能性較高。整體而言，共有 95.0% 的網站屬於需進一步關注的高風險或高不確定性類型。</p>
+<p><img src="./img/overall-result-2026-03-21.svg" alt=""></p>
 <h3 id="結果說明">結果說明</h3>
+<!--
+資料出處：web-resilience-test/test-results/overall_result.tsv
+-->
+
 <p>第一個類型的網站，網站本身就來自境外，或有呼叫境外資源，故存在高度失效風險。</p>
 <p>第二類網站雖未直接連向境外資源，但其所擷取的資源，來自跨國公有雲在台灣的節點。這些節點在網路拓樸上雖位於台灣，但其控制面、來源架構、身份驗證或快取持續能力，仍可能依賴境外系統。因此，本研究將此類網站視為「雖具在地落點但可用性不確定」的類型。</p>
+<p>第三類網站無呈現依賴暴露，表示其網站本身位於境內，且未呼叫境外資源，故能維持正常運作的可能性較高。</p>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th align="right">網站數</th>
+<th align="right">百分比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存在境外資源依賴暴露</td>
+<td align="right">874</td>
+<td align="right">47.0%</td>
+</tr>
+<tr>
+<td>無境外資源依賴<br>但存在跨國雲在台節點依賴暴露</td>
+<td align="right">892</td>
+<td align="right">48.0%</td>
+</tr>
+<tr>
+<td>無呈現依賴暴露</td>
+<td align="right">93</td>
+<td align="right">5.0%</td>
+</tr>
+<tr>
+<td>總計</td>
+<td align="right">1859</td>
+<td align="right">100.0%</td>
+</tr>
+</tbody></table>
 <h3 id="國際公有雲依賴狀態分析">國際公有雲依賴狀態分析</h3>
-<p>統計所有測試網站對於來自「國際公有雲在台灣節點」的資源依賴度，我們發現以下數據：</p>
+<!--
+資料出處：web-resilience-test/test-results/asn_taiwan_ratio.tsv
+參考 generate_statistic.js 產生之「Resilience=1 網站公有雲使用總結」區段及各公司統計
+-->
+
+<p>統計所有第二類（無國外依賴）的網站，對於來自「國際公有雲在台灣節點」的資源依賴度，我們發現以下數據：</p>
 <ul>
-<li>Google Cloud Platform 境內節點：共 710 個網站</li>
-<li>Cloudflare 境內節點：共 240 個網站</li>
-<li>Amazon Web Services 境內節點：共 117 個網站</li>
+<li>Google Cloud Platform 境內節點：共 726 個網站</li>
+<li>Cloudflare 境內節點：共 251 個網站</li>
+<li>Amazon Web Services 境內節點：共 118 個網站</li>
 <li>Akamai 境內節點：共 94 個網站</li>
-<li>Fastly 境內節點：共 33 個網站</li>
+<li>Fastly 境內節點：共 34 個網站</li>
 <li>Azure 境內節點：共 3 個網站</li>
 </ul>
-<p>1832 個網站中，共有 710 個網站取用來自 GCP 境內節點的資源，占比接近四成（38.7%）。亦即，如果 GCP 等公有雲服務，在境外網路中斷時，境內節點無法維持正常運作，將會造成非常高的衝擊。</p>
+<p>無國際依賴的 985 個網站中，共有 726 個網站取用來自 GCP 境內節點的資源，占比超過七成（73.7%）。據此可知，如果 GCP 等公有雲服務，在境外網路中斷時，境內節點無法維持正常運作，將會造成非常高的衝擊。換言之，這些公有雲服務的韌性，是網站能否在海纜障礙的情境下，維持正常運作的關鍵因素。</p>
 <h4 id="國際公有雲資源位置">國際公有雲資源位置</h4>
+<!--
+資料出處：web-resilience-test/test-results/asn_taiwan_ratio.tsv
+參考 generate_statistic.js 產生之「公司合計統計」區段
+-->
+
 <p>我們另外檢視所有網站國際公有雲資源的境內外位置分佈，發現以下結果：</p>
 <table>
 <thead>
@@ -307,39 +352,54 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </tr>
 </thead>
 <tbody><tr>
-<td>Google LLC</td>
-<td>1423</td>
-<td>30</td>
+<td>Google</td>
+<td>1444</td>
+<td>32</td>
 </tr>
 <tr>
-<td>Cloudflare, Inc.</td>
-<td>659</td>
-<td>294</td>
+<td>Cloudflare</td>
+<td>672</td>
+<td>298</td>
 </tr>
 <tr>
-<td>Amazon.com, Inc.</td>
-<td>409</td>
+<td>Amazon</td>
+<td>414</td>
 <td>231</td>
 </tr>
 <tr>
-<td>Akamai Technologies, Inc.</td>
-<td>351</td>
+<td>Akamai</td>
+<td>352</td>
 <td>9</td>
 </tr>
 <tr>
-<td>Fastly, Inc.</td>
-<td>121</td>
-<td>213</td>
+<td>Fastly</td>
+<td>122</td>
+<td>218</td>
 </tr>
 <tr>
-<td>Microsoft Corporation</td>
-<td>6</td>
+<td>Microsoft</td>
+<td>5</td>
 <td>167</td>
 </tr>
 </tbody></table>
-<p>以 Google 雲端為例，資源來自其境內節點的佔比居然高達 99.3%，境外節點僅佔約 0.7%。此結果顯示 CDN 等相關技術發展，對於資料在地化（Data Localization）的實際助益。另外也表示，這些在台節點保存鏡相資源之持續可用時間，將是境外擁塞或斷線時，影響一般網站的服務之存續狀態的關鍵要素。</p>
+<p>以 Google 雲端為例，資源來自其境內節點的佔比居然高達 97.8%，境外節點僅佔約 2.2%。此結果顯示 CDN 等相關技術發展，對於資料在地化（Data Localization）的實際助益。另外也表示，這些在台節點保存鏡相資源之持續可用時間，將是境外擁塞或斷線時，影響一般網站的服務之存續狀態的關鍵要素。</p>
 <p>對於境內資源比例較低的公有雲服務，可進一步評估其是否具備在國內建立完整鏡相備援、快取持續與應變運作機制的可行性。</p>
 <h3 id="資源位置雲平台依賴狀態統計">資源位置／雲平台依賴狀態統計</h3>
+<!--
+資料出處：web-resilience-test/test-results/dependency-breakdown.tsv
+
+原始資料計算方式：
+公有雲 / 境內 = results_domestic_cloud  > 0 的網站數
+公有雲 / 境外 = results_foreign_cloud   > 0 的網站數
+公有雲 / 總計 = total_cloud             > 0 的網站數
+非雲 / 境內   = results_domestic_direct > 0 的網站數
+非雲 / 境外   = results_foreign_direct  > 0 的網站數
+非雲 / 總計   = total_direct            > 0 的網站數
+總計 / 境內   = total_domestic          > 0 的網站數
+總計 / 境外   = total_foreign           > 0 的網站數
+僅用到境外資源 = total_foreign > 0 且 total_domestic = 0 的網站數
+-->
+
 <p>以下統計以「網站是否至少出現一項該類資源請求」為主，數字並非 request 數量。</p>
 <table>
 <thead>
@@ -352,207 +412,186 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </thead>
 <tbody><tr>
 <td>公有雲</td>
-<td>1668 (91%)</td>
-<td>795 (43%)</td>
-<td>1724 (94%)</td>
+<td>1691 (91.0%)</td>
+<td>806 (43.4%)</td>
+<td>1749 (94.1%)</td>
 </tr>
 <tr>
 <td>非雲</td>
-<td>1044 (57%)</td>
-<td>191 (10%)</td>
-<td>1122 (61%)</td>
+<td>1053 (56.6%)</td>
+<td>192 (10.3%)</td>
+<td>1132 (60.9%)</td>
 </tr>
 <tr>
 <td>總計</td>
-<td>1769 (97%)</td>
-<td>862 (47%)</td>
+<td>1793 (96.4%)</td>
+<td>874 (47.0%)</td>
 <td></td>
 </tr>
 </tbody></table>
-<p>分析台灣常用網站之資源依賴狀態，統計對 [境內／公有雲] [境外／公有雲] [境內／非雲] [境外／非雲] 的個別比例，結果如下：</p>
-<p>94% 的網站依賴國際公有雲資源，其中有 91% 的網站依賴境內公有雲資源，43% 網站依賴境外公有雲資源。47% 的網站有境外資源依賴。</p>
-<p>另外，本研究也發現只有 3% 的網站（包含跨國服務）「完全僅用到境外資源」，表示 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。</p>
+<p>分析台灣常用網站之資源依賴狀態，統計對 [境內／公有雲] [境外／公有雲] [境內／非雲] [境外／非雲] 的個別比例，結果如為：</p>
+<p>94% 的網站依賴國際公有雲資源，其中包含 91% 的網站依賴境內公有雲資源，以及 43% 的網站依賴境外公有雲資源。</p>
+<p>另外，本研究也發現，有境外資源依賴的 47% 的 874 個網站中，只有 66 個（3.6%）網站完全「僅用到境外資源」，表示 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。</p>
 <h3 id="資源來源分布">資源來源分布</h3>
+<!--
+資料出處：web-resilience-test/test-results/resource-distribution.tsv
+-->
+
 <p>如果將所有 request 根據 ASN 進行統計排序，我們發現網站依賴資源高度集中於大型供應商，其中超過 5% 的來源有 Google、Cloudflare、Amazon、中華電信及 Facebook。</p>
-<p>其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.4%。來自 Google 的主要資源有 GTM、而 Cloudflare 提供的 JavaScript CDN 與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。</p>
-<p><img src="./img/resource-distribution-2026-01-15.jpg" alt=""></p>
+<p>其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.3%。來自 Google 的主要資源有 GTM、而 Cloudflare 提供的 JavaScript CDN 與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。</p>
+<p><img src="./img/resource-distribution-2026-03-21.svg" alt=""></p>
 <table>
 <thead>
 <tr>
-<th>name</th>
-<th>count</th>
-<th>percent</th>
+<th>單位</th>
+<th align="right">總數</th>
+<th align="right">百分比</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>Google</td>
-<td>6,380</td>
-<td>40.9%</td>
+<td align="right">6,452</td>
+<td align="right">40.9%</td>
 </tr>
 <tr>
 <td>Cloudflare</td>
-<td>2,407</td>
-<td>15.4%</td>
+<td align="right">2,435</td>
+<td align="right">15.4%</td>
 </tr>
 <tr>
 <td>Amazon</td>
-<td>1,618</td>
-<td>10.4%</td>
+<td align="right">1,627</td>
+<td align="right">10.3%</td>
 </tr>
 <tr>
 <td>Data Communication (CHT)</td>
-<td>1,213</td>
-<td>7.8%</td>
+<td align="right">1,234</td>
+<td align="right">7.8%</td>
 </tr>
 <tr>
 <td>Facebook</td>
-<td>1,001</td>
-<td>6.4%</td>
+<td align="right">1,013</td>
+<td align="right">6.4%</td>
 </tr>
 <tr>
 <td>Akamai</td>
-<td>598</td>
-<td>3.8%</td>
+<td align="right">599</td>
+<td align="right">3.8%</td>
 </tr>
 <tr>
 <td>Fastly</td>
-<td>433</td>
-<td>2.8%</td>
+<td align="right">442</td>
+<td align="right">2.8%</td>
 </tr>
 <tr>
 <td>Taiwan Academic (TANet)</td>
-<td>388</td>
-<td>2.5%</td>
+<td align="right">285</td>
+<td align="right">1.8%</td>
 </tr>
 <tr>
 <td>Microsoft</td>
-<td>285</td>
-<td>1.8%</td>
+<td align="right">284</td>
+<td align="right">1.8%</td>
 </tr>
 <tr>
 <td>Oracle</td>
-<td>95</td>
-<td>0.6%</td>
+<td align="right">95</td>
+<td align="right">0.6%</td>
 </tr>
 <tr>
 <td>New Century</td>
-<td>93</td>
-<td>0.6%</td>
+<td align="right">93</td>
+<td align="right">0.6%</td>
 </tr>
 <tr>
-<td>Yahoo</td>
-<td>63</td>
-<td>0.4%</td>
+<td>Taiwan Fixed Network</td>
+<td align="right">79</td>
+<td align="right">0.5%</td>
 </tr>
 <tr>
 <td>Automattic</td>
-<td>59</td>
-<td>0.4%</td>
+<td align="right">59</td>
+<td align="right">0.4%</td>
+</tr>
+<tr>
+<td>Yahoo</td>
+<td align="right">58</td>
+<td align="right">0.4%</td>
 </tr>
 <tr>
 <td>Incapsula</td>
-<td>56</td>
-<td>0.4%</td>
-</tr>
-<tr>
-<td>Zenlayer</td>
-<td>51</td>
-<td>0.3%</td>
-</tr>
-<tr>
-<td>Sony</td>
-<td>47</td>
-<td>0.3%</td>
+<td align="right">56</td>
+<td align="right">0.4%</td>
 </tr>
 <tr>
 <td>Baidu</td>
-<td>46</td>
-<td>0.3%</td>
+<td align="right">54</td>
+<td align="right">0.3%</td>
+</tr>
+<tr>
+<td>Zenlayer</td>
+<td align="right">53</td>
+<td align="right">0.3%</td>
+</tr>
+<tr>
+<td>Sony</td>
+<td align="right">47</td>
+<td align="right">0.3%</td>
 </tr>
 <tr>
 <td>internet content provider (yahoo jp)</td>
-<td>42</td>
-<td>0.3%</td>
+<td align="right">44</td>
+<td align="right">0.3%</td>
 </tr>
 <tr>
 <td>Byteplus</td>
-<td>34</td>
-<td>0.2%</td>
+<td align="right">34</td>
+<td align="right">0.2%</td>
 </tr>
 <tr>
 <td>Magnite</td>
-<td>33</td>
-<td>0.2%</td>
+<td align="right">33</td>
+<td align="right">0.2%</td>
 </tr>
 <tr>
 <td>AboveNet</td>
-<td>25</td>
-<td>0.2%</td>
-</tr>
-<tr>
-<td>Datacamp</td>
-<td>23</td>
-<td>0.1%</td>
-</tr>
-<tr>
-<td>SHOPEE</td>
-<td>23</td>
-<td>0.1%</td>
-</tr>
-<tr>
-<td>Yuan-Jhen Info</td>
-<td>22</td>
-<td>0.1%</td>
-</tr>
-<tr>
-<td>Gamania</td>
-<td>21</td>
-<td>0.1%</td>
-</tr>
-<tr>
-<td>Tencent</td>
-<td>21</td>
-<td>0.1%</td>
-</tr>
-<tr>
-<td>Zhejiang Taobao</td>
-<td>20</td>
-<td>0.1%</td>
+<td align="right">25</td>
+<td align="right">0.2%</td>
 </tr>
 </tbody></table>
 <h3 id="公共機關整體風險">公共機關整體風險</h3>
 <p>分析政府網站與教育機構的韌性狀態，我們發現，相較於整體狀態（47%），政府與教育網站的斷線風險相對較低：</p>
 <ul>
-<li>測試網站中含 200 個政府網站（<code>.gov.tw</code>），其中僅 19 個有境外連線，比例為 10%。</li>
-<li>測試網站中含 219 個教育網站（<code>.edu.tw</code>），其中僅 36 個有境外連線，比例為 16%。</li>
+<li>測試網站中含 199 個政府網站（<code>.gov.tw</code>），其中僅 19 個有境外連線，比例為 9.5%。</li>
+<li>測試網站中含 225 個教育網站（<code>.edu.tw</code>），其中僅 37 個有境外連線，比例為 16.4%。</li>
 </ul>
-<p>此結果顯示，政府與教育網站在資源層面上的境外依賴相對較低，反映公部門與學術網路環境在本地可用性上可能具較高基礎，但其完整服務韌性仍需進一步檢驗後端依賴與使用流程。</p>
+<p>此結果顯示，政府與教育網站，在資源層面上的境外依賴，相對整體表現（47%）低不少，顯示公部門與學術網路環境在本地可用性上可能具較高基礎，但其完整服務韌性仍需進一步檢驗後端依賴與使用流程。</p>
 <table>
 <thead>
 <tr>
 <th>類型</th>
-<th>測試網站數量</th>
-<th>存在境外連線數量</th>
-<th>比例</th>
+<th align="right">測試網站數量</th>
+<th align="right">存在境外連線數量</th>
+<th align="right">比例</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>政府網站</td>
-<td>200</td>
-<td>19</td>
-<td>10%</td>
+<td align="right">199</td>
+<td align="right">19</td>
+<td align="right">9.5%</td>
 </tr>
 <tr>
 <td>教育網站</td>
-<td>219</td>
-<td>36</td>
-<td>16%</td>
+<td align="right">225</td>
+<td align="right">37</td>
+<td align="right">16.4%</td>
 </tr>
 <tr>
 <td>全部</td>
-<td>1832</td>
-<td>862</td>
-<td>47%</td>
+<td align="right">1859</td>
+<td align="right">874</td>
+<td align="right">47.0%</td>
 </tr>
 </tbody></table>
 <!-- FIXME: add 失敗樣本分析 -->
