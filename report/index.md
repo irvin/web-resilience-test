@@ -273,8 +273,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
      - 針對前述 hostname 清單，呼叫 IPinfo API，取得其位置資料
      - 如果查詢的資料顯示 `country=TW`，則紀錄為境內連線
      - 若查詢的結果顯示 `country`非`TW`，則根據連線的 ASN，判定是否來自國際公有雲節點（Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft），並進入下一步的進階判定。
-       - 本研究同時參酌測試網站的 request 資料，建立公有雲的對應 ASN 清單 [cloud_providers_tw.json
-  ](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json)，除供判定使用外，也同步開源供其他研究與專案參考。
+       - 本研究同時參酌測試網站的 request 資料，建立公有雲的對應 ASN 清單 [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json)，除供判定使用外，也同步開源供其他研究與專案參考。
 
      a. Header 判定
        - 檢查連線的 response header，是否包含 `cf-ray`、`x-amz-cf-pop`、`x-served-by` 等雲端系統已知的位置標記。
@@ -283,7 +282,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
        - 若無法從 header 擷取到明確的位置資訊，則針對該資源進行 `ping` 5 次，取最小 RTT。如果 `RTT < 15ms`，則將其視為台灣境內資源。
 
   6. 分類資源，建立韌性指標數據
-     - 根據上述資訊，將每個資源域名分為以下四類之一：`domestic/cloud`、`domestic/direct`、`foreign/cloud`、`foreign/direct`
+     - 根據上述資訊，將每個資源域名分為以下四類之一：`domestic/cloud`、`domestic/direct`、`foreign/cloud`、`foreign/direct`。其中「cloud」指 `ipinfo` 的 `org` 所含 ASN 包含於 cloud_providers_tw.json 的 **`providers_intl`** 與 **`providers_intl_without_known_taiwan_region/pop`** 者。
      - 計算網站的所有四個類型的 request 總數，並將結果儲存為 `test-results/<site>.json` 檔案。
 
   7. 錯誤處理

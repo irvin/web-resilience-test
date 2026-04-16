@@ -72,8 +72,7 @@ async function loadcloudProviderInfo() {
         const data = JSON.parse(rawData);
         const groupKeys = [
             'providers_intl',
-            'providers_intl_without_known_taiwan_region/pop',
-            'providers_local'
+            'providers_intl_without_known_taiwan_region/pop'
         ];
         const providers = groupKeys.flatMap(key => Array.isArray(data[key]) ? data[key] : []);
         const orgKeywordMap = new Map();
