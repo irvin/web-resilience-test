@@ -127,32 +127,36 @@ async function main() {
 
     // 提取網站域名（用於去重）
     const websiteDomain = extractWebsiteDomain(file, data);
-    // 從檔案名稱提取 hostname（用於與 statistic.tsv 對應，移除 www. 前綴）
+    // 網站類型判斷要以原始測試目標 url 為主，避免 canonicalURL 導向其他網域後改變母體
+    const sourceHostname =
+      extractHostname(data.url) ||
+      extractHostname(data.canonicalURL) ||
+      websiteDomain;
+    // 從檔案名稱提取 hostname（用於與 statistic.tsv 對齊，移除 www. 前綴）
     let fileHostname = file.replace(/\.json$/i, '').toLowerCase();
     if (fileHostname.startsWith('www.')) {
       fileHostname = fileHostname.substring(4);
     }
-
     // 從 JSON 檔案計算 resilience 值
     const testResults = data.test_results || { domestic: { cloud: 0, direct: 0 }, foreign: { cloud: 0, direct: 0 } };
     const domesticTotal = (testResults.domestic?.cloud || 0) + (testResults.domestic?.direct || 0);
     const foreignTotal = (testResults.foreign?.cloud || 0) + (testResults.foreign?.direct || 0);
     const isResilient = domesticTotal > 0 && foreignTotal === 0;
-    const isNonResilient = !isResilient;
+    const hasForeignDependency = foreignTotal > 0;
 
     resilienceRiskStats.overall.total += 1;
-    if (isNonResilient) {
+    if (hasForeignDependency) {
       resilienceRiskStats.overall.nonResilient += 1;
     }
-    if (isTargetDomain(fileHostname, 'gov.tw')) {
+    if (isTargetDomain(sourceHostname, 'gov.tw')) {
       resilienceRiskStats.govTw.total += 1;
-      if (isNonResilient) {
+      if (hasForeignDependency) {
         resilienceRiskStats.govTw.nonResilient += 1;
       }
     }
-    if (isTargetDomain(fileHostname, 'edu.tw')) {
+    if (isTargetDomain(sourceHostname, 'edu.tw')) {
       resilienceRiskStats.eduTw.total += 1;
-      if (isNonResilient) {
+      if (hasForeignDependency) {
         resilienceRiskStats.eduTw.nonResilient += 1;
       }
     }
@@ -312,10 +316,10 @@ async function main() {
     lines.push(`${company}\t${count}`);
   }
 
-  // 輸出 .gov.tw / .edu.tw 與整體的 resilience!=1 統計
+  // 輸出 .gov.tw / .edu.tw 與整體的境外依賴統計
   lines.push('');
   lines.push('=== 公共機關整體風險統計 ===');
-  lines.push('類型\t測試網站數量\tresilience != 1 網站數量\t比例');
+  lines.push('類型\t測試網站數量\t存在境外連線數量\t比例');
 
   function appendRiskLine(label, stat) {
     const ratio = stat.total > 0

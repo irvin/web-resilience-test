@@ -30,7 +30,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 本研究發展一套量測的方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。
 
-經檢測 1859 個台灣常用網站，結果顯示，47% 的網站存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42% 的網站依賴跨國公有雲在台節點資源，其在境外連線中斷時的實際可用性，仍存在高度不確定性。
+經檢測 1859 個台灣常用網站，結果顯示，47.0% 的網站存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42.3% 的網站雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點資源，其在境外連線中斷時的實際可用性，仍存在高度不確定性。
 
 ## 目錄
 
@@ -316,7 +316,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
   - [merged_lists_tw.json@553b50a](https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json) 
   - [manual_curated_list_tw.json@28160ed](https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json)
 - 測試結果總表： [statistic.tsv@3908084](https://github.com/irvin/web-resilience-test-result/blob/39080848acd5872f97dbe3d606676c664e92ce7f/statistic.tsv)
-- 國際公有雲統計： [asn_taiwan_radio.tsv@3908084](https://github.com/irvin/web-resilience-test-result/blob/39080848acd5872f97dbe3d606676c664e92ce7f/asn_taiwan_ratio.tsv)
+- 國際公有雲統計： [asn_taiwan_ratio.tsv@3908084](https://github.com/irvin/web-resilience-test-result/blob/39080848acd5872f97dbe3d606676c664e92ce7f/asn_taiwan_ratio.tsv)
 
 ### 整體結果
 
@@ -408,11 +408,11 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 | 非雲                 | 1363 (73.3%) | 195 (10.5%) | 1436 (77.2%) |
 | 總計                 | 1793 (96.4%) | 874 (47.0%) |              |
 
-分析台灣常用網站之資源依賴狀態，統計對 [境內／公有雲] [境外／公有雲] [境內／非雲] [境外／非雲] 的個別比例，結果如為：
+分析台灣常用網站之資源依賴狀態，統計對 [境內／公有雲] [境外／公有雲] [境內／非雲] [境外／非雲] 的個別比例，結果如下：
 
 88.3% 的網站依賴國際公有雲資源，其中包含 85.1% 的網站依賴境內公有雲資源，以及 43.1% 的網站依賴境外公有雲資源。
 
-另外，本研究也發現，佔整體 47% 之有境外資源依賴的的 874 個網站中，只有 66 個（3.6%）網站完全「僅用到境外資源」，表示 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。
+另外，本研究也發現，在 874 個有境外資源依賴的網站中，多數仍同時取用境內資源，只有 66 個（3.6%）網站僅使用境外資源。顯見 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。
 
 ### 資源來源分布
 
@@ -457,16 +457,16 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 資料出處：web-resilience-test/test-results/asn_taiwan_ratio.tsv
 -->
 
-分析政府網站與教育機構的韌性狀態，我們發現，相較於整體狀態（47%），政府與教育網站的斷線風險相對較低：
+分析政府網站與教育機構的韌性狀態，如果僅看對境外資源的依賴，我們發現：
 
-- 測試網站中含 199 個政府網站（`.gov.tw`），其中僅 19 個有境外連線，比例為 9.5%。
-- 測試網站中含 225 個教育網站（`.edu.tw`），其中僅 37 個有境外連線，比例為 16.4%。
+- 測試網站中含 200 個政府網站（包含 `gov.tw` 與 `*.gov.tw`），其中 20 個有境外連線，比例為 10.0%。
+- 測試網站中含 225 個教育網站（`*.edu.tw`），其中僅 37 個有境外連線，比例為 16.4%。
 
-此結果顯示，政府與教育網站，在資源層面上的境外依賴，相對整體表現（47%）低不少，顯示公部門與學術網路環境在本地可用性上可能具較高基礎，但其完整服務韌性仍需進一步檢驗後端依賴與使用流程。
+此結果顯示，政府與教育網站，在資源層面上的境外依賴，相對整體表現（47%）呈現相對較低的現象。顯示公部門與學術網路環境在本地可用性上可能具較高基礎，但其完整服務韌性仍需進一步檢驗後端依賴與使用流程。
 
 | 類型     | 測試網站數量 | 存在境外連線數量 |  比例 |
 | -------- | -----------: | ---------------: | ----: |
-| 政府網站 |          199 |               19 |  9.5% |
+| 政府網站 |          200 |               20 | 10.0% |
 | 教育網站 |          225 |               37 | 16.4% |
 | 全部     |         1859 |              874 | 47.0% |
 
