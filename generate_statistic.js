@@ -6,6 +6,7 @@ const DIR = path.resolve(__dirname, 'test-results');
 const OUTPUT = path.join(DIR, 'statistic.tsv');
 const REPORT_IMG_DIR = path.resolve(__dirname, 'test-results', 'img');
 const RESOURCE_DISTRIBUTION_TSV = path.join(DIR, 'resource-distribution.tsv');
+const OVERALL_RESULT_TSV = path.join(DIR, 'overall-result.tsv');
 const MERGED_LISTS_PATH = path.resolve(
   __dirname,
   'top-traffic-list-taiwan',
@@ -479,6 +480,18 @@ function renderResourceDistributionTsv(distribution) {
   return `${lines.join('\n')}\n`;
 }
 
+function renderOverallResultTsv(overall) {
+  const total = overall.total || 0;
+  const lines = [
+    'category\tcount\tpercent',
+    ['不會動', String(overall.highRisk), formatPercent(overall.highRisk, total)].join('\t'),
+    ['國際雲', String(overall.uncertain), formatPercent(overall.uncertain, total)].join('\t'),
+    ['可能會動', String(overall.localized), formatPercent(overall.localized, total)].join('\t'),
+    ['全部', String(total), formatPercent(total, total)].join('\t'),
+  ];
+  return `${lines.join('\n')}\n`;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const hasDateArg = hasArgFlag('--date', args);
@@ -636,6 +649,9 @@ async function main() {
   console.log(`共處理 ${allData.length} 筆資料`);
 
   const overall = countOverallCategories(allData);
+  const overallTsv = renderOverallResultTsv(overall);
+  await fs.promises.writeFile(OVERALL_RESULT_TSV, overallTsv, 'utf8');
+  console.log(`已產生統計：${OVERALL_RESULT_TSV}`);
   const overallSvg = renderOverallResultSvg(overall, snapshotDate);
   await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
   const overallSvgPath = path.join(
