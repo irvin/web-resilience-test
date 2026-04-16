@@ -10,7 +10,7 @@ MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))
 ### 更新日期
 
 Published: 2026-03-23  
-Last Updated: 2026-04-15
+Last Updated: 2026-04-16
 
 ### 誌謝
 
@@ -359,9 +359,14 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 - Fastly 境內節點：共 34 個網站
 - Azure 境內節點：共 3 個網站
 
-無國際依賴的 985 個網站中，共有 726 個網站取用來自 GCP 境內節點的資源，占比超過七成（73.7%）。亦即，如果 GCP 等公有雲服務，在境外網路中斷時，境內節點無法維持正常運作，將會造成非常高的衝擊。
+無國際依賴的 985 個網站中，共有 726 個網站取用來自 GCP 境內節點的資源，占比超過七成（73.7%）。據此可知，如果 GCP 等公有雲服務，在境外網路中斷時，境內節點無法維持正常運作，將會造成非常高的衝擊。換言之，這些公有雲服務的韌性，是網站能否在海纜障礙的情境下，維持正常運作的關鍵因素。
 
 #### 國際公有雲資源位置
+
+<!--
+資料出處：web-resilience-test/test-results/asn_taiwan_ratio.tsv
+參考 generate_statistic.js 產生之「公司合計統計」區段
+-->
 
 我們另外檢視所有網站國際公有雲資源的境內外位置分佈，發現以下結果：
 
@@ -381,8 +386,9 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 ### 資源位置／雲平台依賴狀態統計
 
 <!--
-資料出處：web-resilience-test/test-results/statistic.tsv
+資料出處：web-resilience-test/test-results/dependency-breakdown.tsv
 
+原始資料計算方式：
 公有雲 / 境內 = results_domestic_cloud  > 0 的網站數
 公有雲 / 境外 = results_foreign_cloud   > 0 的網站數
 公有雲 / 總計 = total_cloud             > 0 的網站數
@@ -404,11 +410,9 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 分析台灣常用網站之資源依賴狀態，統計對 [境內／公有雲] [境外／公有雲] [境內／非雲] [境外／非雲] 的個別比例，結果如為：
 
-- 94% 的網站依賴國際公有雲資源，其中有
-  - 91% 的網站依賴境內公有雲資源
-  - 43% 網站依賴境外公有雲資源
+94% 的網站依賴國際公有雲資源，其中包含 91% 的網站依賴境內公有雲資源，以及 43% 的網站依賴境外公有雲資源。
 
-另外，本研究也發現，有境外資源依賴的 47% 的網站中，只有 66 個網站（包含跨國服務，僅占整體 3.6%）完全「僅用到境外資源」，表示 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。
+另外，本研究也發現，有境外資源依賴的 47% 的 874 個網站中，只有 66 個（3.6%）網站完全「僅用到境外資源」，表示 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。
 
 ### 資源來源分布
 
@@ -424,11 +428,11 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 | 單位                                 |    總數 |  百分比 |
 |--------------------------------------|--------:|--------:|
-| Google                               |   6,456 |  40.9%  |
+| Google                               |   6,452 |  40.9%  |
 | Cloudflare                           |   2,435 |  15.4%  |
-| Amazon                               |   1,629 |  10.3%  |
+| Amazon                               |   1,627 |  10.3%  |
 | Data Communication (CHT)             |   1,234 |   7.8%  |
-| Facebook                             |   1,001 |   6.4%  |
+| Facebook                             |   1,013 |   6.4%  |
 | Akamai                               |     599 |   3.8%  |
 | Fastly                               |     442 |   2.8%  |
 | Taiwan Academic (TANet)              |     285 |   1.8%  |
@@ -436,8 +440,8 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 | Oracle                               |      95 |   0.6%  |
 | New Century                          |      93 |   0.6%  |
 | Taiwan Fixed Network                 |      79 |   0.5%  |
-| Yahoo                                |      58 |   0.4%  |
 | Automattic                           |      59 |   0.4%  |
+| Yahoo                                |      58 |   0.4%  |
 | Incapsula                            |      56 |   0.4%  |
 | Baidu                                |      54 |   0.3%  |
 | Zenlayer                             |      53 |   0.3%  |
@@ -451,16 +455,16 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 分析政府網站與教育機構的韌性狀態，我們發現，相較於整體狀態（47%），政府與教育網站的斷線風險相對較低：
 
-- 測試網站中含 199 個政府網站（`.gov.tw`），其中僅 19 個有境外連線，比例為 10%。
-- 測試網站中含 225 個教育網站（`.edu.tw`），其中僅 37 個有境外連線，比例為 16%。
+- 測試網站中含 199 個政府網站（`.gov.tw`），其中僅 19 個有境外連線，比例為 9.5%。
+- 測試網站中含 225 個教育網站（`.edu.tw`），其中僅 37 個有境外連線，比例為 16.4%。
 
-此結果顯示，政府與教育網站在資源層面上的境外依賴相對較低，反映公部門與學術網路環境在本地可用性上可能具較高基礎，但其完整服務韌性仍需進一步檢驗後端依賴與使用流程。
+此結果顯示，政府與教育網站，在資源層面上的境外依賴，相對整體表現（47%）低不少，顯示公部門與學術網路環境在本地可用性上可能具較高基礎，但其完整服務韌性仍需進一步檢驗後端依賴與使用流程。
 
 | 類型     | 測試網站數量 | 存在境外連線數量 |  比例 |
 | -------- | -----------: | ---------------: | ----: |
-| 政府網站 |          199 |               19 |  9.6% |
+| 政府網站 |          199 |               19 |  9.5% |
 | 教育網站 |          225 |               37 | 16.4% |
-| 全部     |         1860 |              874 | 47.0% |
+| 全部     |         1859 |              874 | 47.0% |
 
 <!-- FIXME: add 失敗樣本分析 -->
 
