@@ -7,6 +7,7 @@ const OUTPUT = path.join(DIR, 'statistic.tsv');
 const REPORT_IMG_DIR = path.resolve(__dirname, 'test-results', 'img');
 const RESOURCE_DISTRIBUTION_TSV = path.join(DIR, 'resource-distribution.tsv');
 const OVERALL_RESULT_TSV = path.join(DIR, 'overall-result.tsv');
+const DEPENDENCY_BREAKDOWN_TSV = path.join(DIR, 'dependency-breakdown.tsv');
 const MERGED_LISTS_PATH = path.resolve(
   __dirname,
   'top-traffic-list-taiwan',
@@ -492,6 +493,50 @@ function renderOverallResultTsv(overall) {
   return `${lines.join('\n')}\n`;
 }
 
+function countDependencyBreakdown(allData) {
+  const total = allData.length;
+  const counts = {
+    publicCloudDomestic: 0,
+    publicCloudForeign: 0,
+    publicCloudTotal: 0,
+    directDomestic: 0,
+    directForeign: 0,
+    directTotal: 0,
+    totalDomestic: 0,
+    totalForeign: 0,
+    foreignOnly: 0,
+  };
+
+  for (const data of allData) {
+    if (data.domesticCloud > 0) counts.publicCloudDomestic += 1;
+    if (data.foreignCloud > 0) counts.publicCloudForeign += 1;
+    if (data.totalCloud > 0) counts.publicCloudTotal += 1;
+    if (data.domesticDirect > 0) counts.directDomestic += 1;
+    if (data.foreignDirect > 0) counts.directForeign += 1;
+    if (data.totalDirect > 0) counts.directTotal += 1;
+    if (data.totalDomestic > 0) counts.totalDomestic += 1;
+    if (data.totalForeign > 0) counts.totalForeign += 1;
+    if (data.totalForeign > 0 && data.totalDomestic === 0) {
+      counts.foreignOnly += 1;
+    }
+  }
+
+  return { total, counts };
+}
+
+function renderDependencyBreakdownTsv(breakdown) {
+  const { total, counts } = breakdown;
+  const fmt = (count) => `${count} (${formatPercent(count, total)})`;
+  const lines = [
+    '類型\t境內\t境外\t總計',
+    ['公有雲', fmt(counts.publicCloudDomestic), fmt(counts.publicCloudForeign), fmt(counts.publicCloudTotal)].join('\t'),
+    ['非雲', fmt(counts.directDomestic), fmt(counts.directForeign), fmt(counts.directTotal)].join('\t'),
+    ['總計', fmt(counts.totalDomestic), fmt(counts.totalForeign), ''].join('\t'),
+    ['僅用到境外資源', '', fmt(counts.foreignOnly), ''].join('\t'),
+  ];
+  return `${lines.join('\n')}\n`;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const hasDateArg = hasArgFlag('--date', args);
@@ -652,6 +697,16 @@ async function main() {
   const overallTsv = renderOverallResultTsv(overall);
   await fs.promises.writeFile(OVERALL_RESULT_TSV, overallTsv, 'utf8');
   console.log(`已產生統計：${OVERALL_RESULT_TSV}`);
+  const dependencyBreakdown = countDependencyBreakdown(allData);
+  const dependencyBreakdownTsv = renderDependencyBreakdownTsv(
+    dependencyBreakdown
+  );
+  await fs.promises.writeFile(
+    DEPENDENCY_BREAKDOWN_TSV,
+    dependencyBreakdownTsv,
+    'utf8'
+  );
+  console.log(`已產生統計：${DEPENDENCY_BREAKDOWN_TSV}`);
   const overallSvg = renderOverallResultSvg(overall, snapshotDate);
   await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
   const overallSvgPath = path.join(
