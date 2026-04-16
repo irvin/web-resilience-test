@@ -1,3 +1,4 @@
 .env
 .cache/
 node_modules/
+report/publish/

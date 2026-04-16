@@ -1,47 +1,14 @@
-const { execSync } = require("child_process");
-const path = require("path");
-
-const reportDir = path.resolve(__dirname, "..");
-const repoDir = path.resolve(reportDir, "..");
-
-function run(command, cwd) {
-  execSync(command, { cwd, stdio: "inherit" });
-}
-
-function runText(command, cwd) {
-  return execSync(command, { cwd, encoding: "utf8" }).trim();
-}
-
-function resolveReportWorktreeDir() {
-  const override = process.env.REPORT_WORKTREE_PATH;
-  if (override) return path.resolve(repoDir, override);
-
-  const targetBranch = process.env.REPORT_BRANCH || "report";
-  const raw = runText("git worktree list --porcelain", repoDir);
-  const blocks = raw.split(/\n\n+/);
-
-  for (const block of blocks) {
-    const lines = block.split("\n");
-    const worktreeLine = lines.find((line) => line.startsWith("worktree "));
-    const branchLine = lines.find((line) => line.startsWith("branch "));
-    if (!worktreeLine || !branchLine) continue;
-    if (branchLine.trim() === `branch refs/heads/${targetBranch}`) {
-      return worktreeLine.replace(/^worktree\s+/, "").trim();
-    }
-  }
-
-  throw new Error(
-    [
-      `Cannot find a worktree for branch '${targetBranch}'.`,
-      "Please create it first, e.g.:",
-      `git worktree add report/publish ${targetBranch}`,
-      "Or set REPORT_WORKTREE_PATH to an existing worktree path.",
-    ].join("\n")
-  );
-}
+const {
+  reportDir,
+  repoDir,
+  run,
+  runText,
+  ensureReportWorktree,
+} = require("./report-worktree");
 
 function main() {
-  const worktreeDir = resolveReportWorktreeDir();
+  const worktree = ensureReportWorktree();
+  const worktreeDir = worktree.path;
   const targetBranch = process.env.REPORT_BRANCH || "report";
   const commitMessage = process.env.REPORT_COMMIT_MESSAGE || "Update report";
 

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
 const { marked } = require("marked");
+const { resolveReportWorktreeDir } = require("./report-worktree");
 
 const reportDir = path.resolve(__dirname, "..");
 const repoDir = path.resolve(reportDir, "..");
@@ -102,43 +102,13 @@ function copyDirRecursive(src, dest) {
   }
 }
 
-function resolveReportWorktreeDir() {
-  // Optional manual override
-  const override = process.env.REPORT_WORKTREE_PATH;
-  if (override) return path.resolve(repoDir, override);
-
-  const targetBranch = process.env.REPORT_BRANCH || "report";
-  const raw = execSync("git worktree list --porcelain", {
-    cwd: repoDir,
-    encoding: "utf8",
-  });
-
-  const blocks = raw.trim().split(/\n\n+/);
-  for (const block of blocks) {
-    const lines = block.split("\n");
-    const worktreeLine = lines.find((line) => line.startsWith("worktree "));
-    const branchLine = lines.find((line) => line.startsWith("branch "));
-    if (!worktreeLine || !branchLine) continue;
-    if (branchLine.trim() === `branch refs/heads/${targetBranch}`) {
-      return worktreeLine.replace(/^worktree\s+/, "").trim();
-    }
-  }
-
-  throw new Error(
-    [
-      `Cannot find a worktree for branch '${targetBranch}'.`,
-      "Please create it first, e.g.:",
-      `git worktree add ../web-resilience-test-${targetBranch} ${targetBranch}`,
-      "Or set REPORT_WORKTREE_PATH to an existing worktree path.",
-    ].join("\n")
-  );
-}
-
 function main() {
   if (!fs.existsSync(sourceMd)) throw new Error(`Source markdown not found: ${sourceMd}`);
   const worktreeDir = resolveReportWorktreeDir();
   const outHtml = path.join(worktreeDir, "index.html");
   const outImgDir = path.join(worktreeDir, "img");
+
+  fs.mkdirSync(worktreeDir, { recursive: true });
 
   const rawMd = fs.readFileSync(sourceMd, "utf8");
   const md = stripFrontmatter(rawMd);

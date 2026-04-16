@@ -5,6 +5,9 @@ const path = require('path');
 const DIR = path.resolve(__dirname, 'test-results');
 const OUTPUT = path.join(DIR, 'statistic.tsv');
 const REPORT_IMG_DIR = path.resolve(__dirname, 'test-results', 'img');
+const RESOURCE_DISTRIBUTION_TSV = path.join(DIR, 'resource-distribution.tsv');
+const OVERALL_RESULT_TSV = path.join(DIR, 'overall-result.tsv');
+const DEPENDENCY_BREAKDOWN_TSV = path.join(DIR, 'dependency-breakdown.tsv');
 const MERGED_LISTS_PATH = path.resolve(
   __dirname,
   'top-traffic-list-taiwan',
@@ -89,6 +92,15 @@ function formatPercent(value, total) {
   return `${((value / total) * 100).toFixed(1)}%`.replace('％', '%');
 }
 
+function escapeSvgText(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 function deriveSnapshotDate(allData, fallbackDate) {
   let maxTs = null;
 
@@ -156,17 +168,12 @@ function renderOverallResultSvg(overall, reportDate) {
     可能會動: 4,
   };
   const globalLineYOffset = 4;
+  const labelFontSize = 48;
+  const connectorTextGap = labelFontSize * 4;
 
   let startAngle = -Math.PI / 2;
   const paths = [];
   const labels = [];
-
-  function getCircleEdgeX(y, side) {
-    const dy = y - cy;
-    const inside = Math.max(0, radius * radius - dy * dy);
-    const dx = Math.sqrt(inside);
-    return side === 'right' ? cx + dx : cx - dx;
-  }
 
   for (const segment of segments) {
     const ratio = segment.count / total;
@@ -186,12 +193,14 @@ function renderOverallResultSvg(overall, reportDate) {
     const midAngle = startAngle + angle / 2;
     const layout = labelLayout[segment.label];
     const textAnchor = segment.label === '不會動' ? 'end' : 'start';
+    const lineSide = layout.textX > cx ? 'right' : 'left';
+    const dotRadius = radius - 16;
+    const dotX = cx + dotRadius * Math.cos(midAngle);
+    const dotY = cy + dotRadius * Math.sin(midAngle);
     const baseLineY = cy + (radius - 1) * Math.sin(midAngle);
     const lineAnchorYOffset = lineAnchorYOffsetByLabel[segment.label] || 0;
     const textAnchorYOffset = textAnchorYOffsetByLabel[segment.label] || 0;
     const lineY = baseLineY + lineAnchorYOffset + globalLineYOffset;
-    const side = layout.textX > cx ? 'right' : 'left';
-    const lineStartX = getCircleEdgeX(lineY, side);
     const textOffset = textOffsetByLabel[segment.label] || 0;
     const textBaseY = baseLineY + textAnchorYOffset;
     const lineTextY = textBaseY + textOffset;
@@ -201,14 +210,15 @@ function renderOverallResultSvg(overall, reportDate) {
       (horizontalLineYOffsetByLabel[segment.label] || 0);
     const labelTopY = lineTextY - 8;
     const labelPercentY = lineTextY + 48;
-    const useBentLine = segment.label === '可能會動';
-    const bendX = (lineStartX + layout.lineEndX) / 2 - 36;
+    const bendX =
+      lineSide === 'right'
+        ? layout.lineEndX - connectorTextGap
+        : layout.lineEndX + connectorTextGap;
 
     labels.push(
-      useBentLine
-        ? `<polyline points="${lineStartX},${lineY} ${bendX},${lineLabelY} ${layout.lineEndX},${lineLabelY}" fill="none" stroke="#6B7280" stroke-width="2.5" />`
-        : `<line x1="${lineStartX}" y1="${lineY}" x2="${layout.lineEndX}" y2="${lineY}" stroke="#6B7280" stroke-width="2.5" />`,
-      `<text x="${layout.textX}" y="${labelTopY}" text-anchor="${textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="48" font-weight="400" fill="#6B7280">${segment.label}</text>`,
+      `<circle cx="${dotX}" cy="${dotY}" r="4" fill="#9CA3AF" />`,
+      `<polyline points="${dotX},${dotY} ${bendX},${lineLabelY} ${layout.lineEndX},${lineLabelY}" fill="none" stroke="#6B7280" stroke-width="2.5" />`,
+      `<text x="${layout.textX}" y="${labelTopY}" text-anchor="${textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="48" font-weight="400" fill="#6B7280">${escapeSvgText(segment.label)}</text>`,
       `<text x="${layout.textX}" y="${labelPercentY}" text-anchor="${textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="43" font-weight="400" fill="#6B7280">${formatPercent(segment.count, total)}</text>`
     );
 
@@ -263,6 +273,7 @@ const PROVIDER_RULES = [
   { provider: 'Gamania', patterns: [/gamania/i] },
   { provider: 'Tencent', patterns: [/tencent/i] },
   { provider: 'Zhejiang Taobao', patterns: [/zhejiang taobao/i] },
+  { provider: 'Taiwan Fixed Network', patterns: [/taiwan fixed network/i] },
 ];
 
 function extractOrgName(org) {
@@ -309,65 +320,221 @@ function countResourceDistribution(jsonDataset) {
   return { totalRequests, items };
 }
 
-function renderResourceDistributionSvg(distribution, reportDate, topN = 12) {
+function renderResourceDistributionSvg(distribution, reportDate, minPercent = 1) {
   const width = 1200;
   const height = 700;
-  const left = 72;
-  const right = 56;
-  const top = 72;
-  const axisLabelWidth = 360;
-  const chartStartX = left + axisLabelWidth;
-  const chartWidth = width - chartStartX - right;
+  const marginLeft = 36;
+  const marginRight = 36;
+  const cx = 610;
+  const cy = 360;
+  const radius = 294;
+  const totalRequests = distribution.totalRequests || 0;
+  const total = totalRequests > 0 ? totalRequests : 1;
 
-  const topItems = distribution.items.slice(0, topN);
-  const others = distribution.items
-    .slice(topN)
+  const visibleItems = distribution.items.filter((item) => item.percent >= minPercent);
+  const otherCount = distribution.items
+    .filter((item) => item.percent < minPercent)
     .reduce((sum, item) => sum + item.count, 0);
-  if (others > 0) {
-    topItems.push({
-      provider: 'Others',
-      count: others,
-      percent:
-        distribution.totalRequests > 0
-          ? (others / distribution.totalRequests) * 100
-          : 0,
+  const pieItems = [...visibleItems];
+  if (otherCount > 0) {
+    pieItems.push({
+      provider: 'Others (<1%)',
+      count: otherCount,
+      percent: (otherCount / total) * 100,
     });
   }
 
-  const rowGap = 14;
-  const barHeight = 24;
-  const firstRowY = top + 170;
+  const colors = [
+    '#F44336',
+    '#FFC107',
+    '#3DAA57',
+    '#FF7A00',
+    '#4CB5BE',
+    '#6F9EE8',
+    '#E97A75',
+    '#F2CC55',
+    '#67C587',
+    '#C5CCD8',
+  ];
 
-  const grid = [0, 10, 20, 30, 40, 50].map((tick) => {
-    const x = chartStartX + (chartWidth * tick) / 50;
-    return [
-      `<line x1="${x}" y1="${firstRowY - 20}" x2="${x}" y2="${firstRowY + topItems.length * (barHeight + rowGap)}" stroke="#E5E7EB" stroke-width="1" />`,
-      `<text x="${x}" y="${firstRowY - 28}" text-anchor="middle" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="16" font-weight="500" fill="#9CA3AF">${tick}%</text>`,
-    ].join('');
-  });
+  const paths = [];
+  const leftLabels = [];
+  const rightLabels = [];
+  const forcedLabelSideByProvider = {
+    Cloudflare: 'left',
+  };
+  let startAngle = -Math.PI / 2;
 
-  const bars = topItems.map((item, index) => {
-    const y = firstRowY + index * (barHeight + rowGap);
-    const barWidth = (chartWidth * item.percent) / 50;
-    const color = index < 5 ? '#2563EB' : '#60A5FA';
-    return [
-      `<text x="${left}" y="${y + 18}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="20" font-weight="500" fill="#374151">${item.provider}</text>`,
-      `<rect x="${chartStartX}" y="${y}" width="${Math.max(barWidth, 2)}" height="${barHeight}" fill="${color}" rx="4" ry="4" />`,
-      `<text x="${chartStartX + Math.max(barWidth, 2) + 10}" y="${y + 18}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="20" font-weight="700" fill="#111827">${item.count.toLocaleString('en-US')} (${item.percent.toFixed(1)}%)</text>`,
-    ].join('');
-  });
+  for (let i = 0; i < pieItems.length; i += 1) {
+    const item = pieItems[i];
+    const ratio = item.count / total;
+    const angle = ratio * Math.PI * 2;
+    const endAngle = startAngle + angle;
+    const largeArcFlag = angle > Math.PI ? 1 : 0;
+    const x1 = cx + radius * Math.cos(startAngle);
+    const y1 = cy + radius * Math.sin(startAngle);
+    const x2 = cx + radius * Math.cos(endAngle);
+    const y2 = cy + radius * Math.sin(endAngle);
+
+    paths.push(
+      `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z" fill="${colors[i % colors.length]}" />`
+    );
+
+    const midAngle = startAngle + angle / 2;
+    const dotX = cx + (radius - 16) * Math.cos(midAngle);
+    const dotY = cy + (radius - 16) * Math.sin(midAngle);
+    const side =
+      forcedLabelSideByProvider[item.provider] ||
+      (Math.cos(midAngle) >= 0 ? 'right' : 'left');
+    const elbowX = cx + (radius + 18) * Math.cos(midAngle);
+    const targetY = cy + (radius + 8) * Math.sin(midAngle);
+
+    const label = {
+      provider: item.provider,
+      percent: item.percent,
+      dotX,
+      dotY,
+      elbowX,
+      targetY,
+      side,
+    };
+    if (side === 'right') {
+      rightLabels.push(label);
+    } else {
+      leftLabels.push(label);
+    }
+
+    startAngle = endAngle;
+  }
+
+  function layoutLabels(labels, side) {
+    if (!labels.length) return [];
+    const minGap = 60;
+    const minY = 58;
+    const maxY = height - 40;
+    const lineEndX = side === 'right' ? width - marginRight : marginLeft;
+    const leftJointX = cx - radius - 40;
+    const textX = lineEndX;
+    const textAnchor = side === 'right' ? 'end' : 'start';
+    const sorted = [...labels].sort((a, b) => a.targetY - b.targetY);
+
+    for (let i = 0; i < sorted.length; i += 1) {
+      const prevY = i === 0 ? minY : sorted[i - 1].finalY + minGap;
+      sorted[i].finalY = Math.max(sorted[i].targetY, prevY);
+    }
+    const overflow = sorted[sorted.length - 1].finalY - maxY;
+    if (overflow > 0) {
+      for (let i = sorted.length - 1; i >= 0; i -= 1) {
+        sorted[i].finalY -= overflow;
+        if (i > 0 && sorted[i].finalY < sorted[i - 1].finalY + minGap) {
+          sorted[i].finalY = sorted[i - 1].finalY + minGap;
+        }
+      }
+    }
+
+    return sorted.map((label) => ({
+      ...label,
+      elbowX: side === 'left' ? leftJointX : label.elbowX,
+      lineEndX,
+      textX,
+      textAnchor,
+    }));
+  }
+
+  const positionedLabels = [
+    ...layoutLabels(leftLabels, 'left'),
+    ...layoutLabels(rightLabels, 'right'),
+  ];
+
+  const labelShapes = [];
+  for (const label of positionedLabels) {
+    labelShapes.push(
+      `<circle cx="${label.dotX}" cy="${label.dotY}" r="4" fill="#9CA3AF" />`,
+      `<polyline points="${label.dotX},${label.dotY} ${label.elbowX},${label.finalY} ${label.lineEndX},${label.finalY}" fill="none" stroke="#6B7280" stroke-width="2.5" />`,
+      `<text x="${label.textX}" y="${label.finalY - 8}" text-anchor="${label.textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="22" font-weight="400" fill="#6B7280">${escapeSvgText(label.provider)}</text>`,
+      `<text x="${label.textX}" y="${label.finalY + 21}" text-anchor="${label.textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="21" font-weight="400" fill="#6B7280">${label.percent.toFixed(1)}%</text>`
+    );
+  }
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
-    `<rect width="100%" height="100%" fill="#FFFFFF" />`,
-    `<text x="${left}" y="110" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="44" font-weight="700" fill="#111827">資源來源分布</text>`,
-    `<text x="${left}" y="152" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="22" font-weight="400" fill="#6B7280">requests by normalized provider (n = ${distribution.totalRequests.toLocaleString('en-US')})</text>`,
-    `<text x="${chartStartX}" y="${firstRowY - 52}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="20" font-weight="500" fill="#374151">% of requests</text>`,
-    grid.join(''),
-    bars.join(''),
-    `<text x="${width - right}" y="${height - 34}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="18" font-weight="400" fill="#9CA3AF">Data snapshot: ${reportDate}</text>`,
+    `<rect width="100%" height="100%" fill="#EDEDED" />`,
+    `<text x="${width - 56}" y="72" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="24" font-weight="400" fill="#9CA3AF">n = ${totalRequests.toLocaleString('en-US')} requests</text>`,
+    paths.join(''),
+    labelShapes.join(''),
+    `<text x="${width - 56}" y="${height - 20}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="19" font-weight="400" fill="#9CA3AF">Data snapshot: ${reportDate}</text>`,
     `</svg>`,
   ].join('');
+}
+
+function renderResourceDistributionTsv(distribution) {
+  const lines = ['name\tcount\tpercent'];
+  for (const item of distribution.items) {
+    lines.push(
+      [
+        item.provider,
+        String(item.count),
+        `${item.percent.toFixed(1)}%`,
+      ].join('\t')
+    );
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+function renderOverallResultTsv(overall) {
+  const total = overall.total || 0;
+  const lines = [
+    'category\tcount\tpercent',
+    ['不會動', String(overall.highRisk), formatPercent(overall.highRisk, total)].join('\t'),
+    ['國際雲', String(overall.uncertain), formatPercent(overall.uncertain, total)].join('\t'),
+    ['可能會動', String(overall.localized), formatPercent(overall.localized, total)].join('\t'),
+    ['全部', String(total), formatPercent(total, total)].join('\t'),
+  ];
+  return `${lines.join('\n')}\n`;
+}
+
+function countDependencyBreakdown(allData) {
+  const total = allData.length;
+  const counts = {
+    publicCloudDomestic: 0,
+    publicCloudForeign: 0,
+    publicCloudTotal: 0,
+    directDomestic: 0,
+    directForeign: 0,
+    directTotal: 0,
+    totalDomestic: 0,
+    totalForeign: 0,
+    foreignOnly: 0,
+  };
+
+  for (const data of allData) {
+    if (data.domesticCloud > 0) counts.publicCloudDomestic += 1;
+    if (data.foreignCloud > 0) counts.publicCloudForeign += 1;
+    if (data.totalCloud > 0) counts.publicCloudTotal += 1;
+    if (data.domesticDirect > 0) counts.directDomestic += 1;
+    if (data.foreignDirect > 0) counts.directForeign += 1;
+    if (data.totalDirect > 0) counts.directTotal += 1;
+    if (data.totalDomestic > 0) counts.totalDomestic += 1;
+    if (data.totalForeign > 0) counts.totalForeign += 1;
+    if (data.totalForeign > 0 && data.totalDomestic === 0) {
+      counts.foreignOnly += 1;
+    }
+  }
+
+  return { total, counts };
+}
+
+function renderDependencyBreakdownTsv(breakdown) {
+  const { total, counts } = breakdown;
+  const fmt = (count) => `${count} (${formatPercent(count, total)})`;
+  const lines = [
+    '類型\t境內\t境外\t總計',
+    ['公有雲', fmt(counts.publicCloudDomestic), fmt(counts.publicCloudForeign), fmt(counts.publicCloudTotal)].join('\t'),
+    ['非雲', fmt(counts.directDomestic), fmt(counts.directForeign), fmt(counts.directTotal)].join('\t'),
+    ['總計', fmt(counts.totalDomestic), fmt(counts.totalForeign), ''].join('\t'),
+    ['僅用到境外資源', '', fmt(counts.foreignOnly), ''].join('\t'),
+  ];
+  return `${lines.join('\n')}\n`;
 }
 
 async function main() {
@@ -527,6 +694,19 @@ async function main() {
   console.log(`共處理 ${allData.length} 筆資料`);
 
   const overall = countOverallCategories(allData);
+  const overallTsv = renderOverallResultTsv(overall);
+  await fs.promises.writeFile(OVERALL_RESULT_TSV, overallTsv, 'utf8');
+  console.log(`已產生統計：${OVERALL_RESULT_TSV}`);
+  const dependencyBreakdown = countDependencyBreakdown(allData);
+  const dependencyBreakdownTsv = renderDependencyBreakdownTsv(
+    dependencyBreakdown
+  );
+  await fs.promises.writeFile(
+    DEPENDENCY_BREAKDOWN_TSV,
+    dependencyBreakdownTsv,
+    'utf8'
+  );
+  console.log(`已產生統計：${DEPENDENCY_BREAKDOWN_TSV}`);
   const overallSvg = renderOverallResultSvg(overall, snapshotDate);
   await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
   const overallSvgPath = path.join(
@@ -542,6 +722,16 @@ async function main() {
   }
 
   const resourceDistribution = countResourceDistribution(jsonDataset);
+  const resourceDistributionTsv = renderResourceDistributionTsv(
+    resourceDistribution
+  );
+  await fs.promises.writeFile(
+    RESOURCE_DISTRIBUTION_TSV,
+    resourceDistributionTsv,
+    'utf8'
+  );
+  console.log(`已產生統計：${RESOURCE_DISTRIBUTION_TSV}`);
+
   const resourceSvg = renderResourceDistributionSvg(
     resourceDistribution,
     snapshotDate

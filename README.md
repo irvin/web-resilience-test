@@ -325,6 +325,26 @@ node generate_statistic.js
 - 生成或更新 `test-results/statistic.tsv` 統計檔案
 - 統計資料會按照 `top-traffic-list-taiwan/merged_lists_tw.json` 的順序排序，不在清單中的網站會附加在最後
 
+### 補充：ASN / 公有雲台灣節點統計
+
+若要分析各國際公有雲（Google、Cloudflare、AWS、Akamai、Fastly、Microsoft）在台灣節點的使用情況，可執行：
+
+```bash
+node asn_taiwan_ratio.js
+```
+
+此腳本會讀取 `test-results/*.json`，輸出 `test-results/asn_taiwan_ratio.tsv`，內容包含：
+
+- 各 ASN / 公司的請求統計（`Total Requests`、`Taiwan Requests`、`Non-Taiwan Requests`、`Taiwan Ratio (%)`）
+- 各公司網站數統計（`Websites (domestic node)`、`Websites (foreign node)`）
+- `resilience=1` （無境外資源依賴）網站中，使用「公有雲台灣節點」的網站數
+
+> 報告中「國際公有雲依賴狀態分析」的相關數字，建議以 `asn_taiwan_ratio.tsv` 作為主要來源並定期同步更新。
+
+### 補充：報告 build / publish
+
+若要將 `report/index.md` 建成可發布的 HTML，或將內容發布到 `report` branch，請參考 `report/README.md` 的正式流程說明。
+
 **圖表輸出（`report/img`）與日期規則：**
 - 會同步輸出：
   - `overall-result-YYYY-MM-DD.svg`
