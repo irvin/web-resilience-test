@@ -405,9 +405,9 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 如果將所有 request 根據 ASN 進行統計排序，我們發現網站依賴資源高度集中於大型供應商，其中超過 5% 的來源有 Google、Cloudflare、Amazon、中華電信及 Facebook。
 
-其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.4%。來自 Google 的主要資源有 GTM、而 Cloudflare 提供的 JavaScript CDN 與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。
+其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.3%。來自 Google 的主要資源有 GTM、而 Cloudflare 提供的 JavaScript CDN 與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。
 
-![](./img/resource-distribution-2026-01-15.jpg)
+![](./img/resource-distribution-2026-03-21.svg)
 
 | 單位                                 |    總數 |  百分比 |
 |--------------------------------------|--------:|--------:|
