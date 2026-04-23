@@ -49,7 +49,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 全球資訊網（World Wide Web，WWW）是台灣社會運作的基礎。
 
-台灣是一個高度數位化的社會，從通訊、物流、商業、媒體、公共及政府運作，生活中的一切，都仰賴網路上的各種數位資訊系統作為基礎。從起床、工作到就寢，人人幾乎無時無刻都盯著手機、電視、電腦、平板等各種螢幕，連結網際網路，存取與交換各種資訊。[ref](https://report.twnic.tw/2025/TrendAnalysis_internetUsage.html)
+台灣是一個高度數位化的社會，從通訊、物流、商業、媒體、公共及政府運作，生活中的一切，都仰賴網路上的各種數位資訊系統作為基礎。從起床、工作到就寢，人人幾乎無時無刻都盯著手機、電視、電腦、平板等各種螢幕，連結網際網路，存取與交換各種資訊。[^twnic-usage]
 
 當你拿出手機，打開某一個 app（例如 Line），收到並回覆一則訊息時，實際上發生了什麼事？
 
@@ -73,18 +73,18 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 根據以上說明，我們已經知道，許多我們每天使用的網站、app，其實都依賴於他國的連線。如果沒有國際連線，極大部分的網站與app，有可能都將無法正常運作。
 
-而台灣身為一個島國，我們連結到全球的通訊，超過 99% 都依賴現有的 14 條國際海底電纜傳輸[ref](https://www.cna.com.tw/news/aipl/202501100036.aspx)，因此，海纜的韌性，等同於台灣社會的韌性。
+而台灣身為一個島國，我們連結到全球的通訊，超過 99% 都依賴現有的 14 條國際海底電纜傳輸[^cna-cables]，因此，海纜的韌性，等同於台灣社會的韌性。
 
 海底電纜一般是數公分直徑的多層纜線，直接放置在海床上（深海處），或埋入海床一至三公尺深度（淺海處），因而在台灣海峽之類水深較淺，人類活動密集的水域，容易因船隻下錨、漁船或抽砂船活動等原因而意外受損。除此之外，另有自然因素（例如地震導致海底山崩），又或者地緣政治相關風險的事故，也是常見的損壞原因。
 
-事實上，根據 [台灣海纜動態地圖（smc.peering.tw）](https://smc.peering.tw/) 網站的可用性統計資料，台灣幾乎無時無刻都有一條以上的海底電纜處於故障狀態。
+事實上，根據台灣海纜動態地圖（smc.peering.tw）網站的可用性統計資料，台灣幾乎無時無刻都有一條以上的海底電纜處於故障狀態。[^smc-map]
 
 ![台灣所有對外海纜自2025/3/18-2026/3/18的可用性](img/smc-peering-tw-2026-03-18-1822.png)
 2025/3/18-2026/3/18 期間，台灣所有國際對外海底電纜的可用性狀況（資料來源：smc.peering.tw）。
 
-台灣目前的對外連線，總共有十五條國際海底電纜，連結四個海邊的登陸機房（淡水、八里、頭城、以及枋山），連結台灣與全球的網路。另有十條國內海底電纜，連接金門、馬祖、澎湖、小琉球等離島。[ref](https://moda.gov.tw/major-policies/subseacable/1747)
+台灣目前的對外連線，總共有十五條國際海底電纜，連結四個海邊的登陸機房（淡水、八里、頭城、以及枋山），連結台灣與全球的網路。另有十條國內海底電纜，連接金門、馬祖、澎湖、小琉球等離島。[^moda-subsea]
 
-這十五條國際海纜，共同承擔了台灣連結全球的網路流量。因為網際網路的設計即著重網狀、冗餘、多樣與連通等要素，如果僅有一條或少數海纜發生故障，電信商可調整訊號轉由其他海纜傳輸，因此一般情況下，儘管連線品質有所下降，但你或許不會感覺到有任何差異。[ref](https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/)
+這十五條國際海纜，共同承擔了台灣連結全球的網路流量。因為網際網路的設計即著重網狀、冗餘、多樣與連通等要素，如果僅有一條或少數海纜發生故障，電信商可調整訊號轉由其他海纜傳輸，因此一般情況下，儘管連線品質有所下降，但你或許不會感覺到有任何差異。[^aei-resilience]
 
 然而，由於物理上的硬性限制，一旦多條海纜同時發生故障，就有可能耗盡所有的傳輸冗餘頻寬，開始產生較嚴重的堵塞，或大規模無法連線，進而對社會上的通訊、物流、政府運作以及各類數位服務造成廣泛衝擊。  ￼
 
@@ -96,19 +96,19 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 此一事故，造成台灣對外的國際通訊嚴重中斷，事件初期，台灣對美國的電話撥通率僅剩 40%，對中國、日本更只有約 10%。不僅台灣受影響，中國、香港、日本、韓國、東南亞各國的國際通訊，也都受到劇烈衝擊。影響國際經貿及金融交易，在境外網路服務方面，Google、Yahoo、MSN、Gmail、維基百科等主要服務，在多國均有大幅中斷。
 
-事發後共有八艘海纜船參與搶修，歷時將近兩個月才完全修復[ref](https://web.archive.org/web/20070217181311/http://www.ofta.gov.hk/zh/press_rel/2007/Feb_2007_r4.html)。聯合國國際減災策略署（ISDR）主任形容此次地震對海底電纜的損害，是現代新型態災難[ref](https://web.archive.org/web/20070210045300/http://news.msn.com.tw/cna/cna_full_text.asp?yy=07&mm=02&dd=08&name=000030)。
+事發後共有八艘海纜船參與搶修，歷時將近兩個月才完全修復。[^ofta-2007] 聯合國國際減災策略署（ISDR）主任形容此次地震對海底電纜的損害，是現代新型態災難。[^msn-isdr]
 
 上述兩事件，均是因為多數海纜同時發生故障，雖未完全中斷，但仍產生非常嚴重的壅塞及斷線。
 
-而 2023 年初的馬祖斷網事件，則成為一地區對外海纜完全中斷的實際案例。當時馬祖對台灣連線的兩條海纜，在 2023 年 2 月 2 號及 2 月 8 號陸續遭中國漁船損壞，因而導致區域對外的網路與電訊完全中斷，僅剩頻寬極為有限的微波（2Gbps）支援，多數民眾難以上網[ref](https://www.facebook.com/wen1949/posts/pfbid0C1juirBxeTdoaarQnzXpWBdR7C8xodHPJ3Ctrh93kF7hdeU6547KiC8SwRRvBjwfl)，直到三月底，歷經 50 天後，才修復其中一條台馬 3 號海纜，恢復正常連網。
+而 2023 年初的馬祖斷網事件，則成為一地區對外海纜完全中斷的實際案例。當時馬祖對台灣連線的兩條海纜，在 2023 年 2 月 2 號及 2 月 8 號陸續遭中國漁船損壞，因而導致區域對外的網路與電訊完全中斷，僅剩頻寬極為有限的微波（2Gbps）支援，多數民眾難以上網。[^matsu-facebook] 直到三月底，歷經 50 天後，才修復其中一條台馬 3 號海纜，恢復正常連網。
 
-台馬 2 號及 3 號海纜總頻寬為 1Tbps，在 2023 年事件後，台馬微波通訊頻寬擴展至 12Gbps，於 2025 年 1 月 15 日及 1 月 22 日，馬祖再次發生兩條海纜陸續中斷的事故，此時則經由擴增後的微波通訊，則得以維持一定程度的連線能量[ref](https://www.twreporter.org/a/damaged-undersea-cables-raises-alarm-in-taiwan)。
+台馬 2 號及 3 號海纜總頻寬為 1Tbps，在 2023 年事件後，台馬微波通訊頻寬擴展至 12Gbps，於 2025 年 1 月 15 日及 1 月 22 日，馬祖再次發生兩條海纜陸續中斷的事故，此時則經由擴增後的微波通訊，則得以維持一定程度的連線能量。[^twreporter-matsu]
 
 ### 衛星能否作為替代方案
 
 2006 年事件初期，中華電信透過調撥中新一號通訊衛星，支援國際電話通訊，在短期間恢復部分國際語音電話可用性。如果現代再次發生同等規模的事故，衛星是否也可以作為替代方案？
 
-衛星的通訊頻寬，跟海纜有極大差距。單條現代海纜的容量約有數十 Tbps，而新的低軌衛星，例如 Starlink，單顆僅有數十 Gbps，約差距一千倍。整個 Starlink 系統的總容量，僅約相當於單個海纜系統[ref](https://opendata.uni-halle.de/bitstream/1981185920/103863/1/1_9%20ICAIIT_2023_paper_4290.pdf)。任何現有的衛星系統，均無法滿足目前台灣連外所需的通訊容量。因此，衛星只能作為政府對外或地區型災難的緊急通訊備援，無法作為服務全國聯外所需的替代方案。
+衛星的通訊頻寬，跟海纜有極大差距。單條現代海纜的容量約有數十 Tbps，而新的低軌衛星，例如 Starlink，單顆僅有數十 Gbps，約差距一千倍。整個 Starlink 系統的總容量，僅約相當於單個海纜系統。[^starlink-capacity] 任何現有的衛星系統，均無法滿足目前台灣連外所需的通訊容量。因此，衛星只能作為政府對外或地區型災難的緊急通訊備援，無法作為服務全國聯外所需的替代方案。
 
 ### 為何今日的風險高過 2006
 
@@ -118,7 +118,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ### 現有研究的不足與本研究定位
 
-目前關於網路韌性的探討，多半聚焦於基礎設施層面，例如海纜拓樸、路由協定[ref](https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf),[ref](https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf)、DNS 系統[ref](https://assets.ctfassets.net/qhzu5l2wyxby/fsS3ZYrpTZKOHJL_EJxRGw/b2d681b0eebb8ee66708c3f94b98f9df/resilience-dns_comnet.pdf), [ref](https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf)、或檢視網站所在位置，較少以全面性的方式，探討當一個地區失去對外連線時，日常使用的數位服務，實際會發生什麼情況[ref](https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/)。
+目前關於網路韌性的探討，多半聚焦於基礎設施層面，例如海纜拓樸、路由協定[^routing-paper-1][^routing-paper-2]、DNS 系統[^dns-paper-1][^dns-paper-2]、或檢視網站所在位置，較少以全面性的方式，探討當一個地區失去對外連線時，日常使用的數位服務，實際會發生什麼情況。[^aei-resilience]
 
 ### 小結
 
@@ -177,11 +177,11 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 - [SimilarWeb](https://www.similarweb.com/top-websites/taiwan/) - SimilarWeb 的台灣網站流量排名（前 50 名）
 - [Semrush](https://www.semrush.com/trending-websites/tw/all) - Semrush 的台灣網站流量排名（前 100 名）
 
-清單更新於 2026 年 1 月 6 日，共 2109 個網站 [ref](https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json)，並依照流量高低先後排序，可用以衡量特定網站重要性。
+清單更新於 2026 年 1 月 6 日，共 2109 個網站。[^merged-list] 並依照流量高低先後排序，可用以衡量特定網站重要性。
 
 相關清單與 script 開源於 [top-traffic-website-list-taiwan](https://github.com/irvin/top-traffic-website-list-taiwan/) 專案。
 
-除以上 2109 網站外，本研究另加入數個手動指定測試站點（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。[ref](https://github.com/irvin/web-resilience-test/blob/a4c53e30acda30fbf39dab2023a5fdb4d866ef2c/manual_curated_list_tw.json)
+除以上 2109 網站外，本研究另加入數個手動指定測試站點（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。[^manual-curated-list]
 
 ### 測試環境
 
@@ -274,7 +274,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
      - 針對前述 hostname 清單，呼叫 IPinfo API，取得其位置資料
      - 如果查詢的資料顯示 `country=TW`，則紀錄為境內連線
      - 若查詢的結果顯示 `country`非`TW`，則根據連線的 ASN，判定是否來自國際公有雲節點（Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft），並進入下一步的進階判定。
-       - 本研究同時參酌測試網站的 request 資料，建立公有雲的對應 ASN 清單 [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json)，除供判定使用外，也同步開源供其他研究與專案參考。
+       - 本研究同時參酌測試網站的 request 資料，建立公有雲的對應 ASN 清單。[^cloud-providers-list] 除供判定使用外，也同步開源供其他研究與專案參考。
 
      a. Header 判定
        - 檢查連線的 response header，是否包含 `cf-ray`、`x-amz-cf-pop`、`x-served-by` 等雲端系統已知的位置標記。
@@ -422,7 +422,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 如果將所有 request 根據 ASN 進行統計排序，我們發現網站依賴資源高度集中於大型供應商，其中超過 5% 的來源有 Google、Cloudflare、Amazon、中華電信及 Facebook。
 
-其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.3%。來自 Google 的主要資源有 GTM、而 Cloudflare 提供的 JavaScript CDN 與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。
+其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.3%。來自 Google 的主要資源有 GTM，而 Cloudflare 提供的 JavaScript CDN（cdnjs[^cdnjs]）與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。
 
 ![](./img/resource-distribution-2026-03-21.svg)
 
@@ -520,3 +520,22 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 - 分析不同資源種類（document、script、image、xhr、font、stylesheet）間是否有依賴差異
 - 分析不同類型網站（新聞、電商、社群、搜尋引擎等）間的韌性差異
 - 鑑別「高流量但低韌性」的高風險網站
+
+[^twnic-usage]: Twnic，〈2025 臺灣網路報告：趨勢分析〉，https://report.twnic.tw/2025/TrendAnalysis_internetUsage.html
+[^cna-cables]: 中央社，〈台灣對外通訊逾 99% 靠海纜傳輸〉，https://www.cna.com.tw/news/aipl/202501100036.aspx
+[^smc-map]: 台灣海纜動態地圖（smc.peering.tw），https://smc.peering.tw/
+[^moda-subsea]: 數位發展部，〈最新海纜狀況〉，https://moda.gov.tw/major-policies/subseacable/1747
+[^aei-resilience]: Center for Technology, Science, and Energy, American Enterprise Institute, “Beyond Infrastructure: Internet Ecosystem Resilience and the Public Good,” https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/
+[^ofta-2007]: 香港電訊管理局，〈有關地震導致對外電訊服務受阻的新聞稿〉（2007-02），Internet Archive 備份，https://web.archive.org/web/20070217181311/http://www.ofta.gov.hk/zh/press_rel/2007/Feb_2007_r4.html
+[^msn-isdr]: MSN 新聞轉載中央社報導，〈聯合國國際減災策略署主任談海纜地震損害〉，Internet Archive 備份，https://web.archive.org/web/20070210045300/http://news.msn.com.tw/cna/cna_full_text.asp?yy=07&mm=02&dd=08&name=000030
+[^matsu-facebook]: 陳雪生 Facebook 貼文，〈馬祖海纜與微波通訊狀況說明〉，https://www.facebook.com/wen1949/posts/pfbid0C1juirBxeTdoaarQnzXpWBdR7C8xodHPJ3Ctrh93kF7hdeU6547KiC8SwRRvBjwfl
+[^twreporter-matsu]: 報導者，〈海底電纜受損，台灣警報再響：從馬祖斷網看台灣的數位韌性挑戰〉，https://www.twreporter.org/a/damaged-undersea-cables-raises-alarm-in-taiwan
+[^starlink-capacity]: ICAIIT 2023 論文，〈比較 Starlink 與海底電纜系統容量之研究〉，https://opendata.uni-halle.de/bitstream/1981185920/103863/1/1_9%20ICAIIT_2023_paper_4290.pdf
+[^routing-paper-1]: Lixia Zhang et al., “A Survey of Inter-Domain Routing,” https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf
+[^routing-paper-2]: CoNEXT 2007 論文，https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf
+[^dns-paper-1]: “DNS Resilience,” https://assets.ctfassets.net/qhzu5l2wyxby/fsS3ZYrpTZKOHJL_EJxRGw/b2d681b0eebb8ee66708c3f94b98f9df/resilience-dns_comnet.pdf
+[^dns-paper-2]: Internet Society, “DNS Resiliency,” https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf
+[^merged-list]: `top-traffic-website-list-taiwan` 專案中的 `merged_lists_tw.json`（commit `553b50a`），https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json
+[^manual-curated-list]: `web-resilience-test` 專案中的 `manual_curated_list_tw.json`（commit `a4c53e3`），https://github.com/irvin/web-resilience-test/blob/a4c53e30acda30fbf39dab2023a5fdb4d866ef2c/manual_curated_list_tw.json
+[^cloud-providers-list]: `top-traffic-website-list-taiwan` 專案中的 `cloud_providers_tw.json`，https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json
+[^cdnjs]: Cloudflare，〈cdnjs〉，https://www.cloudflare.com/zh-tw/cdnjs/

@@ -15,6 +15,91 @@ function stripFrontmatter(md) {
   return md.slice(end + 4).replace(/^\n+/, "");
 }
 
+function extractFootnotes(md) {
+  const lines = md.split("\n");
+  const footnotes = new Map();
+  const kept = [];
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const match = lines[i].match(/^\[\^([^\]]+)\]:\s?(.*)$/);
+    if (!match) {
+      kept.push(lines[i]);
+      continue;
+    }
+
+    const [, id, firstLine] = match;
+    const bodyLines = [firstLine];
+    i += 1;
+
+    while (i < lines.length) {
+      const line = lines[i];
+      if (/^( {2,}|\t)/.test(line)) {
+        bodyLines.push(line.replace(/^( {2,}|\t)/, ""));
+        i += 1;
+        continue;
+      }
+      if (line.trim() === "") {
+        bodyLines.push("");
+        i += 1;
+        continue;
+      }
+      break;
+    }
+
+    i -= 1;
+    footnotes.set(id, bodyLines.join("\n").trim());
+  }
+
+  return {
+    mdWithoutFootnotes: kept.join("\n"),
+    footnotes,
+  };
+}
+
+function renderFootnotes(md, footnotes) {
+  if (footnotes.size === 0) {
+    return md;
+  }
+
+  const orderedIds = [];
+  const seen = new Set();
+  const refCounts = new Map();
+  let transformed = md.replace(/\[\^([^\]]+)\]/g, (_match, rawId) => {
+    const id = String(rawId);
+    if (!footnotes.has(id)) {
+      return _match;
+    }
+
+    if (!seen.has(id)) {
+      seen.add(id);
+      orderedIds.push(id);
+    }
+
+    const refCount = (refCounts.get(id) || 0) + 1;
+    refCounts.set(id, refCount);
+    const index = orderedIds.indexOf(id) + 1;
+    const refId = `fnref-${id}${refCount > 1 ? `-${refCount}` : ""}`;
+    return `<sup id="${refId}" class="footnote-ref"><a href="#fn-${id}">${index}</a></sup>`;
+  });
+
+  if (orderedIds.length === 0) {
+    return transformed;
+  }
+
+  const items = orderedIds.map((id) => {
+    const raw = footnotes.get(id) || "";
+    const content = marked.parse(raw).trim().replace(/^<p>/, "").replace(/<\/p>$/, "");
+    const backrefs = Array.from({ length: refCounts.get(id) || 1 }, (_v, idx) => {
+      const suffix = idx > 0 ? `-${idx + 1}` : "";
+      return `<a href="#fnref-${id}${suffix}" class="footnote-backref" aria-label="Back to reference ${idx + 1}">↩</a>`;
+    }).join(" ");
+    return `<li id="fn-${id}">${content} ${backrefs}</li>`;
+  }).join("\n");
+
+  transformed = transformed.trimEnd() + `\n\n## 註腳\n\n<ol class="footnotes-list">\n${items}\n</ol>\n`;
+  return transformed;
+}
+
 function getTitleFromMarkdown(md, fallback) {
   const titleMatch = md.match(/^#\s+(.+)$/m);
   return titleMatch ? titleMatch[1].trim() : fallback;
@@ -49,6 +134,10 @@ function buildHtmlPage(title, contentHtml) {
       border-radius: 6px;
       background: color-mix(in srgb, CanvasText 8%, Canvas);
     }
+    sup.footnote-ref { font-size: 0.8em; }
+    .footnotes-list { padding-left: 1.4em; }
+    .footnotes-list li { margin: 0.6em 0; }
+    .footnote-backref { margin-left: 0.35em; text-decoration: none; }
     img { max-width: 100%; height: auto; }
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid color-mix(in srgb, CanvasText 18%, Canvas); padding: 8px; }
@@ -112,7 +201,9 @@ function main() {
 
   const rawMd = fs.readFileSync(sourceMd, "utf8");
   const md = stripFrontmatter(rawMd);
-  const htmlContent = addHeadingIds(marked.parse(md));
+  const { mdWithoutFootnotes, footnotes } = extractFootnotes(md);
+  const mdWithRenderedFootnotes = renderFootnotes(mdWithoutFootnotes, footnotes);
+  const htmlContent = addHeadingIds(marked.parse(mdWithRenderedFootnotes));
   const title = getTitleFromMarkdown(md, "report");
   fs.writeFileSync(outHtml, buildHtmlPage(title, htmlContent), "utf8");
   console.log(`Built ${outHtml} from report/index.md`);
