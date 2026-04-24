@@ -134,10 +134,56 @@ function buildHtmlPage(title, contentHtml) {
       border-radius: 6px;
       background: color-mix(in srgb, CanvasText 8%, Canvas);
     }
-    sup.footnote-ref { font-size: 0.8em; }
-    .footnotes-list { padding-left: 1.4em; }
-    .footnotes-list li { margin: 0.6em 0; }
-    .footnote-backref { margin-left: 0.35em; text-decoration: none; }
+    sup.footnote-ref {
+      font-size: 0.74em;
+      line-height: 0;
+      vertical-align: super;
+    }
+    sup.footnote-ref a {
+      text-decoration: none;
+      font-variant-numeric: tabular-nums;
+    }
+    sup.footnote-ref a::before { content: "["; }
+    sup.footnote-ref a::after { content: "]"; }
+    h2#註腳 {
+      margin-top: 3.2rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid color-mix(in srgb, CanvasText 18%, Canvas);
+      max-width: 46rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      color: color-mix(in srgb, CanvasText 62%, Canvas);
+    }
+    .footnotes-list {
+      max-width: 46rem;
+      padding-left: 0;
+      font-size: 0.88rem;
+      color: color-mix(in srgb, CanvasText 80%, Canvas);
+    }
+    .footnotes-list li {
+      margin: 0.55rem 0 0.55rem 1.5rem;
+      padding-left: 0.35rem;
+      line-height: 1.68;
+    }
+    .footnotes-list code {
+      font-size: 0.92em;
+    }
+    .footnotes-list a {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .footnotes-list p {
+      margin: 0;
+    }
+    .footnote-backref {
+      margin-left: 0.3rem;
+      text-decoration: none;
+      opacity: 0.55;
+      font-size: 0.85em;
+    }
+    .footnote-backref:hover {
+      opacity: 0.9;
+    }
     img { max-width: 100%; height: auto; }
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid color-mix(in srgb, CanvasText 18%, Canvas); padding: 8px; }
