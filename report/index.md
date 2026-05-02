@@ -1,5 +1,5 @@
-# 海纜斷光會怎樣？認識台灣的國際網路中斷風險
-## When Submarine Cables Go Dark: Understanding and Preparing for the Risks of Taiwan’s International Internet Disconnection
+# 海纜斷光會怎樣？認識台灣的國際網路中斷風險<!-- omit in toc -->
+## When Submarine Cables Go Dark: Understanding and Preparing for the Risks of Taiwan’s International Internet Disconnection<!-- omit in toc -->
 
 ### 作者
 
@@ -10,7 +10,7 @@ MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))
 ### 更新日期
 
 Published: 2026-03-23  
-Last Updated: 2026-04-17
+Last Updated: 2026-05-05
 
 ### 誌謝
 
@@ -23,120 +23,168 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ## 摘要
 
-本研究探討當台灣發生大規模國際海底電纜中斷時，日常常用網路服務的可用性風險。透過瀏覽器觀測網站首頁資源要求，追蹤頁面依賴資源的來源，作為風險評估指標。研究聚焦兩項核心議題：
+本研究探討當台灣發生大規模國際海底電纜中斷時，日常常用網路服務的可用性。透過瀏覽器觀測網站首頁資源要求，追蹤頁面依賴資源的來源，作為風險評估指標。
 
-（一）台灣常用網站對境外資源的依賴程度；
-（二）台灣常用網站對跨國雲服務境內節點的依賴程度，以及雲端依賴相關的韌性特徵。
+本研究聚焦兩項核心議題：（一）台灣常用網站對境外資源的依賴程度（二）台灣常用網站對跨國雲服務境內節點的依賴程度，並發展量測的方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。
 
-本研究發展一套量測的方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。
+經檢測 1859 個台灣常用網站，結果顯示，47.0% 的網站為第一類「境外依賴型」，存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42.3% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點資源，在境外連線中斷時的實際可用性，存在高度不確定。
 
-經檢測 1859 個台灣常用網站，結果顯示，47.0% 的網站存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42.3% 的網站雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點資源，其在境外連線中斷時的實際可用性，仍存在高度不確定性。
+## 目錄<!-- omit in toc -->
 
-## 目錄
-
-1. [研究背景](#研究背景)
-2. [研究問題](#研究問題)
-3. [研究標的與環境](#研究標的與環境)
-4. [研究方法](#研究方法)
-5. [研究實作與資料處理](#研究實作與資料處理)
-6. [研究結果](#研究結果)
-7. [研究建議](#研究建議)
-8. [研究限制與後續方向](#研究限制與後續方向)
+- [摘要](#摘要)
+- [研究背景](#研究背景)
+  - [台灣是網路高度普及的社會](#台灣是網路高度普及的社會)
+  - [日常網路服務如何依賴國際連線](#日常網路服務如何依賴國際連線)
+  - [台灣作為島國的海纜脆弱性](#台灣作為島國的海纜脆弱性)
+  - [歷史案例：多條國際海纜同時故障](#歷史案例多條國際海纜同時故障)
+  - [歷史案例：馬祖全島斷網](#歷史案例馬祖全島斷網)
+  - [衛星作為替代方案的數量與頻寬問題](#衛星作為替代方案的數量與頻寬問題)
+  - [為何今日的風險高過 2006](#為何今日的風險高過-2006)
+  - [社會認知與現有研究的不足](#社會認知與現有研究的不足)
+  - [小結](#小結)
+- [研究問題](#研究問題)
+- [研究標的與環境](#研究標的與環境)
+  - [建立常用網站清單](#建立常用網站清單)
+  - [測試環境](#測試環境)
+- [研究方法](#研究方法)
+  - [方法定位](#方法定位)
+  - [指標定義與風險分類框架](#指標定義與風險分類框架)
+- [研究實作與資料處理](#研究實作與資料處理)
+  - [擷取測試資料](#擷取測試資料)
+  - [單一網站測試流程](#單一網站測試流程)
+  - [批次測試流程](#批次測試流程)
+  - [建置個別網站查詢頁面](#建置個別網站查詢頁面)
+- [研究結果](#研究結果)
+  - [研究資料快照](#研究資料快照)
+  - [整體結果](#整體結果)
+  - [結果說明](#結果說明)
+  - [國際公有雲依賴狀態分析](#國際公有雲依賴狀態分析)
+  - [國際公有雲資源位置](#國際公有雲資源位置)
+  - [資源位置／雲平台依賴狀態統計](#資源位置雲平台依賴狀態統計)
+  - [資源來源分布](#資源來源分布)
+  - [公共機關整體風險](#公共機關整體風險)
+- [研究建議](#研究建議)
+  - [政策面建議](#政策面建議)
+  - [技術面建議](#技術面建議)
+- [研究限制與後續方向](#研究限制與後續方向)
+- [參考連結](#參考連結)
 
 ## 研究背景
 
+### 台灣是網路高度普及的社會
+
+台灣是高度數位化的社會，全球資訊網（World Wide Web, WWW）作為社會運作的關鍵基石，社會對於網路的數位依存已達到歷史新高。截至 2024 年，台灣寬頻固網家戶普及率上升至 74.5%[^ncc-usage]；行動寬頻普及率達 87.12%；整體上網率則從 2006 年的 67.2% 提升至 88.75%[^twnic-usage]。
+
+從起床到就寢，人人無時無刻都盯著各種連結網路的螢幕，存取與交換各種資訊。網路深度嵌入日常生活與社會活動之中。通訊、商業交易、媒體傳播、物流系統，以及公共與政府服務，皆依賴網路上的數位資訊系統運作。
+
+這種極高的數位連通率，意味著任何具規模且持續一定時間的網路中斷，都可能對經濟與社會造成顯著衝擊。
+
 ### 日常網路服務如何依賴國際連線
 
-全球資訊網（World Wide Web，WWW）是台灣社會運作的基礎。
+當使用者在手機上開啟一個 App（例如 Line）並回覆一則訊息時，實際上會觸發一連串的網路請求。
 
-台灣是一個高度數位化的社會，從通訊、物流、商業、媒體、公共及政府運作，生活中的一切，都仰賴網路上的各種數位資訊系統作為基礎。從起床、工作到就寢，人人幾乎無時無刻都盯著手機、電視、電腦、平板等各種螢幕，連結網際網路，存取與交換各種資訊。[^twnic-usage]
+首先，App 透過作業系統發起連線需求，裝置會向電信業者提供的 DNS 查詢目標伺服器（例如 Line 主機）的 IP 位址。取得位址後，裝置透過 TCP/IP 協定建立連線，送出請求。
 
-當你拿出手機，打開某一個 app（例如 Line），收到並回覆一則訊息時，實際上發生了什麼事？
+資料從手機發出，經由無線通訊傳送至鄰近的行動電話基地台，再透過電信業者的光纖骨幹網路進入核心機房。因 Line 的主要伺服器位於境外（日本），流量將被轉網國際出口，經由淡海或頭城的海纜登陸站，透過海底電纜傳輸至海外。
 
-當你點開 Line 時，手機的作業系統會先打開 Line 程式。Line 會告訴手機，他需要讀取某個網址的 Line 主機（伺服器，大型電腦）的內容。
+到達目的地國家後，資料同樣途經登陸站回到地面，經由當地網路進入雲端服務業者（如亞馬遜 AWS、Google Cloud、微軟 Azure）之資料中心，由應用伺服器處理後，再沿原路徑，回傳至使用者裝置，由手機作業系統及 Line 處理後顯示出來。
 
-手機的作業系統，會先連結到電信公司的 DNS，查詢 Line 想要連結的目標 IP 位址。接著開始透過 TCP/IP 協定，嘗試連結到目標伺服器，以取得所需資料。
+上述過程通常在幾分之一秒內完成，雖然你沒有察覺，但實際上資料可能已跨越數千公里，來回了台灣日本一圈。又或者經過數萬公里，到了另一大州的某個雲端主機，才又回到台灣。
 
-此時訊息先從手機發出，透過無線通訊技術，傳送到最近的行動電話基地台，再從基地台透過實體的光纖網路，送到電信公司機房。
-
-因為 Line 這個服務的主機在國外（日本），此時訊號會再從機房往出國的方向前進。途經許多伺服器後，傳送到台灣的最後一站——台日間某條海底電纜的登陸站（很有可能位於淡海或蘇澳），再透過海底電纜，一路傳送到日本。
-
-訊號抵達日本後，同樣經過登陸站，從海洋回到陸地上，進入當地電信公司機房，再經過一站一站的傳輸，最後傳送到 Line 位於某個雲端業者（例如亞馬遜 Amazon AWS、Google Cloud、微軟 Microsoft Azure…）機房中的 Line 主機上。
-
-最後，Line 的主機處理這個請求後，再將回應，透過反方向的路徑，一樣途經海纜，送回台灣的電信公司網路，再透過行動電話基地台，傳輸回你的手機上，並透過手機的程式，將其處理並顯示出來。
-
-這個再一般不過的流程，都在幾分之一秒內完成。你可能根本沒有察覺，訊息已經經過了數千公里，來回了台灣日本一圈。更甚者早已經過了數萬公里，到了地球的另一端，又從美國或歐洲，回到台灣。
-
-當你打開手機，點開 Line 或任何其他 app、網站的那個瞬間，上述流程已經重複了數十、上百，甚至上千次。
+更重要的是，一個 App 或網站的點擊瞬間，往往已同時觸發多個請求，重複上述流程數十、上百次。多數日常使用的數位服務本質上是「跨國系統」，而看似即時的數位互動，背後高度依賴看不到的國際連線與海底電纜。
 
 ### 台灣作為島國的海纜脆弱性
 
-根據以上說明，我們已經知道，許多我們每天使用的網站、app，其實都依賴於他國的連線。如果沒有國際連線，極大部分的網站與app，有可能都將無法正常運作。
+如前所述，我們日常每天使用網站與 App，實際上許多都依賴境外資源與國際連線。一旦失去對外連線，絕大部分數位服務可能都無法正常運作。
 
-而台灣身為一個島國，我們連結到全球的通訊，超過 99% 都依賴現有的 14 條國際海底電纜傳輸[^cna-cables]，因此，海纜的韌性，等同於台灣社會的韌性。
+台灣作為島國，對外通訊超過 99% 仰賴國際海底電纜[^cna-cables]。因此，海纜的通訊韌性，直接關係到日常中各種服務的可用性，等同於整體社會運作的韌性。
 
-海底電纜一般是數公分直徑的多層纜線，直接放置在海床上（深海處），或埋入海床一至三公尺深度（淺海處），因而在台灣海峽之類水深較淺，人類活動密集的水域，容易因船隻下錨、漁船或抽砂船活動等原因而意外受損。除此之外，另有自然因素（例如地震導致海底山崩），又或者地緣政治相關風險的事故，也是常見的損壞原因。
+海底電纜是數公分直徑的多層纜線，放置在海床上，或於淺海處埋入海床一至三公尺深度。在台灣海峽之類深度較淺，人類活動密集的水域，容易因船隻下錨、漁撈作業、抽砂船活動等人為意外而受損。除此之外，另有自然因素，包含自然耗損、放大器故障、地震土石流，及地緣政治的相關風險。而人為因素，為台灣海纜損壞的最主要原因[^moda-report]
 
-事實上，根據台灣海纜動態地圖（smc.peering.tw）網站的可用性統計資料，台灣幾乎無時無刻都有一條以上的海底電纜處於故障狀態。[^smc-map]
+根據台灣海纜動態地圖（smc.peering.tw）可用性統計，台灣幾乎長期處於「至少一條海纜故障」的狀態[^smc-map]。這意味著，海纜故障或許並非例外事件，而是長期存在的系統背景要素。
 
 ![台灣所有對外海纜自2025/3/18-2026/3/18的可用性](img/smc-peering-tw-2026-03-18-1822.png)
-2025/3/18-2026/3/18 期間，台灣所有國際對外海底電纜的可用性狀況（資料來源：smc.peering.tw）。
+2025/3/18-2026/3/18 期間，台灣所有國際對外海底電纜的可用性狀況（資料來源：台灣海纜動態地圖（smc.peering.tw）〈海纜狀態時間軸〉。
 
-台灣目前的對外連線，總共有十五條國際海底電纜，連結四個海邊的登陸機房（淡水、八里、頭城、以及枋山），連結台灣與全球的網路。另有十條國內海底電纜，連接金門、馬祖、澎湖、小琉球等離島。[^moda-subsea]
+目前台灣透過四處登陸機房（淡水、八里、頭城、枋山），以十五條國際海纜連結全球網路，另有十條國內海纜連接離島[^moda-subseacable]。在正常情況下，因網際網路的網狀、冗餘、多樣與連通等要素，當少數海纜發生故障時，可由電信商調整訊號轉由其他海纜傳輸。儘管連線品質有所下降，但你或許不會感覺到有任何差異。
 
-這十五條國際海纜，共同承擔了台灣連結全球的網路流量。因為網際網路的設計即著重網狀、冗餘、多樣與連通等要素，如果僅有一條或少數海纜發生故障，電信商可調整訊號轉由其他海纜傳輸，因此一般情況下，儘管連線品質有所下降，但你或許不會感覺到有任何差異。[^aei-resilience]
+然而，一旦多條海纜同時受損，整體頻寬冗餘將迅速耗盡，產生較嚴重的堵塞，或大規模服務中斷，對通訊、物流、政府運作與各類數位系統造成廣泛衝擊[^aei-resilience]。
 
-然而，由於物理上的硬性限制，一旦多條海纜同時發生故障，就有可能耗盡所有的傳輸冗餘頻寬，開始產生較嚴重的堵塞，或大規模無法連線，進而對社會上的通訊、物流、政府運作以及各類數位服務造成廣泛衝擊。  ￼
+### 歷史案例：多條國際海纜同時故障
 
-### 歷史案例：多條海纜同時故障的影響
+多條海纜同時故障的情境，近期才剛發生。2025 年 12 月 25 日至 2026 年 1 月 3 日，宜蘭外海一系列海底地震，造成七條國際海纜受損（含 EAC1、SJC2、PLCN、F/RNAL、EAC2、Apricot 等，總數近半）[^moda-114report]，至 2026 年 3 月仍未完全修復。民間也傳出感到網路速度下降與特定應用受阻礙的聲音。
 
-這樣的事件，就在近期才剛發生。2025 年 12 月 25 日至 1 月 3 日，台灣西北方宜蘭外海的一系列海底地震，總共造成七條海底電纜故障（接近半數，含 EAC1、SJC2、PLCN、F/RNAL、EAC2、Apricot 等），直到現在（3 月 16 日）尚未完全修復。民間也持續發出網路變慢等意見。
+相較之下，2006 年恆春外海地震為為更具代表性的歷史案例：2006 年 12 月 26 日晚上八點 26 分及 34 分，恆春西南外海發生兩起規模 7 的地震，並引發多次餘震。雖然本島受災相較對輕微，但造成海底大規模山崩，損壞當時六條對外海纜中的四條。
 
-另一重要案例則在二十年前的年底，台灣曾發生過一場史上最為嚴重的大規模海纜故障事件。2006 年 12 月 26 日晚上八點 26 分及 34 分，恆春西南外海發生兩起規模 7 的地震，並引發多次餘震。雖然本島受災相較對輕微，但造成海底大規模山崩，因而損壞當時六條對外海纜中的四條。
+此事故嚴重中斷台灣對外的國際通訊，初期台灣對美國的電話撥通率僅剩 40%，對中國、日本剩約 10%。不僅台灣，中國、香港、日本、韓國、東南亞各國的國際通訊，也都受到劇烈衝擊。在網路服務方面，Google、Yahoo、MSN、Gmail、維基百科等主要服務，在多國均有大幅中斷。也影響國際經貿及金融交易。
 
-此一事故，造成台灣對外的國際通訊嚴重中斷，事件初期，台灣對美國的電話撥通率僅剩 40%，對中國、日本更只有約 10%。不僅台灣受影響，中國、香港、日本、韓國、東南亞各國的國際通訊，也都受到劇烈衝擊。影響國際經貿及金融交易，在境外網路服務方面，Google、Yahoo、MSN、Gmail、維基百科等主要服務，在多國均有大幅中斷。
+事發後共有八艘海纜船參與搶修，截至 2007 年 2 月中，歷時近兩個月才完全修復。[^ofta-2007] 聯合國國際減災策略署（ISDR）主任形容此次地震對海底電纜的損害，是現代新型態災難。[^msn-isdr]
 
-事發後共有八艘海纜船參與搶修，歷時將近兩個月才完全修復。[^ofta-2007] 聯合國國際減災策略署（ISDR）主任形容此次地震對海底電纜的損害，是現代新型態災難。[^msn-isdr]
+兩起事件顯示，即使未達完全斷線，多條海纜同時故障，仍足以造成嚴重壅塞與廣泛服務異常。
 
-上述兩事件，均是因為多數海纜同時發生故障，雖未完全中斷，但仍產生非常嚴重的壅塞及斷線。
+### 歷史案例：馬祖全島斷網
 
-而 2023 年初的馬祖斷網事件，則成為一地區對外海纜完全中斷的實際案例。當時馬祖對台灣連線的兩條海纜，在 2023 年 2 月 2 號及 2 月 8 號陸續遭中國漁船損壞，因而導致區域對外的網路與電訊完全中斷，僅剩頻寬極為有限的微波（2Gbps）支援，多數民眾難以上網。[^matsu-facebook] 直到三月底，歷經 50 天後，才修復其中一條台馬 3 號海纜，恢復正常連網。
+2023 年初的馬祖斷網事件，則成為一地區對外海纜完全中斷的實際案例。
 
-台馬 2 號及 3 號海纜總頻寬為 1Tbps，在 2023 年事件後，台馬微波通訊頻寬擴展至 12Gbps，於 2025 年 1 月 15 日及 1 月 22 日，馬祖再次發生兩條海纜陸續中斷的事故，此時則經由擴增後的微波通訊，則得以維持一定程度的連線能量。[^twreporter-matsu]
+馬祖對台灣連線的兩條海纜，當時在 2023 年 2 月 2 號及 2 月 8 號陸續遭中國漁船損壞，因而導致區域對外的網路與電訊完全中斷，僅剩頻寬極為有限的微波（2 Gbps）支援，多數民眾難以上網[^matsu-facebook]。直到三月底，歷經 50 天後，才修復其中一條台馬 3 號海纜，恢復正常連網。
 
-### 衛星能否作為替代方案
+台馬 2 號及 3 號海纜總頻寬為 1 Tbps，在 2023 年事件後，台馬微波通訊頻寬擴展至 12 Gbps，於 2025 年 1 月 15 日及 1 月 22 日，馬祖再次發生兩條海纜陸續中斷的事故，此時則經由擴增後的微波通訊，得以維持一定程度的連線能量。[^twreporter-matsu]
 
-2006 年事件初期，中華電信透過調撥中新一號通訊衛星，支援國際電話通訊，在短期間恢復部分國際語音電話可用性。如果現代再次發生同等規模的事故，衛星是否也可以作為替代方案？
+### 衛星作為替代方案的數量與頻寬問題
 
-衛星的通訊頻寬，跟海纜有極大差距。單條現代海纜的容量約有數十 Tbps，而新的低軌衛星，例如 Starlink，單顆僅有數十 Gbps，約差距一千倍。整個 Starlink 系統的總容量，僅約相當於單個海纜系統。[^starlink-capacity] 任何現有的衛星系統，均無法滿足目前台灣連外所需的通訊容量。因此，衛星只能作為政府對外或地區型災難的緊急通訊備援，無法作為服務全國聯外所需的替代方案。
+2006 年事件初期，中華電信透過調撥中新一號通訊衛星，支援國際電話通訊，在短期間內恢復部分國際語音電話可用性。如果現代再次發生同等規模的事故，衛星是否也可以作為替代方案？
+
+根據國家太空中心（TASA）的「B5G 低軌通訊衛星計畫」[^b5g-satellite]，台灣正積極研發低軌衛星技術，計劃在 2030 年前發射首批兩顆實驗性低軌通訊衛星，設計壽命為 3 年。
+
+然而，根據前任國家太空中心董事長吳政忠估算，考慮到低軌衛星的軌道高度過境時間及涵蓋範圍，想要達到覆蓋全台 24 小時不中斷通訊覆蓋，至少需要部署 120 顆以上的衛星[^taiwan-satellite]，且以三年壽命考慮，還需逐年補充 40 顆衛星。與現行計畫規模有顯著落差，難以構成實質的備援通訊管道。
+
+且衛星的通訊頻寬，跟海纜有極大差距。單條現代海纜的容量約有數十 Tbps，而低軌衛星例如 Starlink，單顆的通訊容量僅有數十 Gbps，約差距一千倍。整個 Starlink 系統的總容量，僅約相當於單個海纜系統。（2023 年研究預估，單顆衛星預估為 20 Gbps，3300 顆衛星系統總容量約 20 Tbps[^starlink-capacity]）
+
+就算將現行所有低軌衛星計畫的頻寬容量（Gbps 等級）加總，仍然無法完全替代海底電纜所提供的跨洋流量（Tbps 等級）。台灣網路資訊中心董事長黃勝雄比喻「海纜的吞吐量像是水庫，衛星就像是一條水管」[^twreporter-matsu]。因此，衛星只能作為政府對外或地區型災難的緊急通訊備援，無法作為服務全國聯外所需的替代方案。
 
 ### 為何今日的風險高過 2006
 
-在 2006 事件中，境外連線中斷對社會經貿的影響，主要在於國際電話通訊的中斷，對國際金融交易等族群及特定行業，產生較大影響。境外網路服務的受阻，僅為當時少數網路使用者的困擾。但經過 20 年，網路服務已經是社會運作的基礎，如果再次發生同等規模的事故，除通訊外，勢必會對社會的各方面產生更廣泛的衝擊。
+2006 年海纜事故時，境外連線中斷，對社會經貿的主要影響，主要在於國際電話通訊的中斷，主要影響跨國金融交易及特定行業。境外網路服務的受阻，僅為當時少數網路使用者的困擾。
 
-近年，台灣社會對於海纜斷線的討論，多停留在其對「通訊」的阻礙上。諸如跨國通訊服務受阻，如 Line / Messenger / WeChat 等服務，或者 Google、Gmail、Office 365 等雲端或辦公軟體無法使用。社會對於此類事件的認知，離 2006 並不太遠。
+但近二十年來，社會對網路的依賴已大幅增加。2006 年台灣連外總頻寬僅 147.7 Gbps，至 2026 年已成長至 10.6 Tbps，將近 70 倍[^twnic-bandwidth]。同時，台灣海纜年平均損害達 5.1 次，遠高於全球平均每年 0.1 至 0.2 次，風險約為全球平均的 25 至 50 倍[^cna-cables]。
 
-### 現有研究的不足與本研究定位
+根據 Deloitte 於 2016 年的估算，如台灣這樣的高度數位化國家遭遇全面性網路中斷，每千萬人口每日的 GDP 損失影響高達 2,360 萬美元。換算台灣每日經濟損失預估五千五百萬美元，單月則可能達到十七億美元。此尚未納入半導體供應鏈及跨國金融交易中斷，對國際經濟造成的衝擊等間接損失[^deloitte-report]。
 
-目前關於網路韌性的探討，多半聚焦於基礎設施層面，例如海纜拓樸、路由協定[^routing-paper-1][^routing-paper-2]、DNS 系統[^dns-paper-1][^dns-paper-2]、或檢視網站所在位置，較少以全面性的方式，探討當一個地區失去對外連線時，日常使用的數位服務，實際會發生什麼情況。[^aei-resilience]
+更重要的是，上述研究同時指出，即使未達全面中斷，僅為部分服務阻斷或頻寬降低，亦會透過生產力下降、交易延誤、資訊取得困難與投資信心降低等因素，對經濟活動造成實質影響。
+
+今日台灣不僅更依賴網際網路，也面對更高頻率的海纜故障風險。若再次發生類似 2006 年的大規模中斷事件，影響將不再限於特定產業，不但對社會的衝擊更為廣泛，且應急處理與尋求替代路徑的困難度，也將遠遠高過當年。
+
+### 社會認知與現有研究的不足
+
+雖然近年台灣社會對於海纜斷線的討論熱度增加，但話題多停留在其對「通訊」的阻礙上。諸如跨國通訊服務受阻，如 Line / Messenger / WeChat 等服務，或者 Google、Gmail、Office 365 等雲端或辦公軟體無法使用。社會對於此類事件的認知，離 2006 並不太遠。
+
+學術方面，目前關於網路韌性的探討，則聚焦於基礎設施層面，例如海纜拓樸、路由協定、DNS 系統[^dns-paper-1][^dns-paper-2]，或 CDN、雲端服務集中化等基礎或中介層問題。這種方向往往隱含一項關鍵前提：只要基礎設施仍然存在且可連通，網路服務即具有可用性。
+
+網路路由的本質是高度分散且不完美的系統，故障是日常運作的一部分。路由亦高度受政策所約束，即使在沒有實體中斷的情況下，路由錯誤、設定失誤或節點異常，仍可能導致大規模的服務中斷。因此，單純從「基礎設施是否安好」來評估網路韌性，無法完整反映服務實際可用性。[^routing-paper-1]
+
+在事故時，即使仍有替代海纜可使用的情境下，仍可能因流量重分配、路由策略限制、或關鍵路徑集中等原因，而導致通訊最終仍然受阻。故「物理上可連通」並不等同於「實際可達」[^routing-paper-2]，單純的冗餘設計並不足以確保跨國網路可用性[^csis-cables]。
+
+因現代網路架構橫跨基礎設施層、邏輯層與應用層，且社會與經濟影響，超出單一業者可控制或投資的範圍，因此，網路韌性不僅屬於基礎設施營運商的責任，也具有公共財特性，涉及跨層、跨業者與跨國界的問題。[^aei-resilience]
+
+既有韌性指標如 Internet Resilience Index，則以國家層級的基礎設施、效能、安全與市場結構作為代理指標，評估一國網路生態系的整體韌性[^isoc-iri]。然而，這類指標未直接測量使用者日常實際造訪的網站，在國際連線受限或中斷時是否仍能完整載入與使用。
+
+對於網站對第三方服務（如 DNS、CDN、CA）的依賴程度問題，既有研究聚焦於其集中性，而存在潛在的單點失效風險[^africa-thirdparty]。超過 89% 的網站在關鍵功能上依賴第三方服務，且前三大服務提供者支撐超過 90% 的網站運作[^thirdparty-centralization]。多層級的間接依賴，也可能將單一故障的影響放大數十倍[^thirdparty-dependencies]。
+
+網路韌性不僅要考慮實體設施的可連通性，也需要將服務在對外受阻時的可用性，及其依賴第三方服務的狀態納入考量。因此，本研究希望著重於「服務在受限連線環境下的可用性」，在應用面上發展全面的分析方法，探討「當一地失去對外連線能力時，日常使用的數位服務，有哪些及多少比例仍能維持服務可用性」，以進一步拆解聯外海纜故障的情境，對網路及社會韌性的潛在衝擊。
 
 ### 小結
 
-事實上，因資訊系統作為社會基礎，以及網路服務的架構的複雜性逐年提升，此類事件發生在現代的影響，將會遠遠超過 2006 年的樣貌。
+綜合以上，台灣面對的問題不是「海纜會不會斷」。確切的問題是服務崩潰風險：在高度數位化、服務高度雲端化、應用架構高度跨國依賴的今日社會，一旦對外連線大幅受阻，哪些日常數位服務仍能維持基本功能，哪些會退化，哪些會直接失效。
 
-當代台灣社會的各方面，其實都仰賴於資訊系統。除上述顯而易見的通訊軟體、辦公軟體外，各產業與社會部門，如金融、醫療、教育、交通、能源、政府運作……等，任何產業都有內部資訊系統支撐。而這些系統，在失去境外連線的情境下，可用性其實是存疑的。
+過去對海纜風險的討論，多半聚焦於通訊頻寬、基礎設施損壞與替代通訊媒介。然而，現代網路服務早已不是本地伺服器回應靜態網頁的模式。一個看似「台灣的」網站或 App，實際上可能架設在某個雲端服務上，分布在不同地區的機房；同時依賴雲端主機、CDN、第三方 JavaScript、登入系統、金流服務、流量分析、推播服務、AI API 或其他外部元件。只要其中任何關鍵環節位於境外，或需透過境外路徑取得，服務就可能在海纜中斷時出現非預期失效。
 
-現在的網路服務架構，已經遠遠超過 2006 年的樣貌。大多的資訊服務系統，架設在某個雲端服務上，實際位置可能分布在不同地區的機房；網站與 app 的架構，也不僅是單純的 HTML 頁面，而使用了許多外部的技術元件，如 CSS / JavaScript 框架，串接各種外部的登入、統計、金流、資料、AI 等等功能的 API。因此，一個看似國內的服務，實際上可能存在不同國家的機房，需使用不同國家的資源，才能正常運作。
+且屆時在國際網路連線不通或極度壅塞的狀態下，想要修復或重建相關的資訊系統，將會變成更為困難的事情。
 
-因為上述兩項因素，當海纜斷光可能會對社會的各方面產生廣泛衝擊。可能會有許多企業或部門的內部系統意外的停擺，又或者國內的網站或 App，因沒辦法連結到境外的所需資源，因而也停止運作。因而產生超過預期的衝擊。
+海纜大規模故障的影響，不能只用「還有多少替代海纜或頻寬」來判斷。即使物理網路尚未完全斷線，服務也可能因路由策略、DNS 解析、流量壅塞、雲端依賴，或外部資源不可及而無法正常運作。換言之，我們認為，除網路連通性外，仍需要評估使用者實際依賴的數位服務可用性。
 
-如果因為海纜大規模斷線，導致短時間內，許多部門的資訊系統同時意外失效，將會對社會運作產生極大衝擊。且屆時在沒有國際網路連線的狀態下，要修復這些資訊系統，將會變成極為困難的事情。
+如果我們未完全了解「海纜大規模斷線」的實際影響，我們就無法對其做出準備。這也是本研究的出發點：將抽象的「海纜斷光會怎樣」，轉化為可量測、可比較的技術問題。補足現有韌性討論中較少觸及的應用層缺口。透過建立測試框架，觀察常用數位服務在失去境外連線情境下的載入、退化與失效狀況，為後續的備援設計、提升韌性、政策與社會準備提供具體依據。
 
-既然我們並未了解「海纜大規模斷線」的實際影響，我們就無法對其做出準備。因此，本研究希望能透過發展一套測試技術框架，以衡量在海纜大規模中斷，台灣失去境外連線的情境下，各類數位服務的實際表現。
-
-本研究聚焦於此缺乏系統性議題：當一個高度仰賴國際網路的地區（如台灣），失去其對外海纜連線，亦即失去國際網際網路連線時，主要數位服務的運作、退化或失效的程度。
-
-我們想要了解，台灣常用的數位服務，對於境外依賴有多深，以至於一旦台灣對外連線中斷，可能有多少面臨失效。建立一個可量測的方法，才能回答「海纜斷光會怎樣」，把抽象的「海纜斷光」，轉化為可拆解、可準備的具體問題。
+<!-- FIXME: 校驗至此 -->
 
 ## 研究問題
 
@@ -177,11 +225,11 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 - [SimilarWeb](https://www.similarweb.com/top-websites/taiwan/) - SimilarWeb 的台灣網站流量排名（前 50 名）
 - [Semrush](https://www.semrush.com/trending-websites/tw/all) - Semrush 的台灣網站流量排名（前 100 名）
 
-清單更新於 2026 年 1 月 6 日，共 2109 個網站。[^merged-list] 並依照流量高低先後排序，可用以衡量特定網站重要性。
+測試清單 [merged_lists_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json) 更新於 2026 年 1 月 6 日，共納入 2109 個網站，並依照流量高低先後排序，可用以衡量特定網站重要性。
+
+除以上 2109 網站外，本研究另加入數個手動指定測試站點[manual_curated_list_tw.json](https://github.com/irvin/web-resilience-test/blob/a4c53e30acda30fbf39dab2023a5fdb4d866ef2c/manual_curated_list_tw.json)（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。
 
 相關清單與 script 開源於 [top-traffic-website-list-taiwan](https://github.com/irvin/top-traffic-website-list-taiwan/) 專案。
-
-除以上 2109 網站外，本研究另加入數個手動指定測試站點（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。[^manual-curated-list]
 
 ### 測試環境
 
@@ -194,39 +242,38 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ## 研究方法
 
-### 方法定位與指標定義
+### 方法定位
 
-本研究採用「以網站資源請求行為為基礎的依賴暴露分析」方法。
+網站的可用性不僅取決於是否能成功建立網路連線，亦取決於其能否取得所依賴的多重資源（如 JavaScript、樣式表、圖片與 API）。現代網站通常由多個不同網域所提供的資源組成，這些資源共同決定最終呈現給使用者的內容與功能。
 
-由於網站後端架構、資料傳輸、控制面依賴、與雲端內部運作機制，無法直接從外部觀測，本研究不試圖直接驗證完整系統依賴關係，而聚焦於網站前端可觀測的網路資源請求行為（requests），並據此建立可操作化指標。
+既有研究指出，可透過 headless 瀏覽器分析網站資源請求行為，推導網站對第三方網域資源的依賴關係[^dependency-analyzer][^thirdparty-centralization]。
+
+本研究在「以網站資源請求行為為基礎的依賴暴露分析」之方法基礎上，將依賴結構分析延伸至「國際連線中斷」之系統性條件情境，進一步觀察其對實際服務可用性的影響。
+
+由於網站的後端架構、資料傳輸、控制面依賴、與雲端內部運作機制，無法直接從外部觀測，本研究不試圖驗證完整系統依賴關係，而聚焦於網站前端可觀測的網路資源請求行為（network requests），並據此建立可操作化指標。
+
+### 指標定義與風險分類框架
 
 具體而言，本研究定義以下兩項核心指標：
 
-1. **境外資源依賴暴露（Foreign Dependency Exposure）**  
+1. 境外資源依賴暴露（Foreign Dependency Exposure）  
    指網站 requests 中是否存在境外資源請求，用以衡量網站在資源取得層面對境外網路的依賴暴露。
 
-2. **跨國雲在台節點依賴暴露（Cloud Local Endpoint Exposure）**  
+2. 跨國雲本地節點依賴暴露（Cloud Local Endpoint Exposure）  
    指網站 requests 中是否存在跨國雲服務在台灣節點的請求，用以衡量網站是否直接位於、或對跨國雲在地節點有依賴暴露。
 
-此兩項指標，反映的是網站在前端資源層的「依賴暴露結構」，而非完整系統架構或實際故障行為。
+此兩項指標，反映的是網站在首頁前端資源層的「依賴暴露結構」，而非完整系統架構與實際故障行為。
 
-### 指標與風險分類框架
+基於上述兩項指標，本研究進一步將網站區分為三種類型：
 
-在海纜中斷情境下，上述兩指標的意涵如下：
+1. 境外依賴型（Foreign-dependent）  
+   存在境外資源依賴暴露：網站首頁載入直接依賴境外資源，於境外連線中斷情境下，較可能立即受影響，屬於直接風險最高的類型。
 
-- 存在境外資源依賴暴露：表示網站首頁載入直接依賴境外資源，於境外連線中斷情境下具有較高的直接失效風險。
-- 存在跨國雲在台節點依賴暴露：表示網站首頁載入，仰賴跨國雲服務在台灣節點提供之資源，其可用性取決於雲端控制面、來源架構與快取持續能力，因此具有較高的不確定性。
+2. 雲端依賴型（Cloud-dependent）  
+   無境外資源依賴暴露，但存在跨國雲本地節點依賴暴露：網站首頁載入，無直接連向境外資源，但仰賴跨國雲在台節點提供的資源。此類網站可能具備一定程度的在地化，但其實際可用性，其可用性取決於雲端控制面、來源架構與快取持續能力，因此屬於「表面具在地韌性、實際仍可能有跨境依賴」的狀況，具有較高的不確定性。
 
-因此，本研究進一步將網站依據兩項依賴的暴露，區分為三種類型：
-
-1. **存在境外資源依賴暴露**  
-   網站直接依賴境外資源；一旦國際連線中斷，較可能立即受影響，屬於直接風險最高的類型。
-
-2. **無境外資源依賴暴露 × 存在跨國雲在台節點依賴暴露**  
-   網站無直接連向境外資源，但仰賴跨國雲在台節點提供的資源。此類網站可能具備一定程度的在地落點，但其實際可用性仍取決於雲服務的可用性因素，因此屬於「表面具在地韌性、實際仍可能有跨境依賴」的類型。
-
-3. **無境外資源依賴暴露 × 無跨國雲在台節點依賴暴露**  
-   代表網站前端可觀測資源無境外來源依賴，也無跨國雲在台節點依賴。就本研究之觀測範圍而言，此類網站呈現相對較高的本地運作可能性，但仍不代表其完整系統在境外網路中斷時，必然持續可用。
+3. 本地型（Locally-contained）  
+   無境外資源依賴暴露，亦無跨國雲在台節點依賴暴露：網站前端可觀測資源無依賴境外資源，也無依賴跨國雲在台節點。呈現相對較高的本地運作可能性，但仍不代表其完整系統在境外網路中斷時，必然持續可用。
 
 ## 研究實作與資料處理
 
@@ -245,7 +292,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 最後，本工具針對所有測試結果進行統計，整理成結果數據表格。
 
-#### 單一網站測試流程
+### 單一網站測試流程
   
 [`no-global-connection-check.js`](https://github.com/irvin/web-resilience-test/blob/main_w_tw_result/no-global-connection-check.js) 用在單一網站的測試，流程如下：
 
@@ -274,7 +321,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
      - 針對前述 hostname 清單，呼叫 IPinfo API，取得其位置資料
      - 如果查詢的資料顯示 `country=TW`，則紀錄為境內連線
      - 若查詢的結果顯示 `country`非`TW`，則根據連線的 ASN，判定是否來自國際公有雲節點（Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft），並進入下一步的進階判定。
-       - 本研究同時參酌測試網站的 request 資料，建立公有雲的對應 ASN 清單。[^cloud-providers-list] 除供判定使用外，也同步開源供其他研究與專案參考。
+       - 本研究同時參酌測試網站的 request 資料，建立公有雲的對應 ASN 清單 [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json)。除供判定使用外，也同步開源供其他研究與專案參考。
 
      a. Header 判定
        - 檢查連線的 response header，是否包含 `cf-ray`、`x-amz-cf-pop`、`x-served-by` 等雲端系統已知的位置標記。
@@ -293,7 +340,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
        - `HTTP 4xx Error`
        - `Timeout`
 
-#### 批次測試流程
+### 批次測試流程
   
 [`batch-test.js`](https://github.com/irvin/web-resilience-test/blob/main_w_tw_result/batch-test.js) 會呼叫上述單一網站測試工具，針對測試目標列表批次執行，並輸出結果統計資料成 `test-results/statistic.tsv` 檔案。
 
@@ -336,12 +383,12 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 第三類網站無呈現依賴暴露，表示其網站本身位於境內，且未呼叫境外資源，故能維持正常運作的可能性較高。
 
-| 類型                                           | 網站數 | 百分比 |
-|------------------------------------------------|-------:|-------:|
-| 存在境外資源依賴暴露                           |    874 |  47.0% |
-| 無境外資源依賴<br>但存在跨國雲在台節點依賴暴露 |    787 |  42.3% |
-| 無呈現依賴暴露                                 |    198 |  10.7% |
-| 總計                                           |   1859 | 100.0% |
+| 類型                                                     | 網站數 | 百分比 |
+|----------------------------------------------------------|-------:|-------:|
+| 境外依賴型（存在境外資源依賴暴露）                       |    874 |  47.0% |
+| 雲端依賴型（無境外資源依賴暴露，存在跨國雲本地節點依賴） |    787 |  42.3% |
+| 本地型（無呈現依賴暴露）                                 |    198 |  10.7% |
+| 總計                                                     |   1859 | 100.0% |
 
 ### 國際公有雲依賴狀態分析
 
@@ -350,7 +397,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 參考 generate_statistic.js 產生之「Resilience=1 網站公有雲使用總結」區段及「各公有雲使用情況」區段
 -->
 
-統計所有第二類（無國外依賴）的網站，對於來自「國際公有雲在台灣節點」的資源依賴度，我們發現以下數據：
+統計所有第二類「雲端依賴型」的網站，對於不同「國際公有雲在台灣節點」的資源請求，我們得到以下數據：
 
 - Google Cloud Platform 境內節點：共 726 個網站
 - Cloudflare 境內節點：共 251 個網站
@@ -361,7 +408,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 無國際依賴的 985 個網站中，共有 726 個網站取用來自 GCP 境內節點的資源，占比超過七成（73.7%）。據此可知，如果 GCP 等公有雲服務，在境外網路中斷時，境內節點無法維持正常運作，將會造成非常高的衝擊。換言之，這些公有雲服務的韌性，是網站能否在海纜障礙的情境下，維持正常運作的關鍵因素。
 
-#### 國際公有雲資源位置
+### 國際公有雲資源位置
 
 <!--
 資料出處：web-resilience-test/test-results/asn_taiwan_ratio.tsv
@@ -404,7 +451,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 | 單位：網站數及採用率 | 境內         | 境外        | 總計         |
 |----------------------|--------------|-------------|--------------|
-| 公有雲               | 1582 (85.1%) | 802 (43.1%) | 1641 (88.3%) |
+| 國際公有雲           | 1582 (85.1%) | 802 (43.1%) | 1641 (88.3%) |
 | 非雲                 | 1363 (73.3%) | 195 (10.5%) | 1436 (77.2%) |
 | 總計                 | 1793 (96.4%) | 874 (47.0%) |              |
 
@@ -422,7 +469,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 如果將所有 request 根據 ASN 進行統計排序，我們發現網站依賴資源高度集中於大型供應商，其中超過 5% 的來源有 Google、Cloudflare、Amazon、中華電信及 Facebook。
 
-其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.3%。來自 Google 的主要資源有 GTM，而 Cloudflare 提供的 JavaScript CDN（cdnjs[^cdnjs]）與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。
+其中，Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.3%。來自 Google 的主要資源有 GTM，而 Cloudflare 提供的 JavaScript CDN [cdnjs](https://www.cloudflare.com/zh-tw/cdnjs/) 與 WAF 等基礎架構與服務，構成現在網路服務韌性的關鍵環節。
 
 ![](./img/resource-distribution-2026-03-21.svg)
 
@@ -488,12 +535,13 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 4. 政策要求與預算支持，降低境內關鍵服務對境外資源的依賴度，以提高其本地韌性。
 5. 鼓勵或要求境內關鍵服務制定本地備援機制或復原計畫，並定期進行斷線演練。
 6. 將本地可用性驗證，納入政府與公共服務採購及驗收條件。
+7. 預先制定「極端狀況頻寬分配與封包優先級別」計劃，因應急難時衛星備援容量遠低於海纜的挑戰。
 
 ### 技術面建議
 
-7. 針對 Google、Cloudflare、Amazon、Akamai 等高度關鍵的國際公有雲在各地之節點，應制定相關之網路障礙備援計畫，並進行定期演練。
-8. 網站製作者應考慮使用境外資源的韌性風險，在呼叫框架時，可優先採有提供境內節點之 CDN 服務，或建立 fallback 機制，在函式庫載入失敗時切換到本地資源，以降低境外連線中斷時的影響。
-9. 服務開發者，可針對服務之關鍵要徑（如登入、結帳等），優先進行資料在地化，以改善其韌性並提升服務品質。
+1. 針對 Google、Cloudflare、Amazon、Akamai 等高度關鍵的國際公有雲在各地之節點，應制定相關之連外網路障礙因應計畫，並進行定期演練。
+2. 網站製作者應考慮使用境外資源的韌性風險，在呼叫框架時，可優先採有提供境內節點之 CDN 服務，或建立 fallback 機制，在函式庫載入失敗時切換到本地資源，以降低境外連線中斷時的影響。
+3. 服務開發者，可針對服務之關鍵要徑（如登入、結帳等），優先進行資料在地化，以改善其韌性並提升服務品質。
 
 ## 研究限制與後續方向
 
@@ -520,22 +568,34 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 - 分析不同資源種類（document、script、image、xhr、font、stylesheet）間是否有依賴差異
 - 分析不同類型網站（新聞、電商、社群、搜尋引擎等）間的韌性差異
 - 鑑別「高流量但低韌性」的高風險網站
+- 加入更多台灣流量資料，例如 Chrome CrUX 使用者體驗資料集
 
-[^twnic-usage]: Twnic，〈2025 臺灣網路報告：趨勢分析〉，https://report.twnic.tw/2025/TrendAnalysis_internetUsage.html
-[^cna-cables]: 中央社，〈台灣對外通訊逾 99% 靠海纜傳輸〉，https://www.cna.com.tw/news/aipl/202501100036.aspx
-[^smc-map]: 台灣海纜動態地圖（smc.peering.tw），https://smc.peering.tw/
-[^moda-subsea]: 數位發展部，〈最新海纜狀況〉，https://moda.gov.tw/major-policies/subseacable/1747
-[^aei-resilience]: Center for Technology, Science, and Energy, American Enterprise Institute, “Beyond Infrastructure: Internet Ecosystem Resilience and the Public Good,” https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/
-[^ofta-2007]: 香港電訊管理局，〈有關地震導致對外電訊服務受阻的新聞稿〉（2007-02），Internet Archive 備份，https://web.archive.org/web/20070217181311/http://www.ofta.gov.hk/zh/press_rel/2007/Feb_2007_r4.html
-[^msn-isdr]: MSN 新聞轉載中央社報導，〈聯合國國際減災策略署主任談海纜地震損害〉，Internet Archive 備份，https://web.archive.org/web/20070210045300/http://news.msn.com.tw/cna/cna_full_text.asp?yy=07&mm=02&dd=08&name=000030
-[^matsu-facebook]: 陳雪生 Facebook 貼文，〈馬祖海纜與微波通訊狀況說明〉，https://www.facebook.com/wen1949/posts/pfbid0C1juirBxeTdoaarQnzXpWBdR7C8xodHPJ3Ctrh93kF7hdeU6547KiC8SwRRvBjwfl
-[^twreporter-matsu]: 報導者，〈海底電纜受損，台灣警報再響：從馬祖斷網看台灣的數位韌性挑戰〉，https://www.twreporter.org/a/damaged-undersea-cables-raises-alarm-in-taiwan
-[^starlink-capacity]: ICAIIT 2023 論文，〈比較 Starlink 與海底電纜系統容量之研究〉，https://opendata.uni-halle.de/bitstream/1981185920/103863/1/1_9%20ICAIIT_2023_paper_4290.pdf
-[^routing-paper-1]: Lixia Zhang et al., “A Survey of Inter-Domain Routing,” https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf
-[^routing-paper-2]: CoNEXT 2007 論文，https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf
-[^dns-paper-1]: “DNS Resilience,” https://assets.ctfassets.net/qhzu5l2wyxby/fsS3ZYrpTZKOHJL_EJxRGw/b2d681b0eebb8ee66708c3f94b98f9df/resilience-dns_comnet.pdf
-[^dns-paper-2]: Internet Society, “DNS Resiliency,” https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf
-[^merged-list]: `top-traffic-website-list-taiwan` 專案中的 `merged_lists_tw.json`（commit `553b50a`），https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json
-[^manual-curated-list]: `web-resilience-test` 專案中的 `manual_curated_list_tw.json`（commit `a4c53e3`），https://github.com/irvin/web-resilience-test/blob/a4c53e30acda30fbf39dab2023a5fdb4d866ef2c/manual_curated_list_tw.json
-[^cloud-providers-list]: `top-traffic-website-list-taiwan` 專案中的 `cloud_providers_tw.json`，https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json
-[^cdnjs]: Cloudflare，〈cdnjs〉，https://www.cloudflare.com/zh-tw/cdnjs/
+## 參考連結
+
+[^ncc-usage]: 中華民國國家通訊傳播委員會（NCC），《114 年通訊傳播市場報告》，https://commsurvey.ncc.gov.tw/files/file_pool/1/0p336342530469870607/251201%20%20114年通訊傳播市場報告_網站上傳版.pdf
+[^twnic-usage]: TWNIC 財團法人台灣網路資訊中心，《2025 台灣網路報告 - 整體使用概況》，https://report.twnic.tw/2025/TrendAnalysis_internetUsage.html
+[^cna-cables]: 中央社 CNA，〈專家：海纜如台灣「數位生命線」 99%網路頻寬都靠它〉，https://www.cna.com.tw/news/aipl/202501100036.aspx
+[^moda-report]: 數位發展部，〈114年度臺灣海底通訊電纜損害原因分析及策進報告〉，https://www-api.moda.gov.tw/File/Get/moda/zh-tw/kj9vSvBw5wUeqla
+[^smc-map]: 台灣海纜動態地圖，〈海纜狀態時間軸〉，https://smc.peering.tw/
+[^moda-subseacable]: 數位發展部，〈最新海纜狀況〉，https://moda.gov.tw/major-policies/subseacable/1747
+[^aei-resilience]: Center for Technology, Science, and Energy, American Enterprise Institute，〈Beyond Infrastructure: Internet Ecosystem Resilience and the Public Good〉，https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/
+[^moda-114report]: 數位發展部，〈114年度臺灣海底通訊電纜損害原因分析及策進報告〉，https://moda.gov.tw/major-policies/subseacable/report/1805
+[^ofta-2007]: 香港特別行政區政府電訊管理局，〈新聞公報〉，Internet Archive 備份，https://web.archive.org/web/20070217181311/http://www.ofta.gov.hk/zh/press_rel/2007/Feb_2007_r4.html
+[^msn-isdr]: MSN 新聞轉載中央社，〈專家指台灣外海強震損害海底電纜為現代災難〉，Internet Archive 備份，https://web.archive.org/web/20070210045300/http://news.msn.com.tw/cna/cna_full_text.asp?yy=07&mm=02&dd=08&name=000030
+[^matsu-facebook]: 李問 Wen Lii，Facebook 貼文，https://www.facebook.com/wen1949/posts/pfbid0C1juirBxeTdoaarQnzXpWBdR7C8xodHPJ3Ctrh93kF7hdeU6547KiC8SwRRvBjwfl
+[^twreporter-matsu]: 報導者 The Reporter，〈海底電纜斷裂危機下，台灣維繫「數位生命線」的應變挑戰〉，https://www.twreporter.org/a/damaged-undersea-cables-raises-alarm-in-taiwan
+[^b5g-satellite]: 國家太空中心，〈低軌通訊衛星〉，https://www.tasa.org.tw/zh-TW/missions/detail/Beyond-5G-LEO-Satellite
+[^taiwan-satellite]: Taipei Times，〈TASA to launch six satellites from 2026〉，https://www.taipeitimes.com/News/front/archives/2024/05/13/2003817776
+[^starlink-capacity]: Denys Rozenvasser, Kateryna Shulakova，〈Estimation of the Starlink Global Satellite System Capacity〉，https://opendata.uni-halle.de/bitstream/1981185920/103863/1/1_9%20ICAIIT_2023_paper_4290.pdf
+[^twnic-bandwidth]: TWNIC 財團法人台灣網路資訊中心，〈連線頻寬登錄查詢系統〉，https://map.twnic.tw/main02.php
+[^deloitte-report]: Cary Stier，〈The economic impact of disruptions to Internet connectivity: A Report for Facebook〉，Deloitte，2016 年 10 月，https://www.deloitte.com/content/dam/assets-shared/legacy/docs/perspectives/2022/economic-impact-disruptions-to-internet-connectivity-deloitte.pdf
+[^dns-paper-1]: David Conrad，〈Towards Improving DNS Security, Stability, and Resiliency〉，https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf
+[^dns-paper-2]: Lars Kröhnke, Jelte Jansen, Harald Vranken，〈Resilience of the Domain Name System: A Case Study of the .nl-domain〉，https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf
+[^routing-paper-1]: Jian Wu, Ying Zhang, Z. Morley Mao, Kang G. Shin，〈Internet Routing Resilience to Failures: Analysis and Implications〉，https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf
+[^routing-paper-2]: Dan Pei, Lixia Zhang (UCLA), Dan Massey (USC/ISI)，〈A Framework for Resilient Internet Routing Protocols〉，https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf
+[^csis-cables]: Erin L. Murphy，〈Redundancy, Resiliency, and Repair: Securing Subsea Cable Infrastructure〉，Center for Strategic and International Studies，https://www.csis.org/analysis/redundancy-resiliency-and-repair-securing-subsea-cable-infrastructure
+[^isoc-iri]: Internet Society Pulse，〈Pulse Internet Resilience Index〉，https://pulse.internetsociety.org/en/resilience/#about-the-internet-resilience-index
+[^africa-thirdparty]: Aqsa Kashaf, Jiachen Dou, Margarita Belova, Maria Apostolaki, Yuvraj Agarwal, Vyas Sekar，〈A First Look at Third-Party Service Dependencies of Web Services in Africa〉，Carnegie Mellon University、Princeton University，https://netsyn.princeton.edu/sites/g/files/toruqf3201/files/documents/pam23_0.pdf
+[^thirdparty-centralization]: Rashna Kumar, Sana Asif, Elise Lee, Fabián E. Bustamante，〈Third-party Service Dependencies and Centralization Around the World〉，Northwestern University，https://arxiv.org/abs/2111.12253
+[^thirdparty-dependencies]: Aqsa Kashaf, Vyas Sekar, Yuvraj Agarwal，〈Analyzing Third Party Service Dependencies in Modern Web Services: Have We Learned from the Mirai-Dyn Incident?〉，https://doi.org/10.1145/3419394.3423664
+[^dependency-analyzer]: Yasin Alhamwy, Paul Mertens, Oliver Hohlfeld，〈Poster: Web Dependency Analyzer to Identify Resource Dependencies and their Impact on Rendering〉，https://doi.org/10.1145/3646547.3689683
