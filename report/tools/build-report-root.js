@@ -79,7 +79,7 @@ function renderFootnotes(md, footnotes) {
     refCounts.set(id, refCount);
     const index = orderedIds.indexOf(id) + 1;
     const refId = `fnref-${id}${refCount > 1 ? `-${refCount}` : ""}`;
-    return `<sup id="${refId}" class="footnote-ref"><a href="#fn-${id}">${index}</a></sup>`;
+    return `<sup class="footnote-ref"><a id="${refId}" href="#fn-${id}">${index}</a></sup>`;
   });
 
   if (orderedIds.length === 0) {
@@ -89,14 +89,20 @@ function renderFootnotes(md, footnotes) {
   const items = orderedIds.map((id) => {
     const raw = footnotes.get(id) || "";
     const content = marked.parse(raw).trim().replace(/^<p>/, "").replace(/<\/p>$/, "");
-    const backrefs = Array.from({ length: refCounts.get(id) || 1 }, (_v, idx) => {
+    const totalRefs = refCounts.get(id) || 1;
+    const backrefs = Array.from({ length: totalRefs }, (_v, idx) => {
       const suffix = idx > 0 ? `-${idx + 1}` : "";
-      return `<a href="#fnref-${id}${suffix}" class="footnote-backref" aria-label="Back to reference ${idx + 1}">↩</a>`;
+      const label =
+        totalRefs > 1 ? `回到正文引用處（第 ${idx + 1} 處）` : "回到正文引用處";
+      const text = totalRefs > 1 ? `↩${idx + 1}` : "↩";
+      return `<a href="#fnref-${id}${suffix}" class="footnote-backref" aria-label="${label}" title="${label}">${text}</a>`;
     }).join(" ");
     return `<li id="fn-${id}">${content} ${backrefs}</li>`;
   }).join("\n");
 
-  transformed = transformed.trimEnd() + `\n\n## 註腳\n\n<ol class="footnotes-list">\n${items}\n</ol>\n`;
+  transformed =
+    transformed.trimEnd() +
+    `\n\n<section class="footnotes-section" aria-label="註腳">\n<ol class="footnotes-list">\n${items}\n</ol>\n</section>\n`;
   return transformed;
 }
 
@@ -142,18 +148,10 @@ function buildHtmlPage(title, contentHtml) {
     sup.footnote-ref a {
       text-decoration: none;
       font-variant-numeric: tabular-nums;
+      scroll-margin-top: 4.5rem;
     }
     sup.footnote-ref a::before { content: "["; }
     sup.footnote-ref a::after { content: "]"; }
-    h2#註腳 {
-      margin-top: 3.2rem;
-      padding-top: 1.1rem;
-      border-top: 1px solid color-mix(in srgb, CanvasText 18%, Canvas);
-      max-width: 46rem;
-      font-size: 0.95rem;
-      letter-spacing: 0.04em;
-      color: color-mix(in srgb, CanvasText 62%, Canvas);
-    }
     .footnotes-list {
       max-width: 46rem;
       padding-left: 0;
