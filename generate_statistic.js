@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { chromium } = require('playwright');
 
 // 以目前腳本所在位置為基準，找到 test-results 目錄
 const DIR = path.resolve(__dirname, 'test-results');
@@ -234,6 +235,28 @@ function renderOverallResultSvg(overall, reportDate) {
     `<text x="${width - marginRight}" y="${height - 20}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="19" font-weight="400" fill="#9CA3AF">Data snapshot: ${reportDate}</text>`,
     `</svg>`,
   ].join('');
+}
+
+async function renderSvgToPng(svgContent, outputPath) {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 800 },
+  });
+
+  try {
+    await page.setContent(svgContent, { waitUntil: 'domcontentloaded' });
+    const svgHandle = await page.$('svg');
+    if (!svgHandle) {
+      throw new Error('無法在 SVG 內容中找到 <svg> 節點');
+    }
+    await svgHandle.screenshot({
+      path: outputPath,
+      omitBackground: false,
+    });
+  } finally {
+    await page.close();
+    await browser.close();
+  }
 }
 
 const PROVIDER_RULES = [
@@ -715,10 +738,19 @@ async function main() {
   );
   await fs.promises.writeFile(overallSvgPath, overallSvg, 'utf8');
   console.log(`已產生圖表：${overallSvgPath}`);
+  const overallPngPath = path.join(
+    REPORT_IMG_DIR,
+    `overall-result-${snapshotDate}.png`
+  );
+  await renderSvgToPng(overallSvg, overallPngPath);
+  console.log(`已產生圖表：${overallPngPath}`);
   if (!hasDateArg && !hasDataArg) {
     const latestOverallSvgPath = path.join(REPORT_IMG_DIR, 'overall-result.svg');
     await fs.promises.writeFile(latestOverallSvgPath, overallSvg, 'utf8');
     console.log(`已產生圖表：${latestOverallSvgPath}`);
+    const latestOverallPngPath = path.join(REPORT_IMG_DIR, 'overall-result.png');
+    await renderSvgToPng(overallSvg, latestOverallPngPath);
+    console.log(`已產生圖表：${latestOverallPngPath}`);
   }
 
   const resourceDistribution = countResourceDistribution(jsonDataset);
