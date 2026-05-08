@@ -359,7 +359,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 在本研究的分類框架下，47.0% 的網站為「境外依賴型」，呈現境外資源依賴暴露，顯示其在海纜斷光情境下，**具有較高的直接失效風險**；另有 42.3% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性**具有高度不確定性**，僅有 10.7% 的網站為「本地型」，無呈現依賴暴露，維持正常運作的可能性較高。整體而言，共有 89.3% 的網站屬於需進一步關注的高風險或高不確定性類型。
 
-![](./img/overall-result-2026-03-21.svg)
+![](./img/overall-result.svg)
 
 ### 結果說明
 
@@ -461,7 +461,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 分析個別網站檢測資料，來自 Google 的主要資源有 GTM 等；而 Cloudflare 則提供 [cdnjs](https://www.cloudflare.com/zh-tw/cdnjs/) JavaScript CDN 與 WAF 等基礎架構與服務。這些常用基礎服務，共同構成當代網路服務韌性的關鍵環節。
 
-![](./img/resource-distribution-2026-03-21.svg)
+![](./img/resource-distribution.svg)
 
 | 單位                                 |    總數 |  百分比 |
 |--------------------------------------|--------:|--------:|
