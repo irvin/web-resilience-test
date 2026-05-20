@@ -2,7 +2,7 @@
 
 ###### tags: digital-resilience, 數位韌性松, DigiResiTh0n
 
-> [License under CC0, No Rights Reserved](https://creativecommons.org/public-domain/cc0/)
+> 授權：[CC BY-NC-ND 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/)（詳見 [LICENSE](LICENSE)）
 > 
 > [![Colloborate on HackMD](badge.svg)](https://g0v.hackmd.io/@irvin/digital-services-resilience)
 > 
@@ -432,7 +432,11 @@ api.example.com: X (US (Amazon))
 
 ## 📜 授權
 
-This project is licensed under the CC BY-NC-ND 4.0 International. See the [LICENSE](/LICENSE) file for details.
+本專案在 ISIF 研究專案期間（2026 年 12 月 31 日前）採用 [CC BY-NC-ND 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/)（姓名標示─非商業性─禁止改作 4.0 國際）。
+
+2026 年 12 月 31 日後，本專案之資料與腳本將釋出至公有領域（Public Domain）。研究期間若需超出 CC BY-NC-ND 4.0 限制之使用，請聯絡 Irvin Chen（Open Culture Foundation）：irvin@moztw.org（請 cc hi@ocf.tw）。
+
+完整條款與建議署名格式請見 [LICENSE](LICENSE)。
 
 ## 🙏 致謝
 
