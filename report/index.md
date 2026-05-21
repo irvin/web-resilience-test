@@ -10,7 +10,7 @@ MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))
 ### 更新日期
 
 Published: 2026-03-23  
-Last Updated: 2026-05-06
+Last Updated: 2026-05-22
 
 ### 誌謝
 
@@ -110,9 +110,9 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ### 歷史案例：多條國際海纜同時故障
 
-多條海纜同時故障的情境，近期才剛發生。2025 年 12 月 25 日至 2026 年 1 月 3 日，宜蘭外海一系列海底地震，造成六條國際海纜受損（含 EAC1、SJC2、PLCN、F/RNAL、EAC2、Apricot 等，總數近半）[^moda-report]，至 2026 年 3 月仍未完全修復。民間也傳出感到網路速度下降與特定應用受阻礙的聲音。
+多條海纜同時故障的情境，近期才剛發生。2025 年 12 月 25 日至 2026 年 1 月 3 日，宜蘭外海一系列海底地震，造成六條國際海纜受損（含 EAC1、SJC2、PLCN、F/RNAL、EAC2、Apricot 等，總數近半）[^moda-report]。民間也傳出感到網路速度下降與特定應用受阻礙的聲音，至 2026 年 5 月才全數修復。
 
-相較之下，2006 年恆春外海地震為為更具代表性的歷史案例：2006 年 12 月 26 日晚上八點 26 分及 34 分，恆春西南外海發生兩起規模 7 的地震，並引發多次餘震。雖然本島受災相較對輕微，但造成海底大規模山崩，損壞當時六條對外海纜中的四條。
+相較之下，2006 年恆春外海地震為更具代表性的歷史案例：2006 年 12 月 26 日晚上八點 26 分及 34 分，恆春西南外海發生兩起規模 7 的地震，並引發多次餘震。雖然本島受災相較對輕微，但造成海底大規模山崩，損壞當時六條對外海纜中的四條。
 
 此事故嚴重中斷台灣對外的國際通訊，初期台灣對美國的電話撥通率僅剩 40%，對中國、日本剩約 10%。不僅台灣，中國、香港、日本、韓國、東南亞各國的國際通訊，也都受到劇烈衝擊。在網路服務方面，Google、Yahoo、MSN、Gmail、維基百科等主要服務，在多國均有大幅中斷。也影響國際經貿及金融交易。
 
@@ -184,8 +184,6 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 如果我們未完全了解「海纜大規模斷線」的實際影響，我們就無法對其做出準備。這也是本研究的出發點：將抽象的「海纜斷光會怎樣」，轉化為可量測、可比較的技術問題。補足現有韌性討論中較少觸及的應用層缺口。透過建立測試框架，觀察常用數位服務在失去境外連線情境下的載入、退化與失效狀況，為後續的備援設計、提升韌性、政策與社會準備提供具體依據。
 
-<!-- FIXME: 校驗至此 -->
-
 ## 研究問題
 
 當高度仰賴國際網路的島嶼型國家（例如台灣），失去其對外海纜連線，亦即失去國際網際網路時，其國內主要數位服務運作、退化或失效的程度。
@@ -225,7 +223,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 測試清單 [merged_lists_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json) 更新於 2026 年 1 月 6 日，共納入 2109 個網站，並依照流量高低先後排序，可用以衡量特定網站重要性。
 
-除以上 2109 網站外，本研究另加入數個手動指定測試站點[manual_curated_list_tw.json](https://github.com/irvin/web-resilience-test/blob/a4c53e30acda30fbf39dab2023a5fdb4d866ef2c/manual_curated_list_tw.json)（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。
+除以上 2109 網站外，本研究另加入數個手動指定測試站點[manual_curated_list_tw.json](https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json)（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。
 
 相關清單與 script 開源於 [top-traffic-website-list-taiwan](https://github.com/irvin/top-traffic-website-list-taiwan/) 專案。
 
@@ -439,7 +437,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 僅用到境外資源 = total_foreign > 0 且 total_domestic = 0 的網站數
 -->
 
-分析台灣常用網站對「境內／境外」及「國際雲／其他」之之資源依賴狀態，以「網站至少出現一項該類資源請求」為基準，結果如下：
+分析台灣常用網站對「境內／境外」及「國際雲／其他」之資源依賴狀態，以「網站至少出現一項該類資源請求」為基準，結果如下：
 
 | 單位：網站數及採用率 | 境內         | 境外        | 總計         |
 |----------------------|--------------|-------------|--------------|
