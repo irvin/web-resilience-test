@@ -1,5 +1,7 @@
 # cloud strategy
 
+英文文件請見 [`cloud_strategy.md`](cloud_strategy.md)。
+
 1. 如果 ipinfo 回傳的 country 不是 .tw，則進行以下進一步判斷
 
 2. 針對來自以下 ASN 的雲端（Google / Cloudflare / Amazon / Fastly / Akamai），需進入下一步進一步判斷

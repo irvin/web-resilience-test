@@ -1,5 +1,7 @@
 # RTT 門檻設定與分析
 
+英文文件請見 [`RTT.md`](RTT.md)。
+
 ## 概述
 
 本專案使用 **RTT (Round Trip Time，往返延遲時間)** 作為判斷網路資源是否位於台灣境內的輔助方法之一。當無法透過 HTTP headers（如 `cf-ray`、`x-amz-cf-pop` 等）判斷時，會進行 RTT 測試來推測資源的地理位置。

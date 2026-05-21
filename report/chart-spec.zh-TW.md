@@ -1,6 +1,8 @@
 # 圖表規格（report）
 
-此文件定義 `report/index.md` 使用之圖表產出規格，供 `web-resilience-test` 生成流程實作時依循。
+英文文件請見 [`chart-spec.md`](chart-spec.md)。
+
+此文件定義 `report/index.zh-TW.md` 使用之圖表產出規格，供 `web-resilience-test` 生成流程實作時依循。
 
 ## 目標
 
@@ -45,7 +47,7 @@
   - `overall-result.svg`
   - `resource-distribution.svg`
 
-> `report/index.md` 圖片引用建議對應日期版，避免不同版本資料被 latest 覆蓋。
+> `report/index.zh-TW.md` 圖片引用建議對應日期版，避免不同版本資料被 latest 覆蓋。
 
 ## 共用視覺規格（兩張圖一致）
 
@@ -82,7 +84,7 @@
 
 ## 圖表定義
 
-## 1) 整體結果（對應 `report/index.md`「整體結果」）
+## 1) 整體結果（對應 `report/index.zh-TW.md`「整體結果」）
 
 ### 資料來源
 
@@ -105,7 +107,7 @@
 - 標題：`整體結果`
 - 副標：`n = {網站總數} websites`
 
-## 2) 資源來源分布（對應 `report/index.md`「資源來源分布」）
+## 2) 資源來源分布（對應 `report/index.zh-TW.md`「資源來源分布」）
 
 ### 資料來源
 
@@ -145,4 +147,4 @@
 - 以目前報告版本先產生一次，人工比對：
   - 百分比是否與文字敘述一致
   - Top 供應商排序與表格是否一致
-- 比對完成後，再考慮加入自動更新 `index.md` 圖檔檔名的輔助腳本
+- 比對完成後，再考慮加入自動更新 `index.zh-TW.md` 圖檔檔名的輔助腳本
