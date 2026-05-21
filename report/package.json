@@ -6,9 +6,11 @@
   "scripts": {
     "init-worktree": "node tools/init-report-worktree.js",
     "build": "node tools/build-report-root.js",
+    "build:slide:marp": "marp slide/slide-20260524.marp.md --html --allow-local-files -o slide/slide-20260524.marp.html",
     "publish": "node tools/publish-report.js"
   },
   "devDependencies": {
+    "@marp-team/marp-cli": "^4.4.0",
     "marked": "^17.0.5"
   }
 }
