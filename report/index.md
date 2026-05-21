@@ -110,7 +110,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ### 歷史案例：多條國際海纜同時故障
 
-多條海纜同時故障的情境，近期才剛發生。2025 年 12 月 25 日至 2026 年 1 月 3 日，宜蘭外海一系列海底地震，造成六條國際海纜受損（含 EAC1、SJC2、PLCN、F/RNAL、EAC2、Apricot 等，總數近半）[^moda-114report]，至 2026 年 3 月仍未完全修復。民間也傳出感到網路速度下降與特定應用受阻礙的聲音。
+多條海纜同時故障的情境，近期才剛發生。2025 年 12 月 25 日至 2026 年 1 月 3 日，宜蘭外海一系列海底地震，造成六條國際海纜受損（含 EAC1、SJC2、PLCN、F/RNAL、EAC2、Apricot 等，總數近半）[^moda-report]，至 2026 年 3 月仍未完全修復。民間也傳出感到網路速度下降與特定應用受阻礙的聲音。
 
 相較之下，2006 年恆春外海地震為為更具代表性的歷史案例：2006 年 12 月 26 日晚上八點 26 分及 34 分，恆春西南外海發生兩起規模 7 的地震，並引發多次餘震。雖然本島受災相較對輕微，但造成海底大規模山崩，損壞當時六條對外海纜中的四條。
 
@@ -572,7 +572,6 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 [^smc-map]: 台灣海纜動態地圖，〈海纜狀態時間軸〉，https://smc.peering.tw/
 [^moda-subseacable]: 數位發展部，〈最新海纜狀況〉，https://moda.gov.tw/major-policies/subseacable/1747
 [^aei-resilience]: Center for Technology, Science, and Energy, American Enterprise Institute，〈Beyond Infrastructure: Internet Ecosystem Resilience and the Public Good〉，https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/
-[^moda-114report]: 數位發展部，〈114年度臺灣海底通訊電纜損害原因分析及策進報告〉，https://moda.gov.tw/major-policies/subseacable/report/1805
 [^ofta-2007]: 香港特別行政區政府電訊管理局，〈新聞公報〉，Internet Archive 備份，https://web.archive.org/web/20070217181311/http://www.ofta.gov.hk/zh/press_rel/2007/Feb_2007_r4.html
 [^msn-isdr]: MSN 新聞轉載中央社，〈專家指台灣外海強震損害海底電纜為現代災難〉，Internet Archive 備份，https://web.archive.org/web/20070210045300/http://news.msn.com.tw/cna/cna_full_text.asp?yy=07&mm=02&dd=08&name=000030
 [^matsu-facebook]: 李問 Wen Lii，Facebook 貼文，https://www.facebook.com/wen1949/posts/pfbid0C1juirBxeTdoaarQnzXpWBdR7C8xodHPJ3Ctrh93kF7hdeU6547KiC8SwRRvBjwfl
