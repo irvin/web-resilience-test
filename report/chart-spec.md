@@ -2,7 +2,7 @@ For Traditional Chinese documentation, see [`chart-spec.zh-TW.md`](chart-spec.zh
 
 # Chart specification (report)
 
-This document defines chart output for `report/index.zh-TW.md` (see also [`index.md`](index.md) for the English report). Implementations in `web-resilience-test` should follow it.
+This document defines chart output for `report/index.md` (see also [`en.md`](en.md) for the English report). Implementations in `web-resilience-test` should follow it.
 
 ## Goals
 
@@ -47,7 +47,7 @@ This document defines chart output for `report/index.zh-TW.md` (see also [`index
   - `overall-result.svg`
   - `resource-distribution.svg`
 
-> In `report/index.zh-TW.md` (and [`index.md`](index.md)), prefer dated image paths so versions are not overwritten by latest files.
+> In `report/index.md` (and [`en.md`](en.md)), prefer dated image paths so versions are not overwritten by latest files.
 
 ## Shared visual spec (both charts)
 

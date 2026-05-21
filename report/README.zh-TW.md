@@ -2,7 +2,7 @@
 
 英文文件請見 [`README.md`](README.md)。
 
-這個目錄是獨立的報告編譯工具，用來把 `report/index.zh-TW.md` 建成可發布的 HTML，並同步 `report/img` 到 `report` branch 的 worktree。
+這個目錄是獨立的報告編譯工具，用來把 `report/index.md` 與 `report/en.md` 建成可發布的 HTML，並同步 `report/img` 到 `report` branch 的 worktree。
 
 ## 日常流程
 
@@ -54,8 +54,9 @@ npm run report:publish
 
 ### `npm run build`
 
-- 將 `report/index.zh-TW.md` 編譯成 `index.html`
-- 將 `report/img` 同步到目標 worktree 的 `img/`
+- 將 `report/index.md` 編譯成 `index.html`（繁中，`/web/report/`）
+- 將 `report/en.md` 編譯成 `en.html`（英文，`/web/report/en.html`）
+- 將 `report/img` 同步到目標 worktree 的 `img/`（兩種語言共用）
 - 預設輸出到 `report` branch 對應的 worktree
 - 只更新輸出內容，不會 `commit` 或 `push`
 - 若找不到 worktree，會提示先執行 `npm run init-worktree`
@@ -112,10 +113,11 @@ REPORT_COMMIT_MESSAGE="Publish 2026-03-24 report" npm run publish
 
 `build` 完成後，目標 worktree 內會更新：
 
-- `index.html`
+- `index.html`（繁中）
+- `en.html`（英文）
 - `img/`
 
-也就是說，`report/index.zh-TW.md` 與 `report/img/` 是來源，`report` branch worktree 根目錄則是發布輸出。若你只執行 `build`，這些輸出變更會保留在 worktree 中，直到你執行 `publish` 或手動處理為止。
+也就是說，`report/index.md`、`report/en.md` 與 `report/img/` 是來源，`report` branch worktree 則是發布輸出。若你只執行 `build`，這些輸出變更會保留在 worktree 中，直到你執行 `publish` 或手動處理為止。
 
 ## 可用環境變數
 

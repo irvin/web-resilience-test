@@ -2,7 +2,7 @@ For Traditional Chinese documentation, see [`README.zh-TW.md`](README.zh-TW.md).
 
 # Report Build & Publish
 
-This directory contains standalone report build tooling that compiles `report/index.zh-TW.md` into publishable HTML and syncs `report/img` to the `report` branch worktree.
+This directory contains standalone report build tooling that compiles `report/index.md` and `report/en.md` into publishable HTML and syncs `report/img` to the `report` branch worktree.
 
 ## Daily workflow
 
@@ -54,8 +54,9 @@ npm run report:publish
 
 ### `npm run build`
 
-- Compiles `report/index.zh-TW.md` to `index.html`
-- Syncs `report/img` to `img/` in the target worktree
+- Compiles `report/index.md` to `index.html` (Traditional Chinese, `/web/report/`)
+- Compiles `report/en.md` to `en.html` (English, `/web/report/en.html`)
+- Syncs `report/img` to `img/` in the target worktree (shared by both locales)
 - Default output is the worktree for the `report` branch
 - Updates output only; does not `commit` or `push`
 - If no worktree is found, prompts you to run `npm run init-worktree` first
@@ -112,10 +113,11 @@ REPORT_COMMIT_MESSAGE="Publish 2026-03-24 report" npm run publish
 
 After `build`, the target worktree contains:
 
-- `index.html`
-- `img/`
+- `index.html` (Traditional Chinese)
+- `en.html` (English)
+- `img/` (shared assets)
 
-Sources are `report/index.zh-TW.md` and `report/img/`; the `report` branch worktree root is the publish output. If you only run `build`, changes stay in the worktree until you run `publish` or handle them manually.
+Sources are `report/index.md`, `report/en.md`, and `report/img/`; the `report` branch worktree is the publish output. If you only run `build`, changes stay in the worktree until you run `publish` or handle them manually.
 
 ## Environment variables
 
