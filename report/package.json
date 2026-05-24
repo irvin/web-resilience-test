@@ -6,7 +6,7 @@
   "scripts": {
     "init-worktree": "node tools/init-report-worktree.js",
     "build": "node tools/build-report-root.js",
-    "build:slide:marp": "marp slide/slide-20260524.marp.md --html --allow-local-files -o slide/slide-20260524.marp.html",
+    "build:slide": "marp slide/index.md --html --allow-local-files -o slide/index.html",
     "publish": "node tools/publish-report.js"
   },
   "devDependencies": {

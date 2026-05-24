@@ -12,7 +12,8 @@ function main() {
   const targetBranch = process.env.REPORT_BRANCH || "report";
   const commitMessage = process.env.REPORT_COMMIT_MESSAGE || "Update report";
 
-  // Step 1: Build latest artifacts into report branch worktree
+  // Step 1: Build latest slide and report artifacts into report branch worktree
+  run("npm run build:slide", reportDir);
   run("node tools/build-report-root.js", reportDir);
 
   // Step 2: Commit and push if changed

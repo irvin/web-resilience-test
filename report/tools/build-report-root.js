@@ -5,6 +5,7 @@ const { resolveReportWorktreeDir } = require("./report-worktree");
 
 const reportDir = path.resolve(__dirname, "..");
 const sourceImgDir = path.join(reportDir, "img");
+const sourceSlideDir = path.join(reportDir, "slide");
 
 const REPORT_LOCALES = [
   {
@@ -275,11 +276,34 @@ function copyDirRecursive(src, dest) {
   if (!fs.existsSync(src)) return;
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    if (entry.name === ".DS_Store") continue;
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) copyDirRecursive(srcPath, destPath);
     else if (entry.isFile()) fs.copyFileSync(srcPath, destPath);
   }
+}
+
+function syncSlideAssets(worktreeDir) {
+  const sourceSlideHtml = path.join(sourceSlideDir, "index.html");
+  const sourceSlideImgDir = path.join(sourceSlideDir, "img");
+  const outSlideDir = path.join(worktreeDir, "slide");
+
+  fs.rmSync(outSlideDir, { recursive: true, force: true });
+
+  if (!fs.existsSync(sourceSlideHtml)) {
+    console.log("report/slide/index.html not found, skipped slide sync");
+    return;
+  }
+
+  fs.mkdirSync(outSlideDir, { recursive: true });
+  fs.copyFileSync(sourceSlideHtml, path.join(outSlideDir, "index.html"));
+
+  if (fs.existsSync(sourceSlideImgDir)) {
+    copyDirRecursive(sourceSlideImgDir, path.join(outSlideDir, "img"));
+  }
+
+  console.log(`Synced ${outSlideDir} from report/slide`);
 }
 
 function buildLocaleReport(locale, worktreeDir) {
@@ -324,6 +348,8 @@ function main() {
   } else {
     console.log("report/img not found, skipped image sync");
   }
+
+  syncSlideAssets(worktreeDir);
 }
 
 main();
