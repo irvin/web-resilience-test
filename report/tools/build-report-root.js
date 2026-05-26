@@ -133,9 +133,15 @@ function renderFootnotes(md, footnotes, locale) {
   return transformed;
 }
 
+/** Strip mdBook / pandoc-style TOC hints that must not appear in HTML output. */
+function stripOmitInTocComments(text) {
+  return text.replace(/<!--\s*omit in toc\s*-->/gi, "");
+}
+
 function getTitleFromMarkdown(md, fallback) {
   const titleMatch = md.match(/^#\s+(.+)$/m);
-  return titleMatch ? titleMatch[1].trim() : fallback;
+  if (!titleMatch) return fallback;
+  return stripOmitInTocComments(titleMatch[1]).trim();
 }
 
 function buildHtmlPage(locale, title, contentHtml) {
@@ -315,7 +321,7 @@ function buildLocaleReport(locale, worktreeDir) {
   fs.mkdirSync(path.dirname(outHtml), { recursive: true });
 
   const rawMd = fs.readFileSync(locale.sourceMd, "utf8");
-  const md = stripFrontmatter(rawMd);
+  const md = stripOmitInTocComments(stripFrontmatter(rawMd));
   const { mdWithoutFootnotes, footnotes } = extractFootnotes(md);
   const mdWithRenderedFootnotes = renderFootnotes(mdWithoutFootnotes, footnotes, locale);
   let htmlContent = addHeadingIds(marked.parse(mdWithRenderedFootnotes));
