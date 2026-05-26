@@ -10,7 +10,7 @@ MozTW, Mozilla Taiwan Community ([moztw.org](https://moztw.org))
 ### Dates
 
 Published: 2026-05-22  
-Last Updated: 2026-05-22
+Last Updated: 2026-05-26
 
 ### Acknowledgments
 
@@ -104,9 +104,11 @@ According to the Taiwan Submarine Cable Map (smc.peering.tw), Taiwan is almost a
 ![Availability of all Taiwan international submarine cables, 2025/3/18–2026/3/18](img/smc-peering-tw-2026-03-18-1822.png)
 Availability of all international submarine cables serving Taiwan, 2025/3/18–2026/3/18 (source: Taiwan Submarine Cable Map (smc.peering.tw), cable status timeline).
 
-Taiwan connects globally through fourteen international cables via landing stations at Tamsui, Bali, Toucheng, and Fangshan (another station is under construction in Dawu, Taitung), plus ten domestic cables to Penghu, Kinmen, Matsu, and other outlying islands[^moda-subseacable] (RNAL and FNAL are two systems on one physical cable; MODA counts them separately, yielding fifteen international systems in some counts). Under normal conditions, the Internet’s meshing, redundancy, diversity, and connectivity let carriers reroute traffic over other cables when a few fail. Quality may drop without users noticing.
+Taiwan connects globally through fourteen international cables via landing stations at Tamsui, Bali, Toucheng, and Fangshan (another station is under construction in Dawu, Taitung), plus ten domestic cables to Penghu, Kinmen, Matsu, and other outlying islands[^moda-subseacable] (RNAL and FNAL are two systems on one physical cable; MODA counts them separately, yielding fifteen international systems in some counts).
 
-When multiple cables fail together, bandwidth redundancy is quickly exhausted, causing severe congestion or large-scale outages affecting communications, logistics, government operations, and digital systems[^aei-resilience].
+Under normal conditions, the Internet’s meshing, redundancy, diversity, and connectivity let carriers reroute traffic over other cables when a few fail. Quality may drop without users noticing. However, when multiple cables fail together, bandwidth redundancy is quickly exhausted, causing severe congestion or large-scale outages affecting communications, logistics, government operations, and digital systems[^aei-resilience].
+
+According to repair-time benchmarks published by the Ministry of Digital Affairs[^moda-repair-time], average repair time is about **32 days** for international cables and about **110 days** for domestic cables linking outlying islands. Disruptions can therefore last for months or even quarters, and contingency planning should assume a monthly rather than daily timescale.
 
 ### Historical case: multiple international cables failed at once
 
@@ -557,6 +559,7 @@ Suggested follow-ups:
 [^smc-map]: Taiwan Submarine Cable Map, *cable status timeline*, https://smc.peering.tw/
 [^moda-subseacable]: Ministry of Digital Affairs, *latest cable status* (in Chinese), https://moda.gov.tw/major-policies/subseacable/1747
 [^aei-resilience]: Center for Technology, Science, and Energy, American Enterprise Institute, *Beyond Infrastructure: Internet Ecosystem Resilience and the Public Good*, https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/
+[^moda-repair-time]: Ministry of Digital Affairs, *average submarine cable repair times in Taiwan* (in Chinese), https://moda.gov.tw/press/bulletin/17998
 [^ofta-2007]: OFCA Hong Kong, *press release* (in Chinese), Internet Archive, https://web.archive.org/web/20070217181311/http://www.ofta.gov.hk/zh/press_rel/2007/Feb_2007_r4.html
 [^msn-isdr]: MSN/CNA via Internet Archive, *expert on 2006 quake cable damage* (in Chinese), https://web.archive.org/web/20070210045300/http://news.msn.com.tw/cna/cna_full_text.asp?yy=07&mm=02&dd=08&name=000030
 [^matsu-facebook]: Wen Lii, *Facebook post* (in Chinese), https://www.facebook.com/wen1949/posts/pfbid0C1juirBxeTdoaarQnzXpWBdR7C8xodHPJ3Ctrh93kF7hdeU6547KiC8SwRRvBjwfl

@@ -10,7 +10,7 @@ MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))
 ### 更新日期
 
 Published: 2026-03-23  
-Last Updated: 2026-05-22
+Last Updated: 2026-05-26
 
 ### 誌謝
 
@@ -104,9 +104,11 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 ![台灣所有對外海纜自2025/3/18-2026/3/18的可用性](img/smc-peering-tw-2026-03-18-1822.png)
 2025/3/18-2026/3/18 期間，台灣所有國際對外海底電纜的可用性狀況（資料來源：台灣海纜動態地圖（smc.peering.tw）〈海纜狀態時間軸〉。
 
-目前台灣透過淡水、八里、頭城、枋山等四處登陸機房（另有一興建中之站點於台東大武），以十四條國際海纜連結全球網路，另有十條國內海纜連接澎湖、金門、馬祖等離島[^moda-subseacable]（註：RNAL 及 FNAL 為同一條實體纜線上的兩個海纜系統，數發部將其分開計數，故另得十五條國際海纜之數目）。在正常情況下，因網際網路的網狀、冗餘、多樣與連通等要素，當少數海纜發生故障時，可由電信商調整訊號轉由其他海纜傳輸。儘管連線品質有所下降，但你或許不會感覺到有任何差異。
+目前台灣透過淡水、八里、頭城、枋山等四處登陸機房（另有一興建中之站點於台東大武），以十四條國際海纜連結全球網路，另有十條國內海纜連接澎湖、金門、馬祖等離島[^moda-subseacable]（註：RNAL 及 FNAL 為同一條實體纜線上的兩個海纜系統，數發部將其分開計數，故另得十五條國際海纜之數目）。
 
-然而，一旦多條海纜同時受損，整體頻寬冗餘將迅速耗盡，產生較嚴重的堵塞，或大規模服務中斷，對通訊、物流、政府運作與各類數位系統造成廣泛衝擊[^aei-resilience]。
+在正常情況下，憑藉網際網路的網狀結構、冗餘性、多樣性與連通性，當少數海纜發生故障時，電信業者仍可將訊號調度至其他海纜傳輸。儘管連線品質可能略有下降，多數使用者未必會立即察覺。然而，一旦多條海纜同時受損，整體頻寬冗餘將迅速耗盡，進而造成嚴重壅塞或大規模服務中斷，對通訊、物流、政府運作與各類數位系統帶來廣泛衝擊[^aei-resilience]。
+
+根據數位發展部公布的海纜平均修復時間[^moda-repair-time]，國際海纜平均修復時間約為 **32 天**；連結離島的國內海纜更長，約為 **110 天**。事故的影響往往會持續數月至數季，因此應變與備援規劃，須以月為單位思考。
 
 ### 歷史案例：多條國際海纜同時故障
 
@@ -570,6 +572,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 [^smc-map]: 台灣海纜動態地圖，〈海纜狀態時間軸〉，https://smc.peering.tw/
 [^moda-subseacable]: 數位發展部，〈最新海纜狀況〉，https://moda.gov.tw/major-policies/subseacable/1747
 [^aei-resilience]: Center for Technology, Science, and Energy, American Enterprise Institute，〈Beyond Infrastructure: Internet Ecosystem Resilience and the Public Good〉，https://ctse.aei.org/beyond-infrastructure-internet-ecosystem-resilience-and-the-public-good/
+[^moda-repair-time]: 數位發展部，〈公告受理申請數位發展部「提升海纜韌性建設補助案」〉，https://moda.gov.tw/press/bulletin/17998
 [^ofta-2007]: 香港特別行政區政府電訊管理局，〈新聞公報〉，Internet Archive 備份，https://web.archive.org/web/20070217181311/http://www.ofta.gov.hk/zh/press_rel/2007/Feb_2007_r4.html
 [^msn-isdr]: MSN 新聞轉載中央社，〈專家指台灣外海強震損害海底電纜為現代災難〉，Internet Archive 備份，https://web.archive.org/web/20070210045300/http://news.msn.com.tw/cna/cna_full_text.asp?yy=07&mm=02&dd=08&name=000030
 [^matsu-facebook]: 李問 Wen Lii，Facebook 貼文，https://www.facebook.com/wen1949/posts/pfbid0C1juirBxeTdoaarQnzXpWBdR7C8xodHPJ3Ctrh93kF7hdeU6547KiC8SwRRvBjwfl
