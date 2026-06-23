@@ -56,6 +56,7 @@ npm run report:publish
 
 - 將 `report/index.md` 編譯成 `index.html`（繁中，`/web/report/`）
 - 將 `report/en.md` 編譯成 `en.html`（英文，`/web/report/en.html`）
+- 語言切換介面與主站 `/web/` 相同（`lang-switcher` / `lang-switcher-btn` 膠囊按鈕）
 - 將 `report/img` 同步到目標 worktree 的 `img/`（兩種語言共用）
 - 預設輸出到 `report` branch 對應的 worktree
 - 只更新輸出內容，不會 `commit` 或 `push`

@@ -7,15 +7,19 @@ const reportDir = path.resolve(__dirname, "..");
 const sourceImgDir = path.join(reportDir, "img");
 const sourceSlideDir = path.join(reportDir, "slide");
 
+const REPORT_BASE = "https://resilience.ocf.tw/web/report";
+const REPORT_PATH_ZH = "/web/report/";
+const REPORT_PATH_EN = "/web/report/en.html";
+
 const REPORT_LOCALES = [
   {
     id: "zh-TW",
     sourceMd: path.join(reportDir, "index.md"),
     outRelative: "index.html",
     htmlLang: "zh-Hant",
-    canonical: "https://resilience.ocf.tw/web/report/",
-    altHref: "en.html",
-    altLabel: "English",
+    canonical: `${REPORT_BASE}/`,
+    imgPrefix: "",
+    switcherAriaLabel: "語言",
     footnoteSectionAria: "註腳",
     backrefLabel: (index, total) =>
       total > 1 ? `回到正文引用處（第 ${index} 處）` : "回到正文引用處",
@@ -26,15 +30,59 @@ const REPORT_LOCALES = [
     sourceMd: path.join(reportDir, "en.md"),
     outRelative: "en.html",
     htmlLang: "en",
-    canonical: "https://resilience.ocf.tw/web/report/en.html",
-    altHref: "index.html",
-    altLabel: "繁體中文",
+    canonical: `${REPORT_BASE}/en.html`,
+    imgPrefix: "",
+    switcherAriaLabel: "Language",
     footnoteSectionAria: "Footnotes",
     backrefLabel: (index, total) =>
       total > 1 ? `Back to reference ${index} in text` : "Back to reference in text",
     backrefText: (index, total) => (total > 1 ? `↩${index}` : "↩"),
   },
 ];
+
+const LANG_SWITCHER_CSS = `
+    .lang-switcher {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .lang-switcher-btn {
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      border: 1px solid #c5cdd8;
+      border-radius: 999px;
+      background: #fff;
+      color: #444;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .lang-switcher-btn:hover {
+      border-color: #0366d6;
+      color: #0366d6;
+    }
+    .lang-switcher-btn:focus-visible {
+      outline: 2px solid #0366d6;
+      outline-offset: 2px;
+    }
+    .lang-switcher-btn[aria-current="page"] {
+      background: #0366d6;
+      border-color: #0366d6;
+      color: #fff;
+    }`;
+
+function buildLangSwitcher(locale) {
+  const isZh = locale.id === "zh-TW";
+  const zhCurrent = isZh ? ' aria-current="page"' : "";
+  const enCurrent = isZh ? "" : ' aria-current="page"';
+  return `<nav class="lang-switcher" aria-label="${locale.switcherAriaLabel}">
+  <a class="lang-switcher-btn" href="${REPORT_PATH_ZH}" hreflang="zh-TW"${zhCurrent}>中文</a>
+  <a class="lang-switcher-btn" href="${REPORT_PATH_EN}" hreflang="en"${enCurrent}>English</a>
+</nav>`;
+}
 
 function stripFrontmatter(md) {
   if (!md.startsWith("---")) return md;
@@ -145,9 +193,9 @@ function getTitleFromMarkdown(md, fallback) {
 }
 
 function buildHtmlPage(locale, title, contentHtml) {
-  const langNav = `<nav class="report-lang-nav" aria-label="Report language">
-  <a href="${locale.altHref}">${locale.altLabel}</a>
-</nav>`;
+  const langNav = buildLangSwitcher(locale);
+  const hreflangBlock = `  <link rel="alternate" hreflang="zh-TW" href="${REPORT_BASE}/" />
+  <link rel="alternate" hreflang="en" href="${REPORT_BASE}/en.html" />`;
 
   return `<!doctype html>
 <html lang="${locale.htmlLang}">
@@ -156,6 +204,7 @@ function buildHtmlPage(locale, title, contentHtml) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
   <link rel="canonical" href="${locale.canonical}" />
+${hreflangBlock}
   <style>
     :root { color-scheme: light dark; }
     body {
@@ -165,16 +214,7 @@ function buildHtmlPage(locale, title, contentHtml) {
       line-height: 1.8;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .report-lang-nav {
-      margin: 0 0 1.5rem;
-      font-size: 0.95rem;
-    }
-    .report-lang-nav a {
-      text-decoration: none;
-    }
-    .report-lang-nav a:hover {
-      text-decoration: underline;
-    }
+${LANG_SWITCHER_CSS}
     h1, h2, h3, h4 { line-height: 1.35; margin-top: 1.4em; }
     pre {
       overflow: auto;
@@ -339,7 +379,6 @@ function main() {
     buildLocaleReport(locale, worktreeDir);
   }
 
-  // Remove legacy en/ output from older builds (en/index.html).
   const legacyEnDir = path.join(worktreeDir, "en");
   if (fs.existsSync(legacyEnDir)) {
     fs.rmSync(legacyEnDir, { recursive: true, force: true });

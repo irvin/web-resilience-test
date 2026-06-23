@@ -56,6 +56,7 @@ npm run report:publish
 
 - Compiles `report/index.md` to `index.html` (Traditional Chinese, `/web/report/`)
 - Compiles `report/en.md` to `en.html` (English, `/web/report/en.html`)
+- Language switcher uses the same pill-style UI as the main `/web/` site (`lang-switcher` / `lang-switcher-btn`)
 - Syncs `report/img` to `img/` in the target worktree (shared by both locales)
 - Default output is the worktree for the `report` branch
 - Updates output only; does not `commit` or `push`
