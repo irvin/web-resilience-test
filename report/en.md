@@ -282,7 +282,7 @@ Tools and projects:
 
 We developed [web-resilience-test](https://github.com/irvin/web-resilience-test) to open each target homepage site-by-site with a programmatic headless browser and record all resource connections during load.
 
-For resources of each page, the tool aggregates request domains, filters known ad domains, and uses IPinfo / headers / ping RTT to infer geographic and logical location (e.g. which public cloud provider).
+For resources of each page, the tool aggregates request domains, filters known ad domains, and uses IPinfo / headers / LACeS anycast API / ping RTT to infer geographic and logical location (e.g. which public cloud provider).
 
 Results are aggregated into summary tables.
 
@@ -316,7 +316,8 @@ Results are aggregated into summary tables.
      - If result shows `country=TW`, log as domestic connection
      - Otherwise, we check ASN to find if the request is from multinational public cloud (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft), then do further checks:
        - Headers: look for known location markers in response headers like `cf-ray`, `x-amz-cf-pop`, `x-served-by`, `x-azure-ref`, and `x-msedge-ref` (values containing `TPE` indicate a Taiwan PoP).
-       - RTT: if location is unclear from headers, ping the resource 5× and take the minimum RTT; if `RTT < 15ms`, categorize it as a domestic resource.
+       - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs); if `locations` includes Taiwan and `confidence` is `confident` (or higher), classify as domestic (see [`LACeS.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.md)).
+       - RTT: if the above methods are inconclusive, ping the resource 5× and take the minimum RTT; if `RTT < 15ms`, categorize it as a domestic resource.
 
      Note: we also built [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) from full request data for ASN mapping, open-sourced for other research and projects.
 

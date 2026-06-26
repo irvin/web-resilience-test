@@ -36,7 +36,31 @@ log 在 ipinfo 後方加入 "cloud_provider": {
   x-msedge-ref: <x-msedge-ref>
 }
 
-4. 如沒有找到以上 header，則進行 RTR 延遲測試
+4. 如沒有找到以上 header，則查詢 [LACeS Anycast Census API](https://manycast.net/api/docs)（`https://manycast.net/api/v1/ip/{ip}`）。
+
+若 `locations` 含台灣（`country: TW`）且 `confidence` 為 `confident`（或以上），則判斷為 tw。
+
+詳見 [`LACeS.zh-TW.md`](LACeS.zh-TW.md)。
+
+log 在 ipinfo 後方加入 "cloud_provider": {
+  country: "tw",
+  detection_method: "laces",
+  laces: {
+    source: "laces api (direct)",
+    queried_ip: "1.2.3.4",
+    prefix: "1.2.3.0/24",
+    anycast: true,
+    confidence: "confident",
+    has_tw: true,
+    has_taipei: true,
+    site_count: 12,
+    tw_locations: [{ "city": "Taipei", "country": "TW", "id": "TPE" }]
+  }
+}
+
+精簡後的 LACeS census 記錄於 `cloud_provider.laces`。
+
+5. 若 LACeS 未判定為境內，則進行 RTT 延遲測試
 
 ping -n -c 5 -i 0.2 142.250.66.74
 PING 142.250.66.74 (142.250.66.74): 56 data bytes

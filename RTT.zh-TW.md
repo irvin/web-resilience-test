@@ -4,7 +4,7 @@
 
 ## 概述
 
-本專案使用 **RTT (Round Trip Time，往返延遲時間)** 作為判斷網路資源是否位於台灣境內的輔助方法之一。當無法透過 HTTP headers（如 `cf-ray`、`x-amz-cf-pop`、`x-azure-ref`、`x-msedge-ref` 等）判斷時，會進行 RTT 測試來推測資源的地理位置。
+本專案使用 **RTT (Round Trip Time，往返延遲時間)** 作為判斷網路資源是否位於台灣境內的輔助方法之一。當無法透過 HTTP headers（如 `cf-ray`、`x-amz-cf-pop`、`x-azure-ref`、`x-msedge-ref` 等）或 [LACeS Anycast Census API](LACeS.zh-TW.md) 判斷時，會進行 RTT 測試來推測資源的地理位置。
 
 ## RTT 門檻設定
 
@@ -12,7 +12,7 @@
 
 **門檻值：15 毫秒 (ms)**
 
-定義位置：`no-global-connection-check.js` 第 63 行
+定義位置：`no-global-connection-check.js` 第 69 行
 
 ```javascript
 const RTT_THRESHOLD = 15;
@@ -24,7 +24,9 @@ const RTT_THRESHOLD = 15;
 
 1. **優先檢查 HTTP headers**：如果從 headers 中發現包含台灣節點的標記（如 `cf-ray` 含 `TPE`、`x-azure-ref` 含 `TPE`、`x-msedge-ref` 的 `Ref B: TPE...`），則直接標記為 `country: 'tw'`，`detection_method: 'header'`。
 
-2. **如果沒有找到 header 標記，進行 RTT 測試**：
+2. **若 header 無法判定，查詢 LACeS Anycast Census API**：若 `has_tw` 且 `confidence` 達可採信門檻，標記為 `country: 'tw'`，`detection_method: 'laces'`，census 資料寫入 `cloud_provider.laces`。詳見 [`LACeS.zh-TW.md`](LACeS.zh-TW.md)。
+
+3. **若 LACeS 未判定為境內，進行 RTT 測試**：
    - **RTT < 15ms**：判斷為台灣境內
      - 設定 `cloud_provider.country = 'tw'`
      - 設定 `cloud_provider.detection_method = 'rtt'`
@@ -35,7 +37,7 @@ const RTT_THRESHOLD = 15;
      - 設定 `cloud_provider.detection_method = 'rtt'`
      - 記錄 `cloud_provider.rtt` 數值（供後續分析使用）
 
-3. **如果 RTT 測試失敗**：在 `cloud_provider` 中記錄失敗資訊（不影響境內/境外分類）：
+4. **如果 RTT 測試失敗**：在 `cloud_provider` 中記錄失敗資訊（不影響境內/境外分類）：
    - 設定 `cloud_provider.detection_method = 'rtt'`
    - 設定 `cloud_provider.rtt = null`
    - 設定 `cloud_provider.rtt_error` 為簡短原因：`timeout`、`no_response`、`parse_error` 或 `command_failed`
@@ -155,20 +157,21 @@ p95	142.74965
      - `ip`：ipinfo.ip
      - `ipinfo_country`：ipinfo.country
      - `cloud_country`：cloud_provider.country（若有，通常是 `tw`）
-     - `detection_method`：檢測方法（`rtt` 或 `header`）
+     - `detection_method`：檢測方法（`header`、`laces` 或 `rtt`）
      - `rtt`：實際 RTT 數值（毫秒），失敗時為 `null`
      - `rtt_error`：RTT 失敗時的失敗原因（`timeout`、`no_response`、`parse_error`、`command_failed`）
 
 2. **`test-results/*.json`**
    - 每個網站的測試結果 JSON 檔案
-   - 包含 `domainDetails` 陣列，每個元素可能包含 `cloud_provider.rtt`、`cloud_provider.detection_method`，以及 RTT 失敗時的 `cloud_provider.rtt_error`
+   - 包含 `domainDetails` 陣列，每個元素可能包含 `cloud_provider.rtt`、`cloud_provider.laces`、`cloud_provider.detection_method`，以及 RTT 失敗時的 `cloud_provider.rtt_error`
 
 ### 相關連結
 
-- [RTT 測試實作](no-global-connection-check.js)（第 63 行定義門檻，第 957-987 行實作邏輯）
+- [RTT 測試實作](no-global-connection-check.js)（第 69 行定義門檻，於 header 與 LACeS 步驟之後）
+- [LACeS 整合](LACeS.zh-TW.md)
 - [RTT 數據匯出工具](export-rtt-csv.js)
 - [完整 RTT 數據](rtt.csv)
 
 ---
 
-*最後更新：2026-02-05*
+*最後更新：2026-06-27*

@@ -68,6 +68,11 @@ const CLOUD_HEADERS = [
 // RTT 測試閾值（毫秒）
 const RTT_THRESHOLD = 15;
 
+// LACeS Anycast Census API
+const LACES_API_BASE = 'https://manycast.net/api/v1/ip';
+
+const LACES_CONFIDENCE_LEVELS = ['uncertain', 'partial', 'confident'];
+
 async function loadcloudProviderInfo() {
     if (CLOUD_PROVIDER_INDEX) {
         return CLOUD_PROVIDER_INDEX;
@@ -207,6 +212,226 @@ function getIPinfoCacheFilePath(ip) {
     const cacheDir = path.join(__dirname, '.cache', 'ipinfo');
     const fileName = getCacheFileName(ip);
     return path.join(cacheDir, fileName);
+}
+
+/**
+ * 取得 LACeS 快取檔案路徑（優先 mapped_prefix，否則 IP）
+ * @param {string} cacheKey - mapped_prefix 或 IP
+ * @returns {string} 快取檔案路徑
+ */
+function getLACeSCacheFilePath(cacheKey) {
+    const cacheDir = path.join(__dirname, '.cache', 'laces');
+    const fileName = getCacheFileName(cacheKey);
+    return path.join(cacheDir, fileName);
+}
+
+/**
+ * 判斷 LACeS confidence 是否達到可採信門檻（confident 或以上）
+ * @param {string} confidence - API 回傳的 confidence 值
+ * @returns {boolean}
+ */
+function isLACeSConfidenceReliable(confidence) {
+    if (!confidence) return false;
+    const normalized = String(confidence).toLowerCase();
+    if (normalized === 'confident') return true;
+    const levelIndex = LACES_CONFIDENCE_LEVELS.indexOf(normalized);
+    const confidentIndex = LACES_CONFIDENCE_LEVELS.indexOf('confident');
+    return levelIndex !== -1 && levelIndex >= confidentIndex;
+}
+
+/**
+ * 正規化 LACeS API 回應，計算 has_tw、has_taipei、site_count
+ * @param {Object} raw - LACeS API 原始 JSON
+ * @returns {Object} 含衍生欄位的物件
+ */
+function normalizeLACeSResponse(raw) {
+    if (!raw || typeof raw !== 'object') {
+        return null;
+    }
+
+    const locations = Array.isArray(raw.locations) ? raw.locations : [];
+    const has_tw = locations.some(loc => loc?.country === 'TW');
+    const has_taipei = locations.some(loc => {
+        if (loc?.country !== 'TW') return false;
+        const city = (loc.city || '').toLowerCase();
+        const id = (loc.id || '').toUpperCase();
+        return id === 'TPE' || city.includes('taipei');
+    });
+
+    const siteMetrics = [
+        raw.ab_icmp,
+        raw.ab_tcp,
+        raw.ab_dns,
+        raw.gcd_icmp,
+        raw.gcd_tcp
+    ].map(value => (typeof value === 'number' && !Number.isNaN(value) ? value : 0));
+
+    const site_count = Math.max(...siteMetrics, 0);
+
+    return {
+        ...raw,
+        has_tw,
+        has_taipei,
+        site_count
+    };
+}
+
+/**
+ * Slim LACeS payload for test-result JSON (full response stays in .cache/laces/).
+ */
+function formatLACeSForLog(lacesResult) {
+    if (!lacesResult || typeof lacesResult !== 'object') {
+        return null;
+    }
+
+    const locations = Array.isArray(lacesResult.locations) ? lacesResult.locations : [];
+    const tw_locations = locations
+        .filter(loc => loc?.country === 'TW')
+        .map(loc => ({
+            city: loc.city ?? null,
+            country: loc.country,
+            id: loc.id ?? null
+        }));
+
+    const log = {
+        source: lacesResult.source,
+        queried_ip: lacesResult.queried_ip,
+        prefix: lacesResult.mapped_prefix || lacesResult.prefix || null,
+        anycast: lacesResult.anycast,
+        confidence: lacesResult.confidence,
+        partial: lacesResult.partial,
+        asns: lacesResult.asns,
+        date: lacesResult.date,
+        has_tw: lacesResult.has_tw,
+        has_taipei: lacesResult.has_taipei,
+        site_count: lacesResult.site_count,
+        location_count: locations.length
+    };
+
+    if (tw_locations.length > 0) {
+        log.tw_locations = tw_locations;
+    }
+
+    return log;
+}
+
+function buildLacesCloudProvider(lacesResult) {
+    const laces = formatLACeSForLog(lacesResult);
+    if (!laces) {
+        return null;
+    }
+
+    return {
+        country: 'tw',
+        detection_method: 'laces',
+        laces
+    };
+}
+
+function appendLacesToCloudProvider(cloudProvider, lacesResult) {
+    const laces = formatLACeSForLog(lacesResult);
+    if (!laces) {
+        return cloudProvider;
+    }
+
+    if (!cloudProvider) {
+        return { laces };
+    }
+
+    return {
+        ...cloudProvider,
+        laces
+    };
+}
+
+/**
+ * 查詢 LACeS Anycast Census API
+ * @param {string} ip - IP 地址
+ * @param {Object} options - 選項
+ * @param {boolean} options.useCache - 是否使用快取（預設 true）
+ * @param {boolean} options.debug - debug 模式
+ * @returns {Promise<Object|null>} 正規化後的 API 結果，失敗時返回 null
+ */
+async function checkAnycastWithLACeS(ip, options = {}) {
+    const useCache = options.useCache !== false;
+    const cacheMaxAge = 24 * 60 * 60 * 1000;
+
+    const readCachedLACeS = async (cacheKey, allowExpired = false) => {
+        const cachePath = getLACeSCacheFilePath(cacheKey);
+        if (!useCache) return null;
+        if (!allowExpired && !(await isCacheValid(cachePath, cacheMaxAge))) {
+            return null;
+        }
+        const cachedData = await readCache(cachePath);
+        if (!cachedData) return null;
+        try {
+            const parsed = JSON.parse(cachedData);
+            return normalizeLACeSResponse(parsed);
+        } catch {
+            return null;
+        }
+    };
+
+    try {
+        const cachedByIp = await readCachedLACeS(ip);
+        if (cachedByIp) {
+            if (options.debug) {
+                console.log(`[DEBUG] 使用快取 LACeS 結果: ${ip}`);
+            }
+            return {
+                source: 'laces api (cached)',
+                queried_ip: ip,
+                ...cachedByIp
+            };
+        }
+
+        const response = await axios.get(`${LACES_API_BASE}/${ip}`, {
+            timeout: 15000,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const normalized = normalizeLACeSResponse(response.data);
+        if (!normalized) {
+            return null;
+        }
+
+        const cacheKey = normalized.mapped_prefix || normalized.prefix || ip;
+        if (useCache) {
+            await writeCache(
+                getLACeSCacheFilePath(cacheKey),
+                JSON.stringify(response.data, null, 2)
+            );
+            if (cacheKey !== ip) {
+                await writeCache(
+                    getLACeSCacheFilePath(ip),
+                    JSON.stringify(response.data, null, 2)
+                );
+            }
+        }
+
+        return {
+            source: 'laces api (direct)',
+            queried_ip: ip,
+            ...normalized
+        };
+    } catch (error) {
+        if (options.debug) {
+            console.log(`[DEBUG] LACeS API 查詢失敗 (${ip}): ${error.message}`);
+        }
+
+        const expiredCache = await readCachedLACeS(ip, true);
+        if (expiredCache) {
+            return {
+                source: 'laces api (expired cache)',
+                queried_ip: ip,
+                ...expiredCache
+            };
+        }
+
+        return null;
+    }
 }
 
 /**
@@ -373,6 +598,7 @@ async function initializeIgnorableDomains(options = {}) {
         }
     }
 }
+
 
 async function collectHARAndCanonical(url, options = {}) {
     const timeout = options.timeout || 120000; // 預設 120 秒
@@ -964,6 +1190,19 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
         };
     }
 
+    // LACeS Anycast Census API（header 失敗後、RTT 之前）
+    const lacesResult = await checkAnycastWithLACeS(apiResult.ip, {
+        useCache: options.useCache !== false,
+        debug: options.debug
+    });
+
+    if (lacesResult?.has_tw && isLACeSConfidenceReliable(lacesResult.confidence)) {
+        return {
+            ...apiResult,
+            cloud_provider: buildLacesCloudProvider(lacesResult)
+        };
+    }
+
     // 如果沒有找到包含 TPE 的 header，進行 RTT 測試
     const rttResult = await performRTTTest(apiResult.ip);
     if (!rttResult.failed && rttResult.rtt !== null) {
@@ -971,20 +1210,20 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
             // RTT < 15ms，判斷為台灣
             return {
                 ...apiResult,
-                cloud_provider: {
+                cloud_provider: appendLacesToCloudProvider({
                     country: 'tw',
                     rtt: rttResult.rtt,
                     detection_method: 'rtt'
-                }
+                }, lacesResult)
             };
         } else {
             // RTT >= 15ms，不在台灣，但記錄 RTT 資訊（不包含 country）
             return {
                 ...apiResult,
-                cloud_provider: {
+                cloud_provider: appendLacesToCloudProvider({
                     rtt: rttResult.rtt,
                     detection_method: 'rtt'
-                }
+                }, lacesResult)
             };
         }
     }
@@ -992,17 +1231,17 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
     if (rttResult.failed) {
         return {
             ...apiResult,
-            cloud_provider: {
+            cloud_provider: appendLacesToCloudProvider({
                 rtt: null,
                 detection_method: 'rtt',
                 rtt_error: rttResult.reason
-            }
+            }, lacesResult)
         };
     }
 
     return {
         ...apiResult,
-        cloud_provider: null
+        cloud_provider: appendLacesToCloudProvider(null, lacesResult)
     };
 }
 
@@ -1019,7 +1258,7 @@ function checkLocally(ipInfoResults, cloudProviderInfo) {
         // 優先使用 cloud_provider.country 判斷
         let isDomestic;
         if (result.cloud_provider && result.cloud_provider.country === 'tw') {
-            // 經過 header 或 RTT 測試確認在台灣
+            // 經過 header、laces 或 RTT 測試確認在台灣
             isDomestic = true;
         } else if (result.country === 'TW') {
             // 直接從 ipinfo 判斷在台灣
@@ -1672,11 +1911,9 @@ async function checkWebsiteResilience(url, options = {}) {
         } else {
             // 為其他錯誤建立結果物件
             const isTimeout = error.name === 'TimeoutError';
-            // 檢查是否為 HTTP 4xx 錯誤
             const isHttp4xx = error.message && /^HTTP 4\d{2}/.test(error.message);
             const httpStatusMatch = error.message?.match(/^HTTP (\d{3})/);
 
-            // 檢查是否為 net error（如 ERR_ADDRESS_UNREACHABLE, ERR_NAME_NOT_RESOLVED 等）
             const netErrorMatch = error.message?.match(/net::(ERR_[A-Z_]+)/);
             const netErrorCode = netErrorMatch ? netErrorMatch[1] : null;
 
@@ -1901,5 +2138,8 @@ if (require.main === module) {
 }
 
 module.exports = {
-    checkWebsiteResilience
+    checkWebsiteResilience,
+    formatLACeSForLog,
+    buildLacesCloudProvider,
+    appendLacesToCloudProvider
 };

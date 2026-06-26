@@ -40,7 +40,35 @@ Log after ipinfo:
 }
 ```
 
-4. If none of the above headers are found, run an RTT latency test:
+4. If none of the above headers are found, query the [LACeS Anycast Census API](https://manycast.net/api/docs) (`https://manycast.net/api/v1/ip/{ip}`).
+
+If `locations` includes Taiwan (`country: TW`) and `confidence` is `confident` (or higher), classify as `tw`.
+
+See [`LACeS.md`](LACeS.md) for field definitions and cache behavior.
+
+Log after ipinfo:
+
+```json
+"cloud_provider": {
+  country: "tw",
+  detection_method: "laces",
+  laces: {
+    source: "laces api (direct)",
+    queried_ip: "1.2.3.4",
+    prefix: "1.2.3.0/24",
+    anycast: true,
+    confidence: "confident",
+    has_tw: true,
+    has_taipei: true,
+    site_count: 12,
+    tw_locations: [{ "city": "Taipei", "country": "TW", "id": "TPE" }]
+  }
+}
+```
+
+The slim LACeS census payload is stored as `cloud_provider.laces`.
+
+5. If LACeS does not classify as domestic, run an RTT latency test:
 
 ```
 ping -n -c 5 -i 0.2 142.250.66.74
