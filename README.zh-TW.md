@@ -203,18 +203,34 @@ node no-global-connection-check.js --cache false https://example.com
 
 - **Headless 模式選項**：
 ```bash
-# 使用 headless 模式（預設，不顯示瀏覽器視窗）
-node no-global-connection-check.js --headless true https://example.com
+# 預設為非 headless（顯示瀏覽器視窗，較接近一般使用者）
+node no-global-connection-check.js https://example.com
 
-# 使用非 headless 模式（顯示瀏覽器視窗）
-node no-global-connection-check.js --headless false https://example.com
+# 使用 headless 模式（不顯示瀏覽器視窗；適用 CI 或無圖形介面的伺服器）
+node no-global-connection-check.js --headless true https://example.com
 ```
 
-**注意：** 當測試失敗時，工具會自動嘗試以下重試流程：
+#### 何時使用 `--headless true`？
+
+**優點：** 不須繪製瀏覽器視窗，資源占用較少，**單站載入速度通常較快**，適合快速跑大量站點的批次測試。若 headless 失敗，仍會依重試流程自動改試非 headless。
+
+**取捨：** 以速度為優先的批次測試可選 headless；若希望載入行為較接近一般使用者開啟瀏覽器，建議維持預設非 headless。
+
+#### 為何預設改為非 headless？
+
+本工具會依 CDN response header（例如 Azure 的 `x-azure-ref`、Microsoft 的 `x-msedge-ref`）等線索判斷台灣 PoP。Playwright headless 與 headed 在 User-Agent、`Sec-CH-UA`、TLS 指紋等方面與一般桌面瀏覽器不完全相同；**我們尚未系統性驗證**這些差異是否會改變 CDN 路由或 PoP header。開發過程中曾觀察到同一站點在不同 client 或不同次連線下，PoP 相關 header 可能出現不同值，且具一定波動性。
+
+基於「盡量貼近一般使用者開啟瀏覽器」的設計取向，預設採用 **非 headless**。需要較快跑大批次時，可加上 `--headless true`（失敗時仍會依重試流程改試非 headless）。
+
+**注意：** 當測試失敗時，工具會自動嘗試以下重試流程（預設非 headless）：
+1. 一般版本（非 headless）
+2. 一般版本 prefix www（非 headless）
+
+若指定 `--headless true`，重試流程為：
 1. 一般版本（headless）
-2. 一般版本 prefix www
-3. 非 headless 版本
-4. 非 headless 版本 prefix www
+2. 一般版本（非 headless）
+3. 一般版本 prefix www（headless）
+4. 一般版本 prefix www（非 headless）
 
 ### 批次測試
 
@@ -246,13 +262,13 @@ node batch-test.js --delay 3000 --limit 10 top-traffic-list-taiwan/merged_lists_
 
 - **組合使用多個參數**（支援所有單一測試的參數）：
 ```bash
-node batch-test.js --debug --adblock-url https://filter.futa.gg/hosts_abp.txt --adblock false --cache false --headless false --limit 10 --delay 2000 top-traffic-list-taiwan/merged_lists_tw.json
+node batch-test.js --debug --adblock-url https://filter.futa.gg/hosts_abp.txt --adblock false --cache false --limit 10 --delay 2000 top-traffic-list-taiwan/merged_lists_tw.json
 ```
 
 **批次測試支援的參數**（與單一測試相同）：
 - `--adblock true/false`：是否使用 adblock 清單（預設：true）
 - `--cache true/false`：是否使用快取（預設：true）
-- `--headless true/false`：是否使用 headless 模式（預設：true）
+- `--headless true/false`：是否使用 headless 模式（預設：非 headless；`true` 較快，適合 CI／大批次）
 - `--adblock-url URL`：自訂 adblock 清單 URL
 - `--dns IP`：自訂 DNS 伺服器
 - `--ipinfo-token TOKEN`：IPinfo API token
@@ -310,7 +326,7 @@ npm run check --save https://www.example.com
 - `--debug`：顯示詳細的檢測過程資訊
 - `--adblock false`：不使用 adblock 清單過濾
 - `--timeout N`：設定頁面載入 timeout（秒，預設 120）
-- `--headless false`：改用有頭模式（看得到瀏覽器）
+- `--headless true`：改用 headless 模式（無圖形介面；通常較快）
 
 > 若你是一次新增多個網站，比較建議使用下方的 `batch-test.js` 批次腳本，會自動為每個網站呼叫 `checkWebsiteResilience(... --save)` 並在最後幫你跑統計。
 

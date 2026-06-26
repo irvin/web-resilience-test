@@ -203,18 +203,34 @@ node no-global-connection-check.js --cache false https://example.com
 
 - **Headless mode**:
 ```bash
-# Headless (default, no browser window)
-node no-global-connection-check.js --headless true https://example.com
+# Default: non-headless (visible browser, closer to real users)
+node no-global-connection-check.js https://example.com
 
-# Non-headless (show browser window)
-node no-global-connection-check.js --headless false https://example.com
+# Headless (no browser window; use on CI or headless servers)
+node no-global-connection-check.js --headless true https://example.com
 ```
 
-**Note:** On failure the tool retries in this order:
-1. Normal (headless)
-2. Normal with `www` prefix
-3. Non-headless
-4. Non-headless with `www` prefix
+#### When to use `--headless true`
+
+**Advantage:** No visible browser window, lower resource use, and **page loads are often faster** per site—useful for large batch runs. If headless fails, the retry flow still falls back to non-headless automatically.
+
+**Trade-off:** Use headless when batch speed matters; keep the default non-headless if you want page loads to behave more like a typical user opening a browser.
+
+#### Why non-headless is the default
+
+This tool uses CDN response headers (e.g. Azure `x-azure-ref`, Microsoft `x-msedge-ref`) to infer Taiwan PoP. Playwright headless and headed modes differ from a typical desktop browser in User-Agent, `Sec-CH-UA`, TLS fingerprints, and related signals; **we have not systematically verified** whether those differences change CDN routing or PoP headers. During development we observed that PoP-related headers for the same site can vary across clients or repeated connections.
+
+The default is **non-headless** as a design choice to stay closer to how users normally open a browser. For faster large batch runs, pass `--headless true` (failures still fall back to non-headless via the retry flow).
+
+**Note:** On failure the tool retries as follows (default non-headless):
+1. Normal URL (non-headless)
+2. `www` prefix (non-headless)
+
+With `--headless true`, retries are:
+1. Normal URL (headless)
+2. Normal URL (non-headless)
+3. `www` prefix (headless)
+4. `www` prefix (non-headless)
 
 ### Batch testing
 
@@ -246,13 +262,13 @@ node batch-test.js --delay 3000 --limit 10 top-traffic-list-taiwan/merged_lists_
 
 - **Combine options** (supports all single-site flags):
 ```bash
-node batch-test.js --debug --adblock-url https://filter.futa.gg/hosts_abp.txt --adblock false --cache false --headless false --limit 10 --delay 2000 top-traffic-list-taiwan/merged_lists_tw.json
+node batch-test.js --debug --adblock-url https://filter.futa.gg/hosts_abp.txt --adblock false --cache false --limit 10 --delay 2000 top-traffic-list-taiwan/merged_lists_tw.json
 ```
 
 **Batch-supported flags** (same as single-site):
 - `--adblock true/false`: use adblock lists (default: true)
 - `--cache true/false`: use cache (default: true)
-- `--headless true/false`: headless mode (default: true)
+- `--headless true/false`: headless mode (default: non-headless; `true` is often faster, for CI/large batches)
 - `--adblock-url URL`: custom adblock list URL
 - `--dns IP`: custom DNS
 - `--ipinfo-token TOKEN`: IPinfo API token
@@ -308,7 +324,7 @@ npm run check --save https://www.example.com
 - `--debug`: verbose process output
 - `--adblock false`: skip adblock filtering
 - `--timeout N`: page load timeout in seconds (default 120)
-- `--headless false`: headed browser
+- `--headless true`: headless mode (headless servers; often faster)
 
 > For many sites at once, prefer `batch-test.js`; it calls `checkWebsiteResilience(... --save)` per site and runs statistics at the end.
 

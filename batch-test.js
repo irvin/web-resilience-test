@@ -394,7 +394,7 @@ if (require.main === module) {
         }
     }
 
-    // 解析 headless 選項：--headless true/false（預設為 true）
+    // 解析 headless 選項：--headless true/false（預設為非 headless）
     const headlessIndex = args.indexOf('--headless');
     if (headlessIndex !== -1 && args[headlessIndex + 1]) {
         const headlessValue = args[headlessIndex + 1].toLowerCase();
@@ -403,9 +403,6 @@ if (require.main === module) {
         } else if (headlessValue === 'true' || headlessValue === '1') {
             headless = true;
         }
-    } else {
-        // 預設為 true（headless 模式）
-        headless = true;
     }
 
     // 解析 --debug
@@ -483,7 +480,7 @@ if (require.main === module) {
         console.log('  --adblock false        不使用 adblock 清單（預設為使用）');
         console.log('  --adblock-url URL      使用自訂 adblock 清單 URL（可用逗號分隔多個）');
         console.log('  --cache false          不使用快取，強制重新下載 adblock 清單與 ipinfo 資料（預設 true）');
-        console.log('  --headless false       取消 headless 模式，顯示瀏覽器視窗（預設為 headless 模式 true）');
+        console.log('  --headless true        使用 headless 模式（預設為非 headless，顯示瀏覽器視窗）');
         console.log('  --debug                開啟 debug 模式，顯示詳細資訊');
         console.log('  --timeout N            設定頁面載入 timeout（秒，預設 120）');
         console.log('  --help, -h             顯示此說明');

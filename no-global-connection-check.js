@@ -671,8 +671,8 @@ async function assertPlaywrightReady() {
 async function collectHARAndCanonical(url, options = {}) {
     const timeout = options.timeout || 120000; // 預設 120 秒
     const debug = options.debug || false;
-    // 如果明確指定 headless，使用指定值；否則預設為 true（headless 模式）
-    const headless = options.headless !== undefined ? options.headless : true;
+    // 僅在明確指定 --headless true 時使用 headless；預設為非 headless
+    const headless = options.headless === true;
 
     const browser = await chromium.launch(buildChromiumLaunchOptions({
         headless,
@@ -1605,81 +1605,93 @@ async function checkWebsiteResilience(url, options = {}) {
             // URL 解析失敗，不重試
         }
 
-        // 預設重試流程：1. headless non-www -> 2. headless www -> 3. non-headless non-www -> 4. non-headless www
-        // 如果其中一個成功即停止，如失敗則進入下一個
-        let lastError = null;
-        // 1. 嘗試 headless non-www
-        try {
-            harResult = await collectHARAndCanonical(url, harCollectOptions(true));
-        } catch (error) {
-            lastError = error;
-
-            // 2. 如果失敗，嘗試 headless www
-            if (shouldRetryWithWww && !harResult) {
-                try {
-                    const urlObj = new URL(url);
-                    urlObj.hostname = 'www.' + urlObj.hostname;
-                    const wwwUrl = urlObj.toString();
-
-                    console.log(`發生錯誤，嘗試使用 www. 版本（headless 模式）: ${wwwUrl}`);
-                    retriedWithWww = true;
-
-                    harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(true));
-                    // 如果成功，更新 url 和 inputURL
-                    if (harResult) {
-                        url = wwwUrl;
-                        inputURL = wwwUrl;
-                    }
-                } catch (wwwError) {
-                    lastError = wwwError;
-                }
+        // 重試流程：預設非 headless；--headless true 時依序嘗試 headless / 非 headless × 原 URL / www
+        if (options.headless === true) {
+            let lastError = null;
+            let wwwUrl = null;
+            if (shouldRetryWithWww) {
+                const urlObj = new URL(originalUrl);
+                urlObj.hostname = 'www.' + urlObj.hostname;
+                wwwUrl = urlObj.toString();
             }
 
-            // 3. 如果還是失敗，嘗試 non-headless non-www
+            // 1. headless 原 URL
+            try {
+                harResult = await collectHARAndCanonical(originalUrl, harCollectOptions(true));
+                url = originalUrl;
+                inputURL = originalUrl;
+            } catch (error) {
+                lastError = error;
+            }
+
+            // 2. 非 headless 原 URL
             if (!harResult) {
                 try {
                     console.log(`發生錯誤，嘗試使用非 headless 模式重試: ${originalUrl}`);
                     retriedWithHeadful = true;
-
                     harResult = await collectHARAndCanonical(originalUrl, harCollectOptions(false));
-                    // 如果成功，更新 url 和 inputURL
-                    if (harResult) {
-                        url = originalUrl;
-                        inputURL = originalUrl;
-                    }
-                } catch (headfulError) {
-                    lastError = headfulError;
-
-                    // 4. 如果還是失敗，嘗試 non-headless www
-                    if (shouldRetryWithWww && !harResult) {
-                        try {
-                            const urlObj = new URL(originalUrl);
-                            urlObj.hostname = 'www.' + urlObj.hostname;
-                            const wwwUrl = urlObj.toString();
-
-                            console.log(`發生錯誤，嘗試使用 www. 版本（非 headless 模式）: ${wwwUrl}`);
-                            retriedWithWww = true;
-
-                            harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(false));
-                            // 如果成功，更新 url 和 inputURL
-                            if (harResult) {
-                                url = wwwUrl;
-                                inputURL = wwwUrl;
-                            }
-                        } catch (finalError) {
-                            // 所有重試都失敗，拋出最後的錯誤
-                            throw finalError;
-                        }
-                    } else if (!harResult) {
-                        // 不需要嘗試 www 版本，直接拋出錯誤
-                        throw headfulError;
-                    }
+                    url = originalUrl;
+                    inputURL = originalUrl;
+                } catch (error) {
+                    lastError = error;
                 }
             }
 
-            // 如果所有重試都失敗，拋出最後的錯誤
+            // 3. headless www
+            if (!harResult && wwwUrl) {
+                try {
+                    console.log(`發生錯誤，嘗試使用 www. 版本（headless 模式）: ${wwwUrl}`);
+                    retriedWithWww = true;
+                    harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(true));
+                    url = wwwUrl;
+                    inputURL = wwwUrl;
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+
+            // 4. 非 headless www
+            if (!harResult && wwwUrl) {
+                try {
+                    console.log(`發生錯誤，嘗試使用 www. 版本（非 headless 模式）: ${wwwUrl}`);
+                    retriedWithWww = true;
+                    retriedWithHeadful = true;
+                    harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(false));
+                    url = wwwUrl;
+                    inputURL = wwwUrl;
+                } catch (error) {
+                    lastError = error;
+                    throw error;
+                }
+            }
+
             if (!harResult) {
                 throw lastError;
+            }
+        } else {
+            try {
+                harResult = await collectHARAndCanonical(url, harCollectOptions(false));
+            } catch (error) {
+                if (shouldRetryWithWww && !harResult) {
+                    try {
+                        const urlObj = new URL(url);
+                        urlObj.hostname = 'www.' + urlObj.hostname;
+                        const wwwUrl = urlObj.toString();
+
+                        console.log(`發生錯誤，嘗試使用 www. 版本（非 headless 模式）: ${wwwUrl}`);
+                        retriedWithWww = true;
+
+                        harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(false));
+                        if (harResult) {
+                            url = wwwUrl;
+                            inputURL = wwwUrl;
+                        }
+                    } catch (finalError) {
+                        throw finalError;
+                    }
+                } else if (!harResult) {
+                    throw error;
+                }
             }
         }
 
@@ -2146,7 +2158,7 @@ if (require.main === module) {
     }
     // 如果未指定，保持預設值 true
 
-    // 解析 headless 選項：--headless true/false（預設為 true）
+    // 解析 headless 選項：--headless true/false（預設為非 headless）
     const headlessIndex = args.indexOf('--headless');
     if (headlessIndex !== -1 && args[headlessIndex + 1]) {
         const headlessValue = args[headlessIndex + 1].toLowerCase();
@@ -2155,9 +2167,6 @@ if (require.main === module) {
         } else if (headlessValue === 'true' || headlessValue === '1') {
             headless = true;
         }
-    } else {
-        // 預設為 true（headless 模式）
-        headless = true;
     }
 
     if (!url || url.startsWith('--')) {
@@ -2170,7 +2179,7 @@ if (require.main === module) {
         console.error('  npm run check [--debug] https://example.com  # debug 模式，顯示詳細資訊');
         console.error('  npm run check [--cache false] https://example.com  # 不使用快取，強制重新下載 adblock 清單與 ipinfo 資料（預設 true）');
         console.error('  npm run check [--timeout N] https://example.com  # 設定頁面載入 timeout（秒，預設 120）');
-        console.error('  npm run check [--headless false] https://example.com  # 取消 headless 模式，顯示瀏覽器視窗（預設為 headless 模式）');
+        console.error('  npm run check [--headless true] https://example.com  # 使用 headless 模式（預設為非 headless）');
     process.exit(1);
     }
 
