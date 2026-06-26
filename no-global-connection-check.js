@@ -56,8 +56,14 @@ const TARGET_CLOUD_ASNS = [
     'AS8075'    // Microsoft Azure
 ];
 
-// 需要檢查的 response headers
-const CLOUD_HEADERS = ['cf-ray', 'x-amz-cf-pop', 'x-served-by'];
+// 需要檢查的 response headers（值含 TPE 即視為台灣節點）
+const CLOUD_HEADERS = [
+    'cf-ray',           // Cloudflare
+    'x-amz-cf-pop',     // AWS CloudFront
+    'x-served-by',      // Fastly
+    'x-azure-ref',      // Azure Front Door / Azure CDN
+    'x-msedge-ref'      // Microsoft Edge CDN（如 Bing；Ref B 含 TPE）
+];
 
 // RTT 測試閾值（毫秒）
 const RTT_THRESHOLD = 15;

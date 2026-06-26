@@ -4,7 +4,7 @@ For Traditional Chinese documentation, see [`cloud_strategy.zh-TW.md`](cloud_str
 
 1. If ipinfo returns a country that is not `.tw`, proceed with the following additional checks.
 
-2. For cloud traffic from the following ASNs (Google / Cloudflare / Amazon / Fastly / Akamai), proceed to the next step for further determination:
+2. For cloud traffic from the following ASNs (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft), proceed to the next step for further determination:
 
 AS15169
 AS396982
@@ -16,11 +16,14 @@ AS16625
 AS20940
 AS63949
 AS32787
+AS8075
 
 3. Check whether the following headers exist and contain `TPE`:
 cf-ray
 x-amz-cf-pop
 x-served-by
+x-azure-ref
+x-msedge-ref
 
 If they contain `TPE`, classify as `tw`.
 
@@ -31,7 +34,9 @@ Log after ipinfo:
   country: "tw",
   cf-ray: <cf-ray>,
   x-amz-cf-pop: <x-amz-cf-pop>,
-  x-served-by: <x-served-by>
+  x-served-by: <x-served-by>,
+  x-azure-ref: <x-azure-ref>,
+  x-msedge-ref: <x-msedge-ref>
 }
 ```
 

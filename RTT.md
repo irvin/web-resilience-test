@@ -4,7 +4,7 @@ For Traditional Chinese documentation, see [`RTT.zh-TW.md`](RTT.zh-TW.md).
 
 ## Overview
 
-This project uses **RTT (Round Trip Time)** as one of the auxiliary methods for determining whether a network resource is located within Taiwan. When location cannot be determined via HTTP headers (such as `cf-ray`, `x-amz-cf-pop`, etc.), an RTT test is performed to infer the resource's geographic location.
+This project uses **RTT (Round Trip Time)** as one of the auxiliary methods for determining whether a network resource is located within Taiwan. When location cannot be determined via HTTP headers (such as `cf-ray`, `x-amz-cf-pop`, `x-azure-ref`, `x-msedge-ref`, etc.), an RTT test is performed to infer the resource's geographic location.
 
 ## RTT Threshold Configuration
 
@@ -22,7 +22,7 @@ const RTT_THRESHOLD = 15;
 
 The implementation logic in `no-global-connection-check.js` is as follows:
 
-1. **Check HTTP headers first**: If a header indicates a Taiwan node (e.g., `cf-ray` contains `TPE`), mark directly as `country: 'tw'`, `detection_method: 'header'`.
+1. **Check HTTP headers first**: If a header indicates a Taiwan node (e.g. `cf-ray` contains `TPE`, `x-azure-ref` contains `TPE`, or `x-msedge-ref` has `Ref B: TPE...`), mark directly as `country: 'tw'`, `detection_method: 'header'`.
 
 2. **If no header marker is found, run an RTT test**:
    - **RTT < 15ms**: Classified as within Taiwan

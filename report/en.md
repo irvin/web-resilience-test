@@ -315,7 +315,7 @@ Results are aggregated into summary tables.
      - For previous hostname list, we call IPinfo API to get geographic and logical location
      - If result shows `country=TW`, log as domestic connection
      - Otherwise, we check ASN to find if the request is from multinational public cloud (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft), then do further checks:
-       - Headers: look for known location markers in response headers like `cf-ray`, `x-amz-cf-pop`, `x-served-by`.
+       - Headers: look for known location markers in response headers like `cf-ray`, `x-amz-cf-pop`, `x-served-by`, `x-azure-ref`, and `x-msedge-ref` (values containing `TPE` indicate a Taiwan PoP).
        - RTT: if location is unclear from headers, ping the resource 5× and take the minimum RTT; if `RTT < 15ms`, categorize it as a domestic resource.
 
      Note: we also built [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) from full request data for ASN mapping, open-sourced for other research and projects.

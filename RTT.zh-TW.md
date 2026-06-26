@@ -4,7 +4,7 @@
 
 ## 概述
 
-本專案使用 **RTT (Round Trip Time，往返延遲時間)** 作為判斷網路資源是否位於台灣境內的輔助方法之一。當無法透過 HTTP headers（如 `cf-ray`、`x-amz-cf-pop` 等）判斷時，會進行 RTT 測試來推測資源的地理位置。
+本專案使用 **RTT (Round Trip Time，往返延遲時間)** 作為判斷網路資源是否位於台灣境內的輔助方法之一。當無法透過 HTTP headers（如 `cf-ray`、`x-amz-cf-pop`、`x-azure-ref`、`x-msedge-ref` 等）判斷時，會進行 RTT 測試來推測資源的地理位置。
 
 ## RTT 門檻設定
 
@@ -22,7 +22,7 @@ const RTT_THRESHOLD = 15;
 
 在 `no-global-connection-check.js` 中的實作邏輯如下：
 
-1. **優先檢查 HTTP headers**：如果從 headers 中發現包含台灣節點的標記（如 `cf-ray` 包含 `TPE`），則直接標記為 `country: 'tw'`，`detection_method: 'header'`。
+1. **優先檢查 HTTP headers**：如果從 headers 中發現包含台灣節點的標記（如 `cf-ray` 含 `TPE`、`x-azure-ref` 含 `TPE`、`x-msedge-ref` 的 `Ref B: TPE...`），則直接標記為 `country: 'tw'`，`detection_method: 'header'`。
 
 2. **如果沒有找到 header 標記，進行 RTT 測試**：
    - **RTT < 15ms**：判斷為台灣境內

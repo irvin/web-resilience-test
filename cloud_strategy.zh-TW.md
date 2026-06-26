@@ -4,7 +4,7 @@
 
 1. 如果 ipinfo 回傳的 country 不是 .tw，則進行以下進一步判斷
 
-2. 針對來自以下 ASN 的雲端（Google / Cloudflare / Amazon / Fastly / Akamai），需進入下一步進一步判斷
+2. 針對來自以下 ASN 的雲端（Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft），需進入下一步進一步判斷
 
 AS15169
 AS396982
@@ -16,11 +16,14 @@ AS16625
 AS20940
 AS63949
 AS32787
+AS8075
 
 3. 檢查以下 header 是否存在，內容包含 TPE
 cf-ray
 x-amz-cf-pop
 x-served-by
+x-azure-ref
+x-msedge-ref
 
 如果包含 TPE，則判斷為 tw
 
@@ -28,7 +31,9 @@ log 在 ipinfo 後方加入 "cloud_provider": {
   country: "tw",
   cf-ray: <cf-ray>,
   x-amz-cf-pop: <x-amz-cf-pop>,
-  x-served-by: <x-served-by>
+  x-served-by: <x-served-by>,
+  x-azure-ref: <x-azure-ref>,
+  x-msedge-ref: <x-msedge-ref>
 }
 
 4. 如沒有找到以上 header，則進行 RTR 延遲測試
