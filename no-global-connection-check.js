@@ -13,6 +13,7 @@ const axios = require('axios');
 const dns = require('dns').promises;
 const { Resolver } = require('dns').promises;
 const fs = require('fs').promises;
+const { existsSync } = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { exec } = require('child_process');
@@ -599,6 +600,73 @@ async function initializeIgnorableDomains(options = {}) {
     }
 }
 
+function formatTestErrorReason(error) {
+    const message = error?.message || '';
+
+    const httpStatusMatch = message.match(/^HTTP (\d{3})/);
+    if (httpStatusMatch && /^HTTP 4\d{2}/.test(message)) {
+        return `HTTP ${httpStatusMatch[1]} Error`;
+    }
+
+    const netErrorMatch = message.match(/net::(ERR_[A-Z_]+)/);
+    if (netErrorMatch) {
+        return netErrorMatch[1];
+    }
+
+    if (error?.name === 'TimeoutError') {
+        return 'Timeout';
+    }
+
+    if (message.includes("Executable doesn't exist")) {
+        return `Playwright: Chromium not installed (${chromium.executablePath()})`;
+    }
+
+    if (message.includes('browserType.launch')) {
+        const firstLine = message.split('\n')[0].trim();
+        const detail = firstLine.length > 120 ? `${firstLine.slice(0, 117)}...` : firstLine;
+        return `Playwright launch failed: ${detail}`;
+    }
+
+    if (message) {
+        const firstLine = message.split('\n')[0].trim();
+        return firstLine.length > 160 ? `${firstLine.slice(0, 157)}...` : firstLine;
+    }
+
+    return `Error: ${error?.name || 'Unknown'}`;
+}
+
+/**
+ * 啟動前確認 Playwright Chromium 可啟動，避免 batch 跑大量無效錯誤
+ */
+async function assertPlaywrightReady() {
+    const executablePath = chromium.executablePath();
+
+    if (!existsSync(executablePath)) {
+        console.error('Error: Playwright Chromium not found; browser-based checks cannot run.');
+        console.error(`Expected path: ${executablePath}`);
+        if (process.env.PLAYWRIGHT_BROWSERS_PATH) {
+            console.error(`PLAYWRIGHT_BROWSERS_PATH=${process.env.PLAYWRIGHT_BROWSERS_PATH}`);
+        } else {
+            console.error('Hint: set PLAYWRIGHT_BROWSERS_PATH to an existing browser cache, for example:');
+            console.error('  export PLAYWRIGHT_BROWSERS_PATH="$HOME/Library/Caches/ms-playwright"');
+        }
+        console.error('Or run: npx playwright install chromium');
+        throw new Error(`Playwright: Chromium not installed (${executablePath})`);
+    }
+
+    let browser;
+    try {
+        browser = await chromium.launch({ headless: true });
+    } catch (error) {
+        console.error('Error: Failed to launch Playwright Chromium.');
+        console.error(formatTestErrorReason(error));
+        throw error;
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
+    }
+}
 
 async function collectHARAndCanonical(url, options = {}) {
     const timeout = options.timeout || 120000; // 預設 120 秒
@@ -1910,12 +1978,7 @@ async function checkWebsiteResilience(url, options = {}) {
             errorResult = error.result;
         } else {
             // 為其他錯誤建立結果物件
-            const isTimeout = error.name === 'TimeoutError';
-            const isHttp4xx = error.message && /^HTTP 4\d{2}/.test(error.message);
             const httpStatusMatch = error.message?.match(/^HTTP (\d{3})/);
-
-            const netErrorMatch = error.message?.match(/net::(ERR_[A-Z_]+)/);
-            const netErrorCode = netErrorMatch ? netErrorMatch[1] : null;
 
             // 如果有從錯誤訊息中提取的狀態碼，優先使用；否則使用已取得的 httpStatus
             const errorHttpStatus = httpStatusMatch ? parseInt(httpStatusMatch[1], 10) : httpStatus;
@@ -1952,13 +2015,7 @@ async function checkWebsiteResilience(url, options = {}) {
                 requestCount: requests ? requests.length : 0,
                 uniqueDomains: 0,
                 testError: true,
-                errorReason: isHttp4xx
-                    ? `HTTP ${httpStatusMatch ? httpStatusMatch[1] : '4xx'} Error`
-                    : netErrorCode
-                        ? netErrorCode
-                        : isTimeout
-                            ? 'Timeout'
-                            : `Error: ${error.name || 'Unknown'}`,
+                errorReason: formatTestErrorReason(error),
                 errorDetails: {
                     message: error.message,
                     statusCode: httpStatusMatch ? httpStatusMatch[1] : null
@@ -2114,17 +2171,18 @@ if (require.main === module) {
     }
 
     // 執行檢測
-    checkWebsiteResilience(url, {
-        customDNS,
-        token,
-        save,
-        useAdblock,
-        adblockUrls,
-        debug,
-        useCache,
-        timeout,
-        headless
-    })
+    assertPlaywrightReady()
+        .then(() => checkWebsiteResilience(url, {
+            customDNS,
+            token,
+            save,
+            useAdblock,
+            adblockUrls,
+            debug,
+            useCache,
+            timeout,
+            headless
+        }))
         .then(() => {
             console.log('檢測完成');
         })
@@ -2139,6 +2197,8 @@ if (require.main === module) {
 
 module.exports = {
     checkWebsiteResilience,
+    assertPlaywrightReady,
+    formatTestErrorReason,
     formatLACeSForLog,
     buildLacesCloudProvider,
     appendLacesToCloudProvider

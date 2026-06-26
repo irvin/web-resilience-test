@@ -9,7 +9,7 @@
 require('dotenv').config();
 const fs = require('fs').promises;
 const path = require('path');
-const { checkWebsiteResilience } = require('./no-global-connection-check');
+const { checkWebsiteResilience, assertPlaywrightReady } = require('./no-global-connection-check');
 const { main: generateStatistic } = require('./generate_statistic');
 
 // 預設參數
@@ -505,29 +505,31 @@ if (require.main === module) {
         process.exit(1);
     }
 
-    // 執行批量測試
-    batchTest({
-        limit,
-        startFrom,
-        delayMs,
-        concurrency,
-        customDNS,
-        token,
-        useAdblock,
-        adblockUrls,
-        useCache,
-        headless,
-        testListPath,
-        debug,
-        timeout,
-        argument: formatCommandLineDisplay(process.argv)
-    }).catch(error => {
-        console.error('批量測試失敗:', error);
-        if (debug) {
-            console.error('錯誤堆疊:', error.stack);
-        }
-        process.exit(1);
-    });
+    // 執行批量測試（啟動前先確認 Playwright Chromium 可用）
+    assertPlaywrightReady()
+        .then(() => batchTest({
+            limit,
+            startFrom,
+            delayMs,
+            concurrency,
+            customDNS,
+            token,
+            useAdblock,
+            adblockUrls,
+            useCache,
+            headless,
+            testListPath,
+            debug,
+            timeout,
+            argument: formatCommandLineDisplay(process.argv)
+        }))
+        .catch(error => {
+            console.error('Batch test failed:', error.message || error);
+            if (debug) {
+                console.error('錯誤堆疊:', error.stack);
+            }
+            process.exit(1);
+        });
 }
 
 module.exports = { batchTest };
