@@ -635,6 +635,34 @@ function formatTestErrorReason(error) {
     return `Error: ${error?.name || 'Unknown'}`;
 }
 
+/** preflight 時從 headed Chromium 抓取的預設 User-Agent */
+let playwrightHeadedUserAgent = null;
+
+/**
+ * 從已安裝的 Playwright Chromium（headed）讀取預設 User-Agent
+ */
+async function capturePlaywrightHeadedUserAgent() {
+    if (playwrightHeadedUserAgent !== null) {
+        return playwrightHeadedUserAgent;
+    }
+
+    let browser;
+    try {
+        browser = await chromium.launch({ headless: false });
+        const page = await browser.newPage();
+        playwrightHeadedUserAgent = await page.evaluate(() => navigator.userAgent);
+        return playwrightHeadedUserAgent;
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
+    }
+}
+
+async function resolvePlaywrightUserAgent() {
+    return capturePlaywrightHeadedUserAgent();
+}
+
 /**
  * 啟動前確認 Playwright Chromium 可啟動，避免 batch 跑大量無效錯誤
  */
@@ -654,16 +682,24 @@ async function assertPlaywrightReady() {
         throw new Error(`Playwright: Chromium not installed (${executablePath})`);
     }
 
-    let browser;
     try {
-        browser = await chromium.launch(buildChromiumLaunchOptions({ headless: true }));
+        await capturePlaywrightHeadedUserAgent();
     } catch (error) {
-        console.error('Error: Failed to launch Playwright Chromium.');
+        console.error('Error: Failed to launch Playwright Chromium (headed).');
+        console.error(formatTestErrorReason(error));
+        throw error;
+    }
+
+    let headlessBrowser;
+    try {
+        headlessBrowser = await chromium.launch({ headless: true });
+    } catch (error) {
+        console.error('Error: Failed to launch Playwright Chromium (headless).');
         console.error(formatTestErrorReason(error));
         throw error;
     } finally {
-        if (browser) {
-            await browser.close();
+        if (headlessBrowser) {
+            await headlessBrowser.close();
         }
     }
 }
@@ -679,10 +715,12 @@ async function collectHARAndCanonical(url, options = {}) {
         customDNS: options.customDNS || null
     }));
 
+    const userAgent = await resolvePlaywrightUserAgent();
+
     const context = await browser.newContext({
         bypassCSP: true,
         ignoreHTTPSErrors: true,
-        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        userAgent
     });
 
     const page = await context.newPage();
