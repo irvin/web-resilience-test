@@ -35,7 +35,10 @@ The implementation logic in `no-global-connection-check.js` is as follows:
      - Set `cloud_provider.detection_method = 'rtt'`
      - Record `cloud_provider.rtt` value (for later analysis)
    
-3. **If the RTT test fails**: Do not record `cloud_provider` information.
+3. **If the RTT test fails**: Record failure details in `cloud_provider` (does not affect domestic/foreign classification):
+   - Set `cloud_provider.detection_method = 'rtt'`
+   - Set `cloud_provider.rtt = null`
+   - Set `cloud_provider.rtt_error` to a brief reason: `timeout`, `no_response`, `parse_error`, or `command_failed`
 
 ## Rationale for Using 15ms as the Threshold
 
@@ -160,11 +163,12 @@ For the hard-to-classify 10~30ms range, use confidence tiers:
      - `ipinfo_country`: ipinfo.country
      - `cloud_country`: cloud_provider.country (if present, usually `tw`)
      - `detection_method`: Detection method (`rtt` or `header`)
-     - `rtt`: Actual RTT value (milliseconds)
+     - `rtt`: Actual RTT value (milliseconds), or `null` on failure
+     - `rtt_error`: Failure reason when RTT fails (`timeout`, `no_response`, `parse_error`, `command_failed`)
 
 2. **`test-results/*.json`**
    - Per-site test result JSON files
-   - Contains `domainDetails` array; each element may include `cloud_provider.rtt` and `cloud_provider.detection_method`
+   - Contains `domainDetails` array; each element may include `cloud_provider.rtt`, `cloud_provider.detection_method`, and `cloud_provider.rtt_error` (on RTT failure)
 
 ### Related links
 

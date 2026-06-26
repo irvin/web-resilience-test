@@ -840,7 +840,7 @@ function checkCloudProviderHeaders(headers) {
 /**
  * 對指定 IP 進行 RTT 測試
  * @param {string} ip - IP 地址
- * @returns {Promise<number|null>} 最小延遲時間（毫秒），如果測試失敗則返回 null
+ * @returns {Promise<{ rtt: number|null, failed: boolean, reason?: string }>}
  */
 async function performRTTTest(ip) {
     const isWindows = process.platform === 'win32';
@@ -865,14 +865,19 @@ async function performRTTTest(ip) {
                 return timeMatch ? parseFloat(timeMatch[1]) : Infinity;
             });
             const minTime = Math.min(...times.filter(t => t !== Infinity));
-            return minTime !== Infinity ? minTime : null;
+            if (minTime !== Infinity) {
+                return { rtt: minTime, failed: false };
+            }
+            return { rtt: null, failed: true, reason: 'parse_error' };
         }
-    } catch (error) {
-        // RTT 測試失敗，返回 null
-        return null;
-    }
 
-    return null;
+        return { rtt: null, failed: true, reason: 'no_response' };
+    } catch (error) {
+        if (error.killed || error.code === 'ETIMEDOUT' || /timed?\s*out/i.test(error.message || '')) {
+            return { rtt: null, failed: true, reason: 'timeout' };
+        }
+        return { rtt: null, failed: true, reason: 'command_failed' };
+    }
 }
 
 async function checkIPLocation(domain, customDNS = null, options = {}) {
@@ -960,15 +965,15 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
     }
 
     // 如果沒有找到包含 TPE 的 header，進行 RTT 測試
-    const rtt = await performRTTTest(apiResult.ip);
-    if (rtt !== null) {
-        if (rtt < RTT_THRESHOLD) {
+    const rttResult = await performRTTTest(apiResult.ip);
+    if (!rttResult.failed && rttResult.rtt !== null) {
+        if (rttResult.rtt < RTT_THRESHOLD) {
             // RTT < 15ms，判斷為台灣
             return {
                 ...apiResult,
                 cloud_provider: {
                     country: 'tw',
-                    rtt: rtt,
+                    rtt: rttResult.rtt,
                     detection_method: 'rtt'
                 }
             };
@@ -977,14 +982,24 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
             return {
                 ...apiResult,
                 cloud_provider: {
-                    rtt: rtt,
+                    rtt: rttResult.rtt,
                     detection_method: 'rtt'
                 }
             };
         }
     }
 
-    // 如果 RTT 測試失敗或沒有進行測試，不記錄 cloud_provider
+    if (rttResult.failed) {
+        return {
+            ...apiResult,
+            cloud_provider: {
+                rtt: null,
+                detection_method: 'rtt',
+                rtt_error: rttResult.reason
+            }
+        };
+    }
+
     return {
         ...apiResult,
         cloud_provider: null

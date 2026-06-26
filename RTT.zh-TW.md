@@ -35,7 +35,10 @@ const RTT_THRESHOLD = 15;
      - 設定 `cloud_provider.detection_method = 'rtt'`
      - 記錄 `cloud_provider.rtt` 數值（供後續分析使用）
 
-3. **如果 RTT 測試失敗**：不記錄 `cloud_provider` 資訊。
+3. **如果 RTT 測試失敗**：在 `cloud_provider` 中記錄失敗資訊（不影響境內/境外分類）：
+   - 設定 `cloud_provider.detection_method = 'rtt'`
+   - 設定 `cloud_provider.rtt = null`
+   - 設定 `cloud_provider.rtt_error` 為簡短原因：`timeout`、`no_response`、`parse_error` 或 `command_failed`
 
 ## 使用 15ms 作為門檻的選擇依據
 
@@ -153,11 +156,12 @@ p95	142.74965
      - `ipinfo_country`：ipinfo.country
      - `cloud_country`：cloud_provider.country（若有，通常是 `tw`）
      - `detection_method`：檢測方法（`rtt` 或 `header`）
-     - `rtt`：實際 RTT 數值（毫秒）
+     - `rtt`：實際 RTT 數值（毫秒），失敗時為 `null`
+     - `rtt_error`：RTT 失敗時的失敗原因（`timeout`、`no_response`、`parse_error`、`command_failed`）
 
 2. **`test-results/*.json`**
    - 每個網站的測試結果 JSON 檔案
-   - 包含 `domainDetails` 陣列，每個元素可能包含 `cloud_provider.rtt` 和 `cloud_provider.detection_method`
+   - 包含 `domainDetails` 陣列，每個元素可能包含 `cloud_provider.rtt`、`cloud_provider.detection_method`，以及 RTT 失敗時的 `cloud_provider.rtt_error`
 
 ### 相關連結
 
