@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * 批量測試腳本
- * 讀取指定的網站清單 JSON 檔案
- * 並針對前 N 個網站進行韌性檢測
+ * Batch test script
+ * Reads a website list JSON file
+ * and runs resilience checks on the first N sites
  */
 
 require('dotenv').config();
@@ -12,9 +12,9 @@ const path = require('path');
 const { checkWebsiteResilience, assertPlaywrightReady } = require('./no-global-connection-check');
 const { main: generateStatistic } = require('./generate_statistic');
 
-// 預設參數
-const DEFAULT_DELAY = 1000; // 每個請求之間的延遲（毫秒）
-const DEFAULT_CONCURRENCY = 4; // 預設並行度
+// Default parameters
+const DEFAULT_DELAY = 1000; // Delay between requests (milliseconds)
+const DEFAULT_CONCURRENCY = 4; // Default concurrency
 
 function formatCommandLineDisplay(argv) {
     if (!Array.isArray(argv) || argv.length === 0) {
@@ -34,7 +34,7 @@ function formatCommandLineDisplay(argv) {
 
     const displayArgs = [displayNode, scriptPath, ...argv.slice(2)].filter(Boolean);
 
-    // 格式化命令列參數
+    // Format command-line arguments
     return displayArgs.map((arg) => {
         if (/^[A-Za-z0-9_/.\-=:]+$/.test(arg)) {
             return arg;
@@ -44,10 +44,10 @@ function formatCommandLineDisplay(argv) {
 }
 
 /**
- * 讀取網站清單
- * 支援兩種格式：
- * 1. 普通網站清單：直接是陣列格式
- * 2. 錯誤 log 檔案：包含 errorSites 欄位的物件
+ * Load website list
+ * Supports two formats:
+ * 1. Plain website list: direct array format
+ * 2. Error log file: object with errorSites field
  */
 async function loadWebsiteList(testListPath) {
     const filePath = path.isAbsolute(testListPath)
@@ -56,30 +56,30 @@ async function loadWebsiteList(testListPath) {
     const data = await fs.readFile(filePath, 'utf-8');
     const parsed = JSON.parse(data);
 
-    // 檢查是否為錯誤 log 格式（包含 errorSites 欄位）
+    // Check for error log format (contains errorSites field)
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.errorSites) {
-        console.log(`偵測到錯誤 log 格式，將重新測試 ${parsed.errorSites.length} 個錯誤網站`);
+        console.log(`Detected error log format; will retest ${parsed.errorSites.length} failed sites`);
         return parsed.errorSites;
     }
 
-    // 普通清單格式（陣列）
+    // Plain list format (array)
     if (Array.isArray(parsed)) {
         return parsed;
     }
 
-    // 如果都不符合，拋出錯誤
-    throw new Error('無法識別的檔案格式：必須是網站清單陣列或包含 errorSites 的錯誤 log 物件');
+    // If neither format matches, throw
+    throw new Error('Unrecognized file format: must be a website list array or an error log object with errorSites');
 }
 
 /**
- * 延遲函數
+ * Delay helper
  */
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
- * 批量測試網站
+ * Batch test websites
  */
 async function batchTest(options = {}) {
     const {
@@ -101,32 +101,32 @@ async function batchTest(options = {}) {
     } = options;
 
     if (!testListPath) {
-        throw new Error('必須提供測試清單檔案路徑');
+        throw new Error('Test list file path is required');
     }
 
     console.log('='.repeat(60));
-    console.log('批量韌性檢測開始');
+    console.log('Batch resilience check started');
     console.log('='.repeat(60));
-    console.log(`測試清單: ${testListPath}`);
-    console.log(`測試數量: ${limit !== undefined ? limit : '全部'}`);
-    console.log(`並行度: ${concurrency}`);
-    console.log(`起始位置: ${startFrom}`);
-    console.log(`請求延遲: ${delayMs}ms`);
+    console.log(`Test list: ${testListPath}`);
+    console.log(`Test count: ${limit !== undefined ? limit : 'all'}`);
+    console.log(`Concurrency: ${concurrency}`);
+    console.log(`Start index: ${startFrom}`);
+    console.log(`Request delay: ${delayMs}ms`);
     console.log('='.repeat(60));
     console.log('');
 
-    // 讀取網站清單
-    console.log('正在讀取網站清單...');
+    // Load website list
+    console.log('Loading website list...');
     const websites = await loadWebsiteList(testListPath);
-    console.log(`共找到 ${websites.length} 個網站\n`);
+    console.log(`Found ${websites.length} websites\n`);
 
-    // 取得要測試的網站（從 startFrom 開始，如果 limit 有指定則取 limit 個，否則測試全部）
+    // Select sites to test (from startFrom; limit if set, otherwise all)
     const testTargets = limit !== undefined
         ? websites.slice(startFrom, startFrom + limit)
         : websites.slice(startFrom);
-    console.log(`將測試 ${testTargets.length} 個網站\n`);
+    console.log(`Will test ${testTargets.length} websites\n`);
 
-    // 統計資訊
+    // Statistics
     const stats = {
         total: testTargets.length,
         success: 0,
@@ -136,9 +136,9 @@ async function batchTest(options = {}) {
         results: []
     };
 
-    // 3. 以限制並行度的方式開始測試
+    // Run tests with limited concurrency
     const workerCount = Math.max(1, Math.min(concurrency, testTargets.length || 1));
-    console.log(`實際並行度: ${workerCount}`);
+    console.log(`Effective concurrency: ${workerCount}`);
 
     let currentIndex = 0;
 
@@ -152,13 +152,13 @@ async function batchTest(options = {}) {
             const progress = `[${globalIndex}/${startFrom + testTargets.length}]`;
 
             console.log('\n' + '-'.repeat(60));
-            console.log(`${progress} (Worker ${workerId}) 測試: ${website.website}`);
+            console.log(`${progress} (Worker ${workerId}) Testing: ${website.website}`);
             console.log(`URL: ${website.url}`);
-            console.log(`排名:`, website.rank);
+            console.log(`Rank:`, website.rank);
             console.log('-'.repeat(60));
 
             try {
-                // 執行檢測，直接使用 checkWebsiteResilience 的儲存功能
+                // Run check; uses checkWebsiteResilience save option directly
                 const result = await checkWebsiteResilience(website.url, {
                     customDNS,
                     token,
@@ -171,7 +171,7 @@ async function batchTest(options = {}) {
                     timeout
                 });
 
-                // 記錄統計
+                // Record stats
                 stats.success++;
                 const testResults = result.test_results || {
                     domestic: { cloud: 0, direct: 0 },
@@ -187,12 +187,12 @@ async function batchTest(options = {}) {
 
                 const domestic = testResults.domestic || { cloud: 0, direct: 0 };
                 const foreign = testResults.foreign || { cloud: 0, direct: 0 };
-                console.log(`✓ 測試完成 (Worker ${workerId}): 境內/雲端=${domestic.cloud}, 境內/直連=${domestic.direct}, 境外/雲端=${foreign.cloud}, 境外/直連=${foreign.direct}`);
+                console.log(`✓ Test complete (Worker ${workerId}): domestic/cloud=${domestic.cloud}, domestic/direct=${domestic.direct}, foreign/cloud=${foreign.cloud}, foreign/direct=${foreign.direct}`);
             } catch (error) {
-                // 只要有 errorReason，就視為「測試錯誤」，其餘視為一般失敗
+                // If errorReason is present, treat as test error; otherwise general failure
                 const errResult = error.result || error;
                 if (errResult?.errorReason) {
-                    console.log(`⚠ 測試錯誤 (Worker ${workerId}): ${errResult.errorReason}`);
+                    console.log(`⚠ Test error (Worker ${workerId}): ${errResult.errorReason}`);
                     stats.errorSites.push({
                         website: website.website,
                         url: website.url,
@@ -209,7 +209,7 @@ async function batchTest(options = {}) {
                         errorDetails: errResult.errorDetails
                     });
                 } else {
-                    console.error(`✗ 測試失敗 (Worker ${workerId}): ${error.message}`);
+                    console.error(`✗ Test failed (Worker ${workerId}): ${error.message}`);
                     stats.failed++;
                     stats.results.push({
                         website: website.website,
@@ -221,9 +221,9 @@ async function batchTest(options = {}) {
                 }
             }
 
-            // 在每個 worker 的任務之間加入延遲（如果需要）
+            // Delay between tasks per worker (if configured)
             if (delayMs > 0 && i < testTargets.length - 1) {
-                console.log(`Worker ${workerId} 等待 ${delayMs}ms 後繼續...`);
+                console.log(`Worker ${workerId} waiting ${delayMs}ms before next...`);
                 await delay(delayMs);
             }
         }
@@ -236,22 +236,22 @@ async function batchTest(options = {}) {
 
     await Promise.all(workers);
 
-    // 輸出總結報告
+    // Summary report
     console.log('\n' + '='.repeat(60));
-    console.log('批量檢測完成');
+    console.log('Batch check complete');
     console.log('='.repeat(60));
-    console.log(`總數: ${stats.total}`);
-    console.log(`成功: ${stats.success}`);
-    console.log(`失敗: ${stats.failed}`);
-    console.log(`測試錯誤: ${stats.errorSites.length}`);
-    console.log(`跳過: ${stats.skipped}`);
+    console.log(`Total: ${stats.total}`);
+    console.log(`Success: ${stats.success}`);
+    console.log(`Failed: ${stats.failed}`);
+    console.log(`Test errors: ${stats.errorSites.length}`);
+    console.log(`Skipped: ${stats.skipped}`);
     console.log('='.repeat(60));
 
-    // 儲存總結報告
+    // Save summary report
     if (save) {
         const timestamp = Date.now();
 
-        // 確保 test-results/_logs 目錄存在
+        // Ensure test-results/_logs directory exists
         const logsDir = path.join('test-results', '_logs');
         await fs.mkdir(logsDir, { recursive: true });
 
@@ -284,9 +284,9 @@ async function batchTest(options = {}) {
         };
 
         await fs.writeFile(summaryPath, JSON.stringify(summary, null, 2));
-        console.log(`\n總結報告已儲存: ${summaryPath}`);
+        console.log(`\nSummary saved: ${summaryPath}`);
 
-        // 如果有錯誤網站，輸出獨立的錯誤網站清單
+        // If there are error sites, write a separate error list
         if (stats.errorSites.length > 0) {
             const errorListPath = path.join(logsDir, `batch_errors_${timestamp}.json`);
             const errorList = {
@@ -296,27 +296,27 @@ async function batchTest(options = {}) {
             };
 
             await fs.writeFile(errorListPath, JSON.stringify(errorList, null, 2));
-            console.log(`錯誤網站清單已儲存: ${errorListPath}`);
+            console.log(`Error site list saved: ${errorListPath}`);
         }
 
-        // 自動生成統計資料
+        // Auto-generate statistics
         try {
-            console.log('\n正在生成統計資料...');
+            console.log('\nGenerating statistics...');
             await generateStatistic();
         } catch (statError) {
-            console.warn('生成統計資料失敗:', statError.message);
-            // 不影響主流程，只顯示警告
+            console.warn('Failed to generate statistics:', statError.message);
+            // Non-fatal; warn only
         }
     }
 
     return stats;
 }
 
-// 如果直接執行此檔案
+// When run directly
 if (require.main === module) {
     const args = process.argv.slice(2);
 
-    // 解析命令列參數
+    // Parse command-line arguments
     let limit;
     let startFrom = 0;
     let delayMs = DEFAULT_DELAY;
@@ -328,45 +328,45 @@ if (require.main === module) {
     let useCache = true;
     let headless = undefined;
     let debug = false;
-    let timeout = 120000; // 預設 120 秒
+    let timeout = 120000; // Default 120 seconds
 
-    // 解析 --limit
+    // Parse --limit
     const limitIndex = args.indexOf('--limit');
     if (limitIndex !== -1 && args[limitIndex + 1]) {
         limit = parseInt(args[limitIndex + 1], 10);
     }
 
-    // 解析 --start-from
+    // Parse --start-from
     const startIndex = args.indexOf('--start-from');
     if (startIndex !== -1 && args[startIndex + 1]) {
         startFrom = parseInt(args[startIndex + 1], 10);
     }
 
-    // 解析 --delay
+    // Parse --delay
     const delayIndex = args.indexOf('--delay');
     if (delayIndex !== -1 && args[delayIndex + 1]) {
         delayMs = parseInt(args[delayIndex + 1], 10);
     }
 
-    // 解析 --concurrency
+    // Parse --concurrency
     const concurrencyIndex = args.indexOf('--concurrency');
     if (concurrencyIndex !== -1 && args[concurrencyIndex + 1]) {
         concurrency = parseInt(args[concurrencyIndex + 1], 10);
     }
 
-    // 解析 --dns
+    // Parse --dns
     const dnsIndex = args.indexOf('--dns');
     if (dnsIndex !== -1 && args[dnsIndex + 1]) {
         customDNS = args[dnsIndex + 1];
     }
 
-    // 解析 --ipinfo-token
+    // Parse --ipinfo-token
     const tokenIndex = args.indexOf('--ipinfo-token');
     if (tokenIndex !== -1 && args[tokenIndex + 1]) {
         token = args[tokenIndex + 1];
     }
 
-    // 解析 adblock 選項：--adblock true/false（預設為 true）
+    // Parse adblock option: --adblock true/false (default true)
     const adblockIndex = args.indexOf('--adblock');
     if (adblockIndex !== -1 && args[adblockIndex + 1]) {
         const adblockValue = args[adblockIndex + 1].toLowerCase();
@@ -377,13 +377,13 @@ if (require.main === module) {
         }
     }
 
-    // 解析 --adblock-url
+    // Parse --adblock-url
     const adblockUrlIndex = args.indexOf('--adblock-url');
     if (adblockUrlIndex !== -1 && args[adblockUrlIndex + 1]) {
         adblockUrls = args[adblockUrlIndex + 1].split(',').map(u => u.trim());
     }
 
-    // 解析快取選項：--cache true/false（預設為 true）
+    // Parse cache option: --cache true/false (default true)
     const cacheIndex = args.indexOf('--cache');
     if (cacheIndex !== -1 && args[cacheIndex + 1]) {
         const cacheValue = args[cacheIndex + 1].toLowerCase();
@@ -394,7 +394,7 @@ if (require.main === module) {
         }
     }
 
-    // 解析 headless 選項：--headless true/false（預設為非 headless）
+    // Parse headless option: --headless true/false (default non-headless)
     const headlessIndex = args.indexOf('--headless');
     if (headlessIndex !== -1 && args[headlessIndex + 1]) {
         const headlessValue = args[headlessIndex + 1].toLowerCase();
@@ -405,16 +405,16 @@ if (require.main === module) {
         }
     }
 
-    // 解析 --debug
+    // Parse --debug
     debug = args.includes('--debug');
 
-    // 解析 --timeout
+    // Parse --timeout
     const timeoutIndex = args.indexOf('--timeout');
     if (timeoutIndex !== -1 && args[timeoutIndex + 1]) {
-        timeout = parseInt(args[timeoutIndex + 1], 10) * 1000; // 轉換為毫秒
+        timeout = parseInt(args[timeoutIndex + 1], 10) * 1000; // Convert to milliseconds
     }
 
-    // 驗證參數：檢查是否有無效的參數
+    // Validate arguments: reject unknown flags
     const validOptions = [
         '--limit', '--start-from', '--delay', '--concurrency',
         '--dns', '--ipinfo-token', '--adblock', '--adblock-url',
@@ -429,33 +429,33 @@ if (require.main === module) {
     const invalidArgs = [];
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
-        // 檢查是否是以 - 開頭的參數
+        // Flags start with -
         if (arg.startsWith('-')) {
-            // 如果是有效參數，且需要值，則跳過下一個參數（值）
+            // Valid flag that takes a value: skip the next token
             if (validOptions.includes(arg)) {
                 if (optionsWithValue.includes(arg)) {
-                    i++; // 跳過下一個參數（值）
+                    i++; // Skip value token
                 }
             } else {
-                // 無效參數
+                // Unknown flag
                 invalidArgs.push(arg);
             }
         }
     }
 
-    // 如果有無效參數，顯示錯誤並退出
+    // If invalid args found, print error and exit
     if (invalidArgs.length > 0) {
-        console.error('錯誤: 發現無效的參數:');
+        console.error('Error: invalid argument(s):');
         for (const arg of invalidArgs) {
             console.error(`  ${arg}`);
         }
         console.error('');
-        console.error('使用方式: node batch-test.js [選項] <測試清單檔案路徑>');
-        console.error('使用 --help 或 -h 查看詳細說明');
+        console.error('Usage: node batch-test.js [options] <test-list-file-path>');
+        console.error('Use --help or -h for details');
         process.exit(1);
     }
 
-    // 從最後一個參數讀取測試清單路徑（必須不是以 -- 開頭的選項）
+    // Test list path is the last non-flag argument
     let testListPath = null;
     for (let i = args.length - 1; i >= 0; i--) {
         if (!args[i].startsWith('--')) {
@@ -464,28 +464,28 @@ if (require.main === module) {
         }
     }
 
-    // 顯示使用說明
+    // Help text
     if (args.includes('--help') || args.includes('-h')) {
-        console.log('批量測試腳本使用方式:');
+        console.log('Batch test usage:');
         console.log('');
-        console.log('node batch-test.js [選項] <測試清單檔案路徑>');
+        console.log('node batch-test.js [options] <test-list-file-path>');
         console.log('');
-        console.log('選項:');
-        console.log('  --limit N              測試 N 個網站（預設: 全部）');
-        console.log('  --start-from N         從第 N 個網站開始（預設: 0）');
-        console.log('  --delay N              每個請求之間的延遲，單位毫秒（預設: 1000）');
-        console.log('  --concurrency N        同時進行的最大測試數（預設: 4）');
-        console.log('  --dns IP               使用自訂 DNS 伺服器');
-        console.log('  --ipinfo-token TOKEN   指定 IPinfo API token');
-        console.log('  --adblock false        不使用 adblock 清單（預設為使用）');
-        console.log('  --adblock-url URL      使用自訂 adblock 清單 URL（可用逗號分隔多個）');
-        console.log('  --cache false          不使用快取，強制重新下載 adblock 清單與 ipinfo 資料（預設 true）');
-        console.log('  --headless true        使用 headless 模式（預設為非 headless，顯示瀏覽器視窗）');
-        console.log('  --debug                開啟 debug 模式，顯示詳細資訊');
-        console.log('  --timeout N            設定頁面載入 timeout（秒，預設 120）');
-        console.log('  --help, -h             顯示此說明');
+        console.log('Options:');
+        console.log('  --limit N              Test N websites (default: all)');
+        console.log('  --start-from N         Start at index N (default: 0)');
+        console.log('  --delay N              Delay between requests in ms (default: 1000)');
+        console.log('  --concurrency N        Max concurrent tests (default: 4)');
+        console.log('  --dns IP               Use custom DNS server');
+        console.log('  --ipinfo-token TOKEN   IPinfo API token');
+        console.log('  --adblock false        Disable adblock list (default: enabled)');
+        console.log('  --adblock-url URL      Custom adblock list URL(s), comma-separated');
+        console.log('  --cache false          Disable cache; force refresh adblock and ipinfo (default: true)');
+        console.log('  --headless true        Headless browser (default: headed, visible window)');
+        console.log('  --debug                Debug mode with verbose output');
+        console.log('  --timeout N            Page load timeout in seconds (default: 120)');
+        console.log('  --help, -h             Show this help');
         console.log('');
-        console.log('範例:');
+        console.log('Examples:');
         console.log('  node batch-test.js --limit 10 top-traffic-list-taiwan/merged_lists_tw.json');
         console.log('  node batch-test.js --limit 50 --start-from 10 --delay 3000 top-traffic-list-taiwan/merged_lists_tw.json');
         console.log('  node batch-test.js --limit 100 --dns 8.8.8.8 --ipinfo-token your_token top-traffic-list-taiwan/merged_lists_tw.json');
@@ -493,16 +493,16 @@ if (require.main === module) {
         process.exit(0);
     }
 
-    // 檢查是否提供了測試清單路徑
+    // Require test list path
     if (!testListPath) {
-        console.error('錯誤: 必須提供測試清單檔案路徑');
+        console.error('Error: test list file path is required');
         console.error('');
-        console.error('使用方式: node batch-test.js [選項] <測試清單檔案路徑>');
-        console.error('使用 --help 或 -h 查看詳細說明');
+        console.error('Usage: node batch-test.js [options] <test-list-file-path>');
+        console.error('Use --help or -h for details');
         process.exit(1);
     }
 
-    // 執行批量測試（啟動前先確認 Playwright Chromium 可用）
+    // Run batch test (verify Playwright Chromium first)
     assertPlaywrightReady()
         .then(() => batchTest({
             limit,
@@ -523,7 +523,7 @@ if (require.main === module) {
         .catch(error => {
             console.error('Batch test failed:', error.message || error);
             if (debug) {
-                console.error('錯誤堆疊:', error.stack);
+                console.error('Stack trace:', error.stack);
             }
             process.exit(1);
         });

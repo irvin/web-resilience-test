@@ -1,7 +1,7 @@
 /*
     1) checkWebsiteResilience('https://24h.pchome.com.tw/prod/DCAYAD-A900BIAMV')
-        .then(result => console.log('檢測完成'))
-        .catch(error => console.error('檢測失敗:', error));
+        .then(result => console.log('Check complete'))
+        .catch(error => console.error('Check failed:', error));
 
     2) node no-global-connection-check.js https://24h.pchome.com.tw/prod/DCAYAD-A900BIAMV
 */
@@ -20,10 +20,10 @@ const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
-// 建立 ipinfo client
+// Create ipinfo client
 // const ipinfo = new IPinfoWrapper(process.env.IPINFO_TOKEN || undefined);
 
-// 可忽略的域名列表（手動維護的）
+// Manually maintained list of ignorable domains
 const MANUAL_IGNORABLE_DOMAINS = [
     'fonts.gstatic.com'
     // 'static.hotjar.com',
@@ -41,7 +41,7 @@ const CLOUD_PROVIDERS_DATA_PATH = path.join(
 );
 let CLOUD_PROVIDER_INDEX = null;
 
-// 需要進一步判斷的雲端服務商 ASN 列表
+// Cloud provider ASNs that need further Taiwan-region detection
 const TARGET_CLOUD_ASNS = [
     'AS15169',   // Google LLC
     'AS396982',  // Google LLC
@@ -57,16 +57,16 @@ const TARGET_CLOUD_ASNS = [
     'AS8075'    // Microsoft Azure
 ];
 
-// 需要檢查的 response headers（值含 TPE 即視為台灣節點）
+// Response headers to check (value containing TPE indicates Taiwan PoP)
 const CLOUD_HEADERS = [
     'cf-ray',           // Cloudflare
     'x-amz-cf-pop',     // AWS CloudFront
     'x-served-by',      // Fastly
     'x-azure-ref',      // Azure Front Door / Azure CDN
-    'x-msedge-ref'      // Microsoft Edge CDN（如 Bing；Ref B 含 TPE）
+    'x-msedge-ref'      // Microsoft Edge CDN (e.g. Bing; ref may contain TPE)
 ];
 
-// RTT 測試閾值（毫秒）
+// RTT test threshold (milliseconds)
 const RTT_THRESHOLD = 15;
 
 // LACeS Anycast Census API
@@ -108,7 +108,7 @@ async function loadcloudProviderInfo() {
         CLOUD_PROVIDER_INDEX = { orgKeywordMap, asnMap };
         return CLOUD_PROVIDER_INDEX;
     } catch (error) {
-        console.warn(`無法載入雲端服務清單: ${error.message}`);
+        console.warn(`Failed to load cloud provider list: ${error.message}`);
         CLOUD_PROVIDER_INDEX = {
             orgKeywordMap: new Map(),
             asnMap: new Map()
@@ -139,12 +139,12 @@ function getCloudProviderMatch(orgValue, cloudProviderInfo) {
 }
 
 
-// 動態載入的 adblock 清單域名（會在初始化時載入）
+// Adblock list domains loaded at initialization
 let ADBLOCK_DOMAINS = new Set();
 
 /**
- * 解析 adblock 規則，提取域名
- * 支援格式：
+ * Parse adblock rules and extract domains
+ * Supported formats:
  * - ||domain.com^
  * - ||domain.com^$third-party
  * - domain.com
@@ -155,12 +155,12 @@ function parseAdblockRules(rulesText) {
     const lines = rulesText.split('\n');
 
     for (const line of lines) {
-        // 跳過註解和空行
+        // Skip comments and blank lines
         if (!line.trim() || line.trim().startsWith('!') || line.trim().startsWith('[')) {
             continue;
         }
 
-        // 解析 ||domain.com^ 格式
+        // Parse ||domain.com^ format
         const domainMatch = line.match(/^\|\|([^\/\^$]+)/);
         if (domainMatch) {
             const domain = domainMatch[1].trim();
@@ -170,7 +170,7 @@ function parseAdblockRules(rulesText) {
             continue;
         }
 
-        // 解析簡單的域名規則（不包含特殊符號）
+        // Parse simple domain rules (no special characters)
         if (!line.includes('*') && !line.includes('/') && !line.includes('^') &&
             !line.includes('$') && !line.includes('|') && line.includes('.')) {
             const domain = line.trim();
@@ -184,9 +184,9 @@ function parseAdblockRules(rulesText) {
 }
 
 /**
- * 取得 URL 的快取檔名（使用 hash）
+ * Cache filename for a URL (MD5 hash)
  * @param {string} url - URL
- * @returns {string} 快取檔名
+ * @returns {string} Cache filename
  */
 function getCacheFileName(url) {
     const hash = crypto.createHash('md5').update(url).digest('hex');
@@ -194,9 +194,9 @@ function getCacheFileName(url) {
 }
 
 /**
- * 取得快取檔案路徑
+ * Cache file path for a URL
  * @param {string} url - URL
- * @returns {string} 快取檔案路徑
+ * @returns {string} Cache file path
  */
 function getCacheFilePath(url) {
     const cacheDir = path.join(__dirname, '.cache', 'adblock');
@@ -205,9 +205,9 @@ function getCacheFilePath(url) {
 }
 
 /**
- * 取得 IPinfo 快取檔案路徑
- * @param {string} ip - IP 地址
- * @returns {string} 快取檔案路徑
+ * IPinfo cache file path
+ * @param {string} ip - IP address
+ * @returns {string} Cache file path
  */
 function getIPinfoCacheFilePath(ip) {
     const cacheDir = path.join(__dirname, '.cache', 'ipinfo');
@@ -216,9 +216,9 @@ function getIPinfoCacheFilePath(ip) {
 }
 
 /**
- * 取得 LACeS 快取檔案路徑（優先 mapped_prefix，否則 IP）
- * @param {string} cacheKey - mapped_prefix 或 IP
- * @returns {string} 快取檔案路徑
+ * LACeS cache file path (mapped_prefix preferred, else IP)
+ * @param {string} cacheKey - mapped_prefix or IP
+ * @returns {string} Cache file path
  */
 function getLACeSCacheFilePath(cacheKey) {
     const cacheDir = path.join(__dirname, '.cache', 'laces');
@@ -227,8 +227,8 @@ function getLACeSCacheFilePath(cacheKey) {
 }
 
 /**
- * 判斷 LACeS confidence 是否達到可採信門檻（confident 或以上）
- * @param {string} confidence - API 回傳的 confidence 值
+ * Whether LACeS confidence meets the reliable threshold (confident or above)
+ * @param {string} confidence - confidence from API
  * @returns {boolean}
  */
 function isLACeSConfidenceReliable(confidence) {
@@ -241,9 +241,9 @@ function isLACeSConfidenceReliable(confidence) {
 }
 
 /**
- * 正規化 LACeS API 回應，計算 has_tw、has_taipei、site_count
- * @param {Object} raw - LACeS API 原始 JSON
- * @returns {Object} 含衍生欄位的物件
+ * Normalize LACeS API response; compute has_tw, has_taipei, site_count
+ * @param {Object} raw - raw LACeS API JSON
+ * @returns {Object} object with derived fields
  */
 function normalizeLACeSResponse(raw) {
     if (!raw || typeof raw !== 'object') {
@@ -346,12 +346,12 @@ function appendLacesToCloudProvider(cloudProvider, lacesResult) {
 }
 
 /**
- * 查詢 LACeS Anycast Census API
- * @param {string} ip - IP 地址
- * @param {Object} options - 選項
- * @param {boolean} options.useCache - 是否使用快取（預設 true）
- * @param {boolean} options.debug - debug 模式
- * @returns {Promise<Object|null>} 正規化後的 API 結果，失敗時返回 null
+ * Query LACeS Anycast Census API
+ * @param {string} ip - IP address
+ * @param {Object} options - options
+ * @param {boolean} options.useCache - use cache (default true)
+ * @param {boolean} options.debug - debug mode
+ * @returns {Promise<Object|null>} normalized API result, or null on failure
  */
 async function checkAnycastWithLACeS(ip, options = {}) {
     const useCache = options.useCache !== false;
@@ -377,7 +377,7 @@ async function checkAnycastWithLACeS(ip, options = {}) {
         const cachedByIp = await readCachedLACeS(ip);
         if (cachedByIp) {
             if (options.debug) {
-                console.log(`[DEBUG] 使用快取 LACeS 結果: ${ip}`);
+                console.log(`[DEBUG] Using cached LACeS result: ${ip}`);
             }
             return {
                 source: 'laces api (cached)',
@@ -419,7 +419,7 @@ async function checkAnycastWithLACeS(ip, options = {}) {
         };
     } catch (error) {
         if (options.debug) {
-            console.log(`[DEBUG] LACeS API 查詢失敗 (${ip}): ${error.message}`);
+            console.log(`[DEBUG] LACeS API query failed (${ip}): ${error.message}`);
         }
 
         const expiredCache = await readCachedLACeS(ip, true);
@@ -436,10 +436,10 @@ async function checkAnycastWithLACeS(ip, options = {}) {
 }
 
 /**
- * 檢查快取是否有效（預設 24 小時）
- * @param {string} cachePath - 快取檔案路徑
- * @param {number} maxAge - 最大年齡（毫秒），預設 24 小時
- * @returns {Promise<boolean>} 如果快取有效則返回 true
+ * Check whether cache is still valid (default 24 hours)
+ * @param {string} cachePath - cache file path
+ * @param {number} maxAge - max age in ms (default 24 hours)
+ * @returns {Promise<boolean>} true if cache is valid
  */
 async function isCacheValid(cachePath, maxAge = 24 * 60 * 60 * 1000) {
     try {
@@ -452,9 +452,9 @@ async function isCacheValid(cachePath, maxAge = 24 * 60 * 60 * 1000) {
 }
 
 /**
- * 讀取快取
- * @param {string} cachePath - 快取檔案路徑
- * @returns {Promise<string|null>} 快取內容，如果不存在則返回 null
+ * Read cache
+ * @param {string} cachePath - cache file path
+ * @returns {Promise<string|null>} cache content, or null if missing
  */
 async function readCache(cachePath) {
     try {
@@ -467,13 +467,13 @@ async function readCache(cachePath) {
 }
 
 /**
- * 寫入快取
- * @param {string} cachePath - 快取檔案路徑
- * @param {string} content - 要快取的內容
+ * Write cache
+ * @param {string} cachePath - cache file path
+ * @param {string} content - content to cache
  */
 async function writeCache(cachePath, content) {
     try {
-        // 確保快取目錄存在
+        // Ensure cache directory exists
         const cacheDir = path.dirname(cachePath);
         await fs.mkdir(cacheDir, { recursive: true });
 
@@ -485,20 +485,20 @@ async function writeCache(cachePath, content) {
 
         await fs.writeFile(cachePath, JSON.stringify(cacheData, null, 2), 'utf-8');
     } catch (error) {
-        console.warn(`無法寫入快取 ${cachePath}: ${error.message}`);
+        console.warn(`Failed to write cache ${cachePath}: ${error.message}`);
     }
 }
 
 /**
- * 從線上載入 adblock 清單（支援快取）
- * @param {Array<string>} listUrls - adblock 清單的 URL 陣列
- * @param {Object} options - 選項
- * @param {boolean} options.useCache - 是否使用快取（預設 true）
- * @returns {Promise<Set<string>>} 解析後的域名集合
+ * Load adblock lists from the network (with cache)
+ * @param {Array<string>} listUrls - adblock list URLs
+ * @param {Object} options - options
+ * @param {boolean} options.useCache - use cache (default true)
+ * @returns {Promise<Set<string>>} parsed domain set
  */
 async function loadAdblockLists(listUrls = [], options = {}) {
     const { useCache = true } = options;
-    const cacheMaxAge = 24 * 60 * 60 * 1000; // 固定 24 小時
+    const cacheMaxAge = 24 * 60 * 60 * 1000; // Fixed 24 hours
 
     const urls = listUrls.length > 0 ? listUrls : DEFAULT_ADBLOCK_LISTS;
     const allDomains = new Set();
@@ -508,25 +508,25 @@ async function loadAdblockLists(listUrls = [], options = {}) {
             const cachePath = getCacheFilePath(url);
             let content = null;
 
-            // 嘗試讀取快取
+            // Try reading cache
             if (useCache) {
                 const isValid = await isCacheValid(cachePath, cacheMaxAge);
                 if (isValid) {
                     content = await readCache(cachePath);
                     if (content) {
-                        console.log(`使用快取載入 adblock 清單: ${url}`);
+                        console.log(`Loading adblock list from cache: ${url}`);
                         const domains = parseAdblockRules(content);
                         for (const domain of domains) {
                             allDomains.add(domain);
                         }
-                        console.log(`  已載入 ${domains.size} 個域名規則（來自快取）`);
+                        console.log(`  Loaded ${domains.size} domain rules (from cache)`);
                         continue;
                     }
                 }
             }
 
-            // 快取無效或不存在，從網路下載
-            console.log(`正在下載 adblock 清單: ${url}`);
+            // Cache invalid or missing; download from network
+            console.log(`Downloading adblock list: ${url}`);
             const response = await axios.get(url, {
                 timeout: 10000,
                 headers: {
@@ -536,7 +536,7 @@ async function loadAdblockLists(listUrls = [], options = {}) {
 
             content = response.data;
 
-            // 儲存到快取
+            // Save to cache
             if (useCache) {
                 await writeCache(cachePath, content);
             }
@@ -545,21 +545,21 @@ async function loadAdblockLists(listUrls = [], options = {}) {
             for (const domain of domains) {
                 allDomains.add(domain);
             }
-            console.log(`  已載入 ${domains.size} 個域名規則`);
+            console.log(`  Loaded ${domains.size} domain rules`);
         } catch (error) {
-            console.warn(`無法載入清單 ${url}: ${error.message}`);
+            console.warn(`Failed to load list ${url}: ${error.message}`);
 
-            // 如果下載失敗，嘗試使用舊的快取（即使已過期）
+            // On download failure, try stale cache
             if (useCache) {
                 const cachePath = getCacheFilePath(url);
                 const content = await readCache(cachePath);
                 if (content) {
-                    console.log(`  嘗試使用過期快取...`);
+                    console.log(`  Trying expired cache...`);
                     const domains = parseAdblockRules(content);
                     for (const domain of domains) {
                         allDomains.add(domain);
                     }
-                    console.log(`  已載入 ${domains.size} 個域名規則（來自過期快取）`);
+                    console.log(`  Loaded ${domains.size} domain rules (from expired cache)`);
                 }
             }
         }
@@ -574,11 +574,11 @@ function getAdblockUrlsForResult(options = {}) {
 }
 
 /**
- * 初始化可忽略的域名列表
- * @param {Object} options - 選項
- * @param {Array<string>} options.adblockUrls - 自訂 adblock 清單 URL
- * @param {boolean} options.useAdblock - 是否使用 adblock 清單（預設 true）
- * @param {boolean} options.useCache - 是否使用快取（預設 true）
+ * Initialize ignorable domain list
+ * @param {Object} options - options
+ * @param {Array<string>} options.adblockUrls - custom adblock list URLs
+ * @param {boolean} options.useAdblock - use adblock list (default true)
+ * @param {boolean} options.useCache - use cache (default true)
  */
 async function initializeIgnorableDomains(options = {}) {
     const {
@@ -587,15 +587,15 @@ async function initializeIgnorableDomains(options = {}) {
         useCache = true
     } = options;
 
-    // 重置為手動維護的清單
+    // Reset to manually maintained list
     IGNORABLE_DOMAINS = [...MANUAL_IGNORABLE_DOMAINS];
 
     if (useAdblock) {
         try {
             ADBLOCK_DOMAINS = await loadAdblockLists(adblockUrls, { useCache });
-            console.log(`已載入 ${ADBLOCK_DOMAINS.size} 個 adblock 域名規則`);
+            console.log(`Loaded ${ADBLOCK_DOMAINS.size} adblock domain rules`);
         } catch (error) {
-            console.warn('載入 adblock 清單失敗，使用預設清單:', error.message);
+            console.warn('Failed to load adblock list; using default list:', error.message);
         }
     }
 }
@@ -635,11 +635,11 @@ function formatTestErrorReason(error) {
     return `Error: ${error?.name || 'Unknown'}`;
 }
 
-/** preflight 時從 headed Chromium 抓取的預設 User-Agent */
+/** Default User-Agent captured from headed Chromium during preflight */
 let playwrightHeadedUserAgent = null;
 
 /**
- * 從已安裝的 Playwright Chromium（headed）讀取預設 User-Agent
+ * Read default User-Agent from installed Playwright Chromium (headed)
  */
 async function capturePlaywrightHeadedUserAgent() {
     if (playwrightHeadedUserAgent !== null) {
@@ -664,7 +664,7 @@ async function resolvePlaywrightUserAgent() {
 }
 
 /**
- * 啟動前確認 Playwright Chromium 可啟動，避免 batch 跑大量無效錯誤
+ * Verify Playwright Chromium can launch before batch runs to avoid mass false errors
  */
 async function assertPlaywrightReady() {
     const executablePath = chromium.executablePath();
@@ -705,9 +705,9 @@ async function assertPlaywrightReady() {
 }
 
 async function collectHARAndCanonical(url, options = {}) {
-    const timeout = options.timeout || 120000; // 預設 120 秒
+    const timeout = options.timeout || 120000; // Default 120 seconds
     const debug = options.debug || false;
-    // 僅在明確指定 --headless true 時使用 headless；預設為非 headless
+    // Headless only when --headless true; default is headed
     const headless = options.headless === true;
 
     const browser = await chromium.launch(buildChromiumLaunchOptions({
@@ -725,13 +725,13 @@ async function collectHARAndCanonical(url, options = {}) {
 
     const page = await context.newPage();
 
-    // 收集所有請求（包含主頁面請求）
+    // Collect all requests (including main document)
     const allRequests = [];
 
-    // 收集 response headers
+    // Collect response headers
     const responseHeadersMap = new Map();
 
-    // 監聽所有請求
+    // Listen to all requests
     page.on('request', request => {
         allRequests.push({
             url: request.url(),
@@ -739,47 +739,47 @@ async function collectHARAndCanonical(url, options = {}) {
         });
 
         if (debug) {
-            console.log(`[DEBUG] → 請求: ${request.method()} ${request.url()}`);
+            console.log(`[DEBUG] → Request: ${request.method()} ${request.url()}`);
         }
     });
 
-    // 監聽回應並收集 headers（不僅限於 debug 模式）
+    // Listen to responses and collect headers (not debug-only)
     page.on('response', async (response) => {
         const url = response.url();
         try {
             const headers = response.headers();
             responseHeadersMap.set(url, headers);
         } catch (error) {
-            // 忽略無法取得 headers 的情況
+            // Ignore failures to read headers
         }
 
-        // 保留原有的 debug 輸出
+        // Keep existing debug output
         if (debug) {
             const status = response.status();
             const statusText = status >= 400 ? '❌' : '✓';
-            console.log(`[DEBUG] ${statusText} 回應: ${status} ${response.url()}`);
+            console.log(`[DEBUG] ${statusText} Response: ${status} ${response.url()}`);
         }
     });
 
-    // 如果啟用 debug，監聽各種事件
+    // When debug is on, listen to more events
     if (debug) {
-        console.log(`[DEBUG] 開始載入頁面: ${url}`);
+        console.log(`[DEBUG] Loading page: ${url}`);
 
-        // 監聽請求失敗
+        // Request failures
         page.on('requestfailed', request => {
-            console.log(`[DEBUG] ✗ 請求失敗: ${request.method()} ${request.url()} - ${request.failure()?.errorText || 'Unknown'}`);
+            console.log(`[DEBUG] ✗ Request failed: ${request.method()} ${request.url()} - ${request.failure()?.errorText || 'Unknown'}`);
         });
 
-        // 監聽載入狀態變化
+        // Load state changes
         page.on('load', () => {
-            console.log(`[DEBUG] ✓ 頁面載入完成 (load)`);
+            console.log(`[DEBUG] ✓ Page load complete (load)`);
         });
 
         page.on('domcontentloaded', () => {
-            console.log(`[DEBUG] ✓ DOM 內容載入完成 (domcontentloaded)`);
+            console.log(`[DEBUG] ✓ DOM content loaded (domcontentloaded)`);
         });
 
-        // 監聽 console 訊息
+        // Console messages
         page.on('console', msg => {
             const type = msg.type();
             const text = msg.text();
@@ -788,65 +788,65 @@ async function collectHARAndCanonical(url, options = {}) {
             }
         });
 
-        // 監聽頁面錯誤
+        // Page errors
         page.on('pageerror', error => {
-            console.log(`[DEBUG] ✗ 頁面錯誤: ${error.message}`);
+            console.log(`[DEBUG] ✗ Page error: ${error.message}`);
         });
     }
 
     try {
-        // 開始收集 HAR
+        // Start HAR collection
         await context.tracing.start({ snapshots: true, screenshots: true });
 
         if (debug) {
-            console.log(`[DEBUG] 正在導航到: ${url}`);
+            console.log(`[DEBUG] Navigating to: ${url}`);
         }
 
-        // 訪問頁面並檢查響應狀態碼
+        // Visit page and check response status
         const response = await page.goto(url, {
             waitUntil: 'domcontentloaded',
             timeout: timeout
         });
 
         if (debug) {
-            console.log(`[DEBUG] ✓ 導航完成，狀態碼: ${response ? response.status() : 'N/A'}`);
+            console.log(`[DEBUG] ✓ Navigation complete, status: ${response ? response.status() : 'N/A'}`);
         }
 
-        // 取得 HTTP 狀態碼
+        // HTTP status code
         const httpStatus = response ? response.status() : null;
 
-        // 檢查是否為 4xx 錯誤
+        // Reject 4xx responses
         if (httpStatus && httpStatus >= 400 && httpStatus < 500) {
             const statusText = response.statusText();
             throw new Error(`HTTP ${httpStatus} ${statusText}`);
         }
 
         if (debug) {
-            console.log(`[DEBUG] 等待頁面載入狀態: load`);
+            console.log(`[DEBUG] Waiting for load state: load`);
         }
 
         await page.waitForLoadState('load', { timeout: timeout });
 
         if (debug) {
-            console.log(`[DEBUG] ✓ 頁面載入狀態: load 完成`);
+            console.log(`[DEBUG] ✓ Load state complete: load`);
         }
 
-        // 嘗試獲取 canonical URL
-        let canonical = url; // 預設使用原始 URL
+        // Resolve canonical URL
+        let canonical = url; // Default to original URL
         try {
             canonical = await page.evaluate((originalURL) => {
-                // 優先使用 canonical 標籤
+                // Prefer canonical link tag
                 const canonicalLink = document.querySelector('link[rel="canonical"]');
                 if (canonicalLink) {
                     return canonicalLink.href;
                 }
-                // 如果沒有 canonical 標籤，使用原始 URL
+                // No canonical tag; use original URL
                 return originalURL;
             }, url);
         } catch (evaluateError) {
-            // 如果 evaluate 失敗（例如頁面導航導致執行上下文被破壞），使用原始 URL
+            // evaluate may fail on navigation; fall back to original URL
             if (debug) {
-                console.log(`[DEBUG] 無法取得 canonical URL: ${evaluateError.message}，使用原始 URL`);
+                console.log(`[DEBUG] Could not get canonical URL: ${evaluateError.message}; using original URL`);
             }
             canonical = url;
         }
@@ -855,41 +855,40 @@ async function collectHARAndCanonical(url, options = {}) {
             console.log(`[DEBUG] Canonical URL: ${canonical}`);
         }
 
-        // 使用 Playwright 請求監聽器收集的請求數據
-        // 這樣可以包含主頁面請求，而不只是資源請求
+        // Requests from Playwright listener (includes main document, not only subresources)
         const requests = allRequests.map(req => ({
             url: req.url,
             type: req.type
         }));
 
         if (debug) {
-            console.log(`[DEBUG] 收集到 ${requests.length} 個請求`);
+            console.log(`[DEBUG] Collected ${requests.length} requests`);
         }
 
         return { requests, canonical, httpStatus, responseHeaders: responseHeadersMap };
     } finally {
         await browser.close();
         if (debug) {
-            console.log(`[DEBUG] 瀏覽器已關閉`);
+            console.log(`[DEBUG] Browser closed`);
         }
     }
 }
 
 /**
- * 檢查兩個域名是否相關（一個是另一個的子域名或相同）
- * @param {string} hostname1 - 第一個域名
- * @param {string} hostname2 - 第二個域名
- * @returns {boolean} 如果相關則返回 true
+ * Whether two hostnames are related (same or parent/child)
+ * @param {string} hostname1 - first hostname
+ * @param {string} hostname2 - second hostname
+ * @returns {boolean} true if related
  */
 function isRelatedDomain(hostname1, hostname2) {
     if (hostname1 === hostname2) {
         return true;
     }
-    // 檢查 hostname1 是否是 hostname2 的子域名
+    // hostname1 is a subdomain of hostname2
     if (hostname1.endsWith('.' + hostname2)) {
         return true;
     }
-    // 檢查 hostname2 是否是 hostname1 的子域名
+    // hostname2 is a subdomain of hostname1
     if (hostname2.endsWith('.' + hostname1)) {
         return true;
     }
@@ -897,28 +896,28 @@ function isRelatedDomain(hostname1, hostname2) {
 }
 
 /**
- * 檢查域名是否應該被忽略
- * @param {string} hostname - 要檢查的主機名
- * @param {string|null} targetHostname - 目標網址的主機名，如果是目標網址本身或其子域名則不忽略
- * @returns {boolean} 如果應該被忽略則返回 true
+ * Whether a hostname should be ignored
+ * @param {string} hostname - hostname to check
+ * @param {string|null} targetHostname - target site hostname; never ignore target or its subdomains
+ * @returns {boolean} true if should be ignored
  */
 function shouldIgnoreDomain(hostname, targetHostname = null) {
-    // 如果是目標網址本身或其相關域名（子域名），則不忽略
+    // Never ignore target site or related domains
     if (targetHostname && isRelatedDomain(hostname, targetHostname)) {
         return false;
     }
 
-    // 使用 Set 進行快速查找
+    // Fast lookup via Set
     if (ADBLOCK_DOMAINS.has(hostname)) {
         return true;
     }
 
-    // 檢查子域名匹配（例如：ads.example.com 匹配 example.com）
+    // Subdomain match (e.g. ads.example.com matches example.com)
     const hostnameParts = hostname.split('.');
     for (let i = 0; i < hostnameParts.length; i++) {
         const domain = hostnameParts.slice(i).join('.');
         if (ADBLOCK_DOMAINS.has(domain)) {
-            // 如果匹配的域名是目標網址或其相關域名，則不忽略
+            // Do not ignore if matched domain is the target or related
             if (targetHostname && isRelatedDomain(domain, targetHostname)) {
                 return false;
             }
@@ -926,17 +925,17 @@ function shouldIgnoreDomain(hostname, targetHostname = null) {
         }
     }
 
-    // 檢查手動維護的清單，支援一般字串與萬用字元（例如 *.example.com）
+    // Manual list; supports plain strings and wildcards (e.g. *.example.com)
     const matchedManualDomain = MANUAL_IGNORABLE_DOMAINS.find(domainPattern => {
         if (!domainPattern) return false;
 
-        // 萬用字元前綴：*.example.com → 匹配 example.com 以及任何其子網域
+        // Wildcard prefix: *.example.com matches example.com and subdomains
         if (domainPattern.startsWith('*.')) {
-            const base = domainPattern.slice(2); // 去掉 "*."
+            const base = domainPattern.slice(2); // strip "*."
             return hostname === base || hostname.endsWith(`.${base}`);
         }
 
-        // 一般情況維持原本的 includes 行為
+        // Default: original includes() behavior
         return hostname.includes(domainPattern);
     });
     if (matchedManualDomain) {
@@ -947,36 +946,36 @@ function shouldIgnoreDomain(hostname, targetHostname = null) {
 }
 
 /**
- * 獲取域名被忽略的原因
- * @param {string} hostname - 要檢查的主機名
- * @param {string|null} targetHostname - 目標網址的主機名
- * @returns {string|null} 忽略原因，如果沒有被忽略則返回 null
+ * Reason a hostname was ignored
+ * @param {string} hostname - hostname to check
+ * @param {string|null} targetHostname - target site hostname
+ * @returns {string|null} ignore reason, or null if not ignored
  */
 function getIgnoreReason(hostname, targetHostname = null) {
-    // 如果是目標網址本身或其相關域名，則不忽略
+    // Never ignore target site or related domains
     if (targetHostname && isRelatedDomain(hostname, targetHostname)) {
         return null;
     }
 
-    // 檢查是否在 adblock 清單中（完全匹配）
+    // Exact match in adblock list
     if (ADBLOCK_DOMAINS.has(hostname)) {
-        return `Adblock 清單（完全匹配）`;
+        return `Adblock list (exact match)`;
     }
 
-    // 檢查子域名匹配
+    // Subdomain match
     const hostnameParts = hostname.split('.');
     for (let i = 0; i < hostnameParts.length; i++) {
         const domain = hostnameParts.slice(i).join('.');
         if (ADBLOCK_DOMAINS.has(domain)) {
-            // 如果匹配的域名是目標網址或其相關域名，則不忽略
+            // Do not ignore if matched domain is the target or related
             if (targetHostname && isRelatedDomain(domain, targetHostname)) {
                 return null;
             }
-            return `Adblock 清單（子域名匹配: ${domain}）`;
+            return `Adblock list (subdomain match: ${domain})`;
         }
     }
 
-    // 檢查手動維護的清單（支援萬用字元）
+    // Manual list (supports wildcards)
     const matchedManualDomain = MANUAL_IGNORABLE_DOMAINS.find(domainPattern => {
         if (!domainPattern) return false;
 
@@ -988,7 +987,7 @@ function getIgnoreReason(hostname, targetHostname = null) {
         return hostname.includes(domainPattern);
     });
     if (matchedManualDomain) {
-        return `手動維護清單（匹配: ${matchedManualDomain}）`;
+        return `Manual ignore list (match: ${matchedManualDomain})`;
     }
 
     return null;
@@ -1015,7 +1014,7 @@ function cleanHARData(requests, targetHostname = null) {
 }
 
 /**
- * Chromium 啟動選項：套用自訂 DNS（A / AAAA 皆由該 resolver 查詢）。
+ * Chromium launch options: custom DNS (A/AAAA via that resolver).
  */
 function buildChromiumLaunchOptions({ headless = false, customDNS = null } = {}) {
     const args = [];
@@ -1039,7 +1038,7 @@ async function getDomainIP(domain, customDNS = null) {
         }
         return (await dns.resolve4(domain))[0];
     } catch (error) {
-        console.error(`無法解析域名 ${domain}:`, error.message);
+        console.error(`Failed to resolve domain ${domain}:`, error.message);
         return null;
     }
 }
@@ -1048,15 +1047,15 @@ async function checkIPLocationWithAPI(domain, options = {}) {
     try {
         const ip = await getDomainIP(domain, options.customDNS);
         if (!ip) {
-            throw new Error(`無法獲取 ${domain} 的 IP 地址`);
+            throw new Error(`Could not resolve IP for ${domain}`);
         }
 
-        // 檢查快取選項
+        // Cache options
         const useCache = options.useCache !== false;
-        const cacheMaxAge = 24 * 60 * 60 * 1000; // 固定 24 小時
+        const cacheMaxAge = 24 * 60 * 60 * 1000; // Fixed 24 hours
         const cachePath = getIPinfoCacheFilePath(ip);
 
-        // 嘗試讀取快取
+        // Try reading cache
         if (useCache) {
             const isValid = await isCacheValid(cachePath, cacheMaxAge);
             if (isValid) {
@@ -1065,7 +1064,7 @@ async function checkIPLocationWithAPI(domain, options = {}) {
                     try {
                         const cachedResult = JSON.parse(cachedData);
                         if (options.debug) {
-                            console.log(`[DEBUG] 使用快取 IPinfo 結果: ${ip}`);
+                            console.log(`[DEBUG] Using cached IPinfo result: ${ip}`);
                         }
                         return {
                             source: 'ipinfo json api (cached)',
@@ -1074,17 +1073,17 @@ async function checkIPLocationWithAPI(domain, options = {}) {
                             ...cachedResult
                         };
                     } catch {
-                        // 快取格式錯誤，繼續查詢
+                        // Bad cache format; query again
                         if (options.debug) {
-                            console.log(`[DEBUG] 快取格式錯誤，重新查詢: ${ip}`);
+                            console.log(`[DEBUG] Invalid cache format; re-querying: ${ip}`);
                         }
                     }
                 }
             }
         }
 
-        // 快取無效或不存在，從 API 查詢
-        // 優先使用命令列參數的 token，其次使用環境變數
+        // Cache miss or expired; query API
+        // CLI token first, then env var
         const token = options.token || process.env.IPINFO_TOKEN;
         const url = token
             ? `https://ipinfo.io/${ip}/json?token=${token}`
@@ -1103,16 +1102,16 @@ async function checkIPLocationWithAPI(domain, options = {}) {
             ...response.data
         };
 
-        // 儲存到快取
+        // Save to cache
         if (useCache) {
             await writeCache(cachePath, JSON.stringify(response.data, null, 2));
         }
 
         return result;
     } catch (error) {
-        console.error(`[API] 檢查 ${domain} 失敗:`, error.message);
+        console.error(`[API] Check failed for ${domain}:`, error.message);
 
-        // 如果查詢失敗，嘗試使用過期快取作為備用
+        // On failure, try expired cache as fallback
         if (options.useCache !== false) {
             const ip = await getDomainIP(domain, options.customDNS);
             if (ip) {
@@ -1122,7 +1121,7 @@ async function checkIPLocationWithAPI(domain, options = {}) {
                     try {
                         const cachedResult = JSON.parse(cachedData);
                         if (options.debug) {
-                            console.log(`[DEBUG] 使用過期快取 IPinfo 結果: ${ip}`);
+                            console.log(`[DEBUG] Using expired cached IPinfo result: ${ip}`);
                         }
                         return {
                             source: 'ipinfo json api (expired cache)',
@@ -1131,7 +1130,7 @@ async function checkIPLocationWithAPI(domain, options = {}) {
                             ...cachedResult
                         };
                     } catch {
-                        // 忽略快取解析錯誤
+                        // Ignore cache parse errors
                     }
                 }
             }
@@ -1147,9 +1146,9 @@ async function checkIPLocationWithAPI(domain, options = {}) {
 }
 
 /**
- * 從 org 欄位中提取 ASN
- * @param {string} org - org 字串，例如 "AS13335 Cloudflare, Inc."
- * @returns {string|null} ASN 字串，例如 "AS13335"，如果無法提取則返回 null
+ * Extract ASN from org field
+ * @param {string} org - e.g. "AS13335 Cloudflare, Inc."
+ * @returns {string|null} e.g. "AS13335", or null
  */
 function extractASN(org) {
     if (!org || typeof org !== 'string') return null;
@@ -1158,9 +1157,9 @@ function extractASN(org) {
 }
 
 /**
- * 檢查 response headers 是否包含 TPE（台灣節點標記）
- * @param {Object} headers - response headers 物件
- * @returns {Object} 包含 found, hasTPE, values 的物件
+ * Whether response headers contain TPE (Taiwan PoP marker)
+ * @param {Object} headers - response headers
+ * @returns {Object} { found, hasTPE, values }
  */
 function checkCloudProviderHeaders(headers) {
     if (!headers || typeof headers !== 'object') {
@@ -1176,7 +1175,7 @@ function checkCloudProviderHeaders(headers) {
         if (headerValue) {
             found = true;
             values[headerName] = headerValue;
-            // 檢查是否包含 TPE（不區分大小寫）
+            // Case-insensitive TPE check
             if (headerValue.toUpperCase().includes('TPE')) {
                 hasTPE = true;
             }
@@ -1187,7 +1186,7 @@ function checkCloudProviderHeaders(headers) {
 }
 
 /**
- * 從 HAR response headers 解析該 domain 的 cloud header（含未命中 TPE 者，供 log 使用）
+ * Resolve cloud headers for a domain from HAR (including non-TPE hits, for logging)
  * @returns {{ foundTPE: boolean, headerValues: Object }}
  */
 function resolveCloudHeadersForDomain(responseHeaders, domain, domainUrl) {
@@ -1227,7 +1226,7 @@ function resolveCloudHeadersForDomain(responseHeaders, domain, domainUrl) {
                 logHeaderValues = check.values;
             }
         } catch {
-            // 忽略 URL 解析錯誤
+            // Ignore URL parse errors
         }
     }
 
@@ -1247,8 +1246,8 @@ function appendHeadersToCloudProvider(cloudProvider, headerValues) {
 }
 
 /**
- * 對指定 IP 進行 RTT 測試
- * @param {string} ip - IP 地址
+ * RTT test for an IP
+ * @param {string} ip - IP address
  * @returns {Promise<{ rtt: number|null, failed: boolean, reason?: string }>}
  */
 async function performRTTTest(ip) {
@@ -1260,9 +1259,9 @@ async function performRTTTest(ip) {
     try {
         const { stdout } = await execAsync(command, { timeout: 10000 });
 
-        // 解析 ping 輸出提取時間
-        // Windows 格式: time=14.516ms 或 time<1ms
-        // Unix/Mac 格式: time=14.516 ms
+        // Parse ping output for latency
+        // Windows: time=14.516ms or time<1ms
+        // Unix/Mac: time=14.516 ms
         const timePattern = isWindows
             ? /time[=<](\d+\.?\d*)\s*ms/gi
             : /time=(\d+\.?\d*)\s*ms/gi;
@@ -1297,12 +1296,12 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
         debug: options.debug
     });
 
-    // 如果查詢失敗，直接返回
+    // Return early on lookup failure
     if (apiResult.error) {
         return apiResult;
     }
 
-    // 如果 country 是 TW，不需要進一步判斷
+    // country TW needs no further checks
     if (apiResult.country === 'TW') {
         return {
             ...apiResult,
@@ -1310,10 +1309,10 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
         };
     }
 
-    // 提取 ASN
+    // Extract ASN
     const asn = extractASN(apiResult.org);
     if (!asn || !TARGET_CLOUD_ASNS.includes(asn)) {
-        // 不在目標 ASN 列表中，不需要進一步判斷
+        // Not in target ASN list; no further checks
         return {
             ...apiResult,
             cloud_provider: null
@@ -1328,7 +1327,7 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
         domainUrl
     );
 
-    // 檢查 headers
+    // Check headers
     if (foundTPE) {
         return {
             ...apiResult,
@@ -1340,7 +1339,7 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
         };
     }
 
-    // LACeS Anycast Census API（header 失敗後、RTT 之前）
+    // LACeS Anycast Census API (after headers, before RTT)
     const lacesResult = await checkAnycastWithLACeS(apiResult.ip, {
         useCache: options.useCache !== false,
         debug: options.debug
@@ -1356,11 +1355,11 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
         };
     }
 
-    // 如果沒有找到包含 TPE 的 header，進行 RTT 測試
+    // No TPE in headers; run RTT test
     const rttResult = await performRTTTest(apiResult.ip);
     if (!rttResult.failed && rttResult.rtt !== null) {
         if (rttResult.rtt < RTT_THRESHOLD) {
-            // RTT < 15ms，判斷為台灣
+            // RTT < 15ms → treat as Taiwan
             return {
                 ...apiResult,
                 cloud_provider: appendHeadersToCloudProvider(
@@ -1373,7 +1372,7 @@ async function checkIPLocation(domain, customDNS = null, options = {}) {
                 )
             };
         } else {
-            // RTT >= 15ms，不在台灣，但記錄 RTT 資訊（不包含 country）
+            // RTT >= 15ms → not Taiwan; record RTT without country
             return {
                 ...apiResult,
                 cloud_provider: appendHeadersToCloudProvider(
@@ -1420,13 +1419,13 @@ function checkLocally(ipInfoResults, cloudProviderInfo) {
     for (const result of ipInfoResults) {
         if (result.error) continue;
 
-        // 優先使用 cloud_provider.country 判斷
+        // Prefer cloud_provider.country for domestic detection
         let isDomestic;
         if (result.cloud_provider && result.cloud_provider.country === 'tw') {
-            // 經過 header、laces 或 RTT 測試確認在台灣
+            // Taiwan confirmed via header, LACeS, or RTT
             isDomestic = true;
         } else if (result.country === 'TW') {
-            // 直接從 ipinfo 判斷在台灣
+            // Taiwan from ipinfo directly
             isDomestic = true;
         } else {
             isDomestic = false;
@@ -1460,7 +1459,7 @@ function checkLocally(ipInfoResults, cloudProviderInfo) {
 }
 
 /**
- * Cloudflare Challenge 錯誤類別
+ * Cloudflare Challenge error type
  */
 class CloudflareChallengeError extends Error {
     constructor(result) {
@@ -1471,7 +1470,7 @@ class CloudflareChallengeError extends Error {
 }
 
 /**
- * 零請求錯誤類別
+ * Zero-request error type (all domains filtered out)
  */
 class ZeroRequestError extends Error {
     constructor(result) {
@@ -1482,18 +1481,18 @@ class ZeroRequestError extends Error {
 }
 
 /**
- * 檢測是否遇到 Cloudflare challenge
- * @param {Array} domainDetails - 域名詳細資訊陣列
- * @returns {Object|null} 如果檢測到 Cloudflare challenge 則返回錯誤資訊，否則返回 null
+ * Detect Cloudflare challenge
+ * @param {Array} domainDetails - domain detail array
+ * @returns {Object|null} error info if challenge detected, else null
  */
 function detectCloudflareChallenge(domainDetails) {
     if (!domainDetails || domainDetails.length === 0) {
         return null;
     }
 
-    // 檢查是否有 Cloudflare challenge 的跡象
+    // Look for Cloudflare challenge indicators
     const challengeIndicators = domainDetails.filter(detail => {
-        // 檢查 originalUrl 是否包含 challenge-platform 或域名是 challenges.cloudflare.com
+        // challenge-platform in originalUrl or challenges.cloudflare.com host
         return detail.originalUrl && (
             detail.originalUrl.includes('cdn-cgi/challenge-platform') ||
             detail.originalUrl.includes('challenges.cloudflare.com')
@@ -1513,7 +1512,7 @@ function detectCloudflareChallenge(domainDetails) {
 
 async function getLocalIPInfo(options = {}) {
     try {
-        // 優先使用命令列參數的 token，其次使用環境變數
+        // CLI token first, then env var
         const token = options.token || process.env.IPINFO_TOKEN;
         const url = token
             ? 'https://ipinfo.io/json?token=' + token
@@ -1529,7 +1528,7 @@ async function getLocalIPInfo(options = {}) {
             source: 'ipinfo json api (direct)'
         };
     } catch (error) {
-        console.error('無法取得測試環境資訊:', error.message);
+        console.error('Failed to get testing environment info:', error.message);
         return {
             error: true,
             message: error.message
@@ -1559,7 +1558,7 @@ function formatDomainDetail(result, cleanedData, resilience) {
         category: resilience.details.find(d => d.domain === result.domain)?.category
     };
 
-    // 只有在 cloud_provider 不為 null 時才加入
+    // Include cloud_provider only when non-null
     if (result.cloud_provider) {
         detail.cloud_provider = result.cloud_provider;
     }
@@ -1568,7 +1567,7 @@ function formatDomainDetail(result, cleanedData, resilience) {
 }
 
 async function checkWebsiteResilience(url, options = {}) {
-    // 在函數開始時初始化變數，以便在 catch 區塊中使用
+    // Initialize early for catch block access
     let inputURL = url;
     let canonicalURL = null;
     let requests = [];
@@ -1576,21 +1575,21 @@ async function checkWebsiteResilience(url, options = {}) {
     let customDNS = null;
     let httpStatus = null;
 
-    // 檢查原始 URL 是否為頂層網域（用於決定檔名生成時是否使用 canonical）
+    // Whether input URL is apex (affects filename vs canonical)
     let isTopLevelDomain = false;
     try {
         const originalUrlObj = new URL(url.startsWith('http://') || url.startsWith('https://') ? url : 'https://' + url);
         const originalPath = originalUrlObj.pathname || '';
         isTopLevelDomain = originalPath === '' || originalPath === '/';
     } catch {
-        // 若 URL 解析失敗，預設為 false
+        // Default false if URL parse fails
     }
 
     try {
-        // 初始化可忽略的域名列表（如果尚未初始化）
+        // Initialize ignorable domains if not loaded yet
         if (ADBLOCK_DOMAINS.size === 0 && options.useAdblock !== false) {
             if (options.debug) {
-                console.log('[DEBUG] 正在載入 adblock 清單...');
+                console.log('[DEBUG] Loading adblock list...');
             }
             await initializeIgnorableDomains({
                 adblockUrls: options.adblockUrls,
@@ -1598,24 +1597,24 @@ async function checkWebsiteResilience(url, options = {}) {
                 useCache: options.useCache !== false
             });
             if (options.debug) {
-                console.log(`[DEBUG] 已載入 ${ADBLOCK_DOMAINS.size} 個 adblock 域名規則`);
+                console.log(`[DEBUG] Loaded ${ADBLOCK_DOMAINS.size} adblock domain rules`);
             }
         }
 
-        // 保存原始輸入的 URL
+        // Keep original input URL
         inputURL = url;
 
-        // 確保 URL 有 protocol
+        // Ensure URL has a scheme
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
             url = 'https://' + url;
         }
 
-        console.log(`開始檢測網站: ${url}`);
+        console.log(`Starting check: ${url}`);
 
         const envDNS = process.env.DEFAULT_DNS;
         customDNS = options.customDNS || envDNS;
         if (customDNS) {
-            console.log(`使用自訂 DNS 伺服器: ${customDNS}（ipinfo 與 Playwright 共用）`);
+            console.log(`Using custom DNS server: ${customDNS} (shared by ipinfo and Playwright)`);
         }
 
         const harCollectOptions = (headless) => ({
@@ -1625,25 +1624,25 @@ async function checkWebsiteResilience(url, options = {}) {
             customDNS
         });
 
-        // 1. 收集 connections 和 canonical URL
+        // 1. Collect connections and canonical URL
         let harResult = null;
         let retriedWithWww = false;
         let retriedWithHeadful = false;
         const originalUrl = url;
-        // 檢查是否需要嘗試 www 版本
+        // Whether to try www variant
         let shouldRetryWithWww = false;
         try {
             const urlObj = new URL(url);
             const hostname = urlObj.hostname;
-            // 如果沒有 www 前綴，則可以嘗試 www 版本
+            // Retry with www if hostname has no www prefix
             if (!hostname.startsWith('www.')) {
                 shouldRetryWithWww = true;
             }
         } catch {
-            // URL 解析失敗，不重試
+            // URL parse failed; no www retry
         }
 
-        // 重試流程：預設非 headless；--headless true 時依序嘗試 headless / 非 headless × 原 URL / www
+        // Retry flow: default headed; with --headless true try headless/headed × original/www
         if (options.headless === true) {
             let lastError = null;
             let wwwUrl = null;
@@ -1653,7 +1652,7 @@ async function checkWebsiteResilience(url, options = {}) {
                 wwwUrl = urlObj.toString();
             }
 
-            // 1. headless 原 URL
+            // 1. headless, original URL
             try {
                 harResult = await collectHARAndCanonical(originalUrl, harCollectOptions(true));
                 url = originalUrl;
@@ -1662,10 +1661,10 @@ async function checkWebsiteResilience(url, options = {}) {
                 lastError = error;
             }
 
-            // 2. 非 headless 原 URL
+            // 2. headed, original URL
             if (!harResult) {
                 try {
-                    console.log(`發生錯誤，嘗試使用非 headless 模式重試: ${originalUrl}`);
+                    console.log(`Error; retrying in headed mode: ${originalUrl}`);
                     retriedWithHeadful = true;
                     harResult = await collectHARAndCanonical(originalUrl, harCollectOptions(false));
                     url = originalUrl;
@@ -1675,10 +1674,10 @@ async function checkWebsiteResilience(url, options = {}) {
                 }
             }
 
-            // 3. headless www
+            // 3. headless, www
             if (!harResult && wwwUrl) {
                 try {
-                    console.log(`發生錯誤，嘗試使用 www. 版本（headless 模式）: ${wwwUrl}`);
+                    console.log(`Error; retrying www variant (headless): ${wwwUrl}`);
                     retriedWithWww = true;
                     harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(true));
                     url = wwwUrl;
@@ -1688,10 +1687,10 @@ async function checkWebsiteResilience(url, options = {}) {
                 }
             }
 
-            // 4. 非 headless www
+            // 4. headed, www
             if (!harResult && wwwUrl) {
                 try {
-                    console.log(`發生錯誤，嘗試使用 www. 版本（非 headless 模式）: ${wwwUrl}`);
+                    console.log(`Error; retrying www variant (headed): ${wwwUrl}`);
                     retriedWithWww = true;
                     retriedWithHeadful = true;
                     harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(false));
@@ -1716,7 +1715,7 @@ async function checkWebsiteResilience(url, options = {}) {
                         urlObj.hostname = 'www.' + urlObj.hostname;
                         const wwwUrl = urlObj.toString();
 
-                        console.log(`發生錯誤，嘗試使用 www. 版本（非 headless 模式）: ${wwwUrl}`);
+                        console.log(`Error; retrying www variant (headed): ${wwwUrl}`);
                         retriedWithWww = true;
 
                         harResult = await collectHARAndCanonical(wwwUrl, harCollectOptions(false));
@@ -1738,51 +1737,51 @@ async function checkWebsiteResilience(url, options = {}) {
         httpStatus = harResult.httpStatus || null;
 
         if (retriedWithHeadful) {
-            console.log(`成功使用非 headless 模式進行測試`);
+            console.log(`Succeeded using headed mode`);
         }
         if (retriedWithWww) {
-            console.log(`成功使用 www. 版本進行測試`);
+            console.log(`Succeeded using www variant`);
         }
 
         if (canonicalURL && canonicalURL !== url) {
-            console.log(`檢測到 canonical URL: ${canonicalURL}`);
+            console.log(`Canonical URL detected: ${canonicalURL}`);
         }
 
-        console.log(`收集到 ${requests.length} 個請求`);
+        console.log(`Collected ${requests.length} requests`);
 
-        // Debug: 顯示所有請求
+        // Debug: list all requests
         if (options.debug) {
-            console.log('\n[DEBUG] 所有請求列表:');
+            console.log('\n[DEBUG] All requests:');
             console.log('-------------------');
             requests.forEach((req, idx) => {
                 console.log(`[${idx + 1}] ${req.url} (${req.type})`);
             });
         }
 
-        // 取得測試環境資訊
+        // Testing environment (local IP info)
         localIPInfo = await getLocalIPInfo(options);
         if (options.debug && !localIPInfo.error) {
-            console.log('\n[DEBUG] 測試環境資訊:');
+            console.log('\n[DEBUG] Testing environment:');
             console.log('-------------------');
             console.log(localIPInfo);
         }
 
         if (!customDNS) {
-            console.log('\n使用本機 DNS 伺服器:', dns.getServers());
+            console.log('\nUsing local DNS servers:', dns.getServers());
         }
 
-        // 取得目標網址的主機名（用於判斷是否為目標網址本身）
+        // Target hostname (never filter out target or its subdomains)
         const targetURL = new URL(canonicalURL || url);
         const targetHostname = targetURL.hostname;
 
-        // 2. 清理資料
+        // 2. Clean HAR data
         const cleanedData = cleanHARData(requests, targetHostname);
         const domains = Object.values(cleanedData).map(req => new URL(req.url).hostname);
-        console.log(`清理後剩餘 ${domains.length} 個唯一域名`);
+        console.log(`${domains.length} unique domains after filtering`);
 
-        // 檢查是否為零域名（篩選後沒有剩餘域名）
+        // Zero domains after filter
         if (domains.length === 0) {
-            // 建立錯誤結果物件
+            // Build error result
             const errorResult = {
                 url: inputURL,
                 canonicalURL: canonicalURL || url,
@@ -1804,7 +1803,7 @@ async function checkWebsiteResilience(url, options = {}) {
                 testError: true,
                 errorReason: 'No domains after filtering',
                 errorDetails: {
-                    message: '所有域名都被 adblock 清單過濾掉了',
+                    message: 'All domains were filtered out by the adblock list',
                     totalRequests: requests.length,
                     filteredDomains: 0
                 }
@@ -1812,15 +1811,15 @@ async function checkWebsiteResilience(url, options = {}) {
             throw new ZeroRequestError(errorResult);
         }
 
-        // Debug: 顯示清理後的域名列表
+        // Debug: domains after filter
         if (options.debug) {
-            console.log('\n[DEBUG] 清理後的域名列表:');
+            console.log('\n[DEBUG] Domains after filtering:');
             console.log('-------------------');
             domains.forEach((domain, idx) => {
                 console.log(`[${idx + 1}] ${domain}`);
             });
 
-            // 顯示被忽略的域名及其原因
+            // Ignored domains and reasons
             const ignoredDomainsWithReasons = requests
                 .map(req => {
                     try {
@@ -1833,22 +1832,22 @@ async function checkWebsiteResilience(url, options = {}) {
                 })
                 .filter(item => item !== null)
                 .filter((item, idx, self) => {
-                    // 去重，只保留第一次出現的
+                    // Dedupe by hostname
                     return self.findIndex(x => x.hostname === item.hostname) === idx;
                 })
-                .filter(item => !domains.includes(item.hostname)); // 確保不在清理後的域名列表中
+                .filter(item => !domains.includes(item.hostname)); // Exclude domains still in filtered list
 
             if (ignoredDomainsWithReasons.length > 0) {
-                console.log('\n[DEBUG] 被忽略的域名:');
+                console.log('\n[DEBUG] Ignored domains:');
                 console.log('-------------------');
                 ignoredDomainsWithReasons.forEach((item, idx) => {
                     console.log(`[${idx + 1}] ${item.hostname}`);
-                    console.log(`     原因: ${item.reason}`);
+                    console.log(`     Reason: ${item.reason}`);
                 });
             }
         }
 
-        // 3. 建立 domain 到 URL 的映射，以便找到對應的 headers
+        // 3. Map domain → URL for header lookup
         const domainToUrlMap = new Map();
         Object.values(cleanedData).forEach(req => {
             try {
@@ -1858,21 +1857,21 @@ async function checkWebsiteResilience(url, options = {}) {
                     domainToUrlMap.set(hostname, req.url);
                 }
             } catch {
-                // 忽略 URL 解析錯誤
+                // Ignore URL parse errors
             }
         });
 
-        // 4. 檢查每個域名
+        // 4. Check each domain
         if (options.debug) {
-            console.log('\n[DEBUG] 開始檢查域名 IP 位置...');
+            console.log('\n[DEBUG] Checking domain IP locations...');
         }
         const locationResults = await Promise.all(
             domains.map(async (domain) => {
                 if (options.debug) {
-                    console.log(`[DEBUG] 檢查 ${domain}...`);
+                    console.log(`[DEBUG] Checking ${domain}...`);
                 }
 
-                // 找到對應的 URL
+                // URL for this domain
                 const domainUrl = domainToUrlMap.get(domain);
 
                 const result = await checkIPLocation(domain, customDNS, {
@@ -1885,26 +1884,26 @@ async function checkWebsiteResilience(url, options = {}) {
 
                 if (options.debug) {
                     const method = result.cloud_provider?.detection_method || 'ipinfo';
-                    console.log(`[DEBUG] ${domain}: ${result.ip || 'N/A'} (${result.country || 'N/A'}) [${method}] ${result.source?.includes('cached') ? '(快取)' : ''}`);
+                    console.log(`[DEBUG] ${domain}: ${result.ip || 'N/A'} (${result.country || 'N/A'}) [${method}] ${result.source?.includes('cached') ? '(cached)' : ''}`);
                 }
                 return result;
             })
         );
 
-        // 5. 計算韌性分數
+        // 5. Compute resilience summary
         const cloudProviderInfo = await loadcloudProviderInfo();
         const resilience = checkLocally(locationResults, cloudProviderInfo);
 
-        // 6. 產生報告
-        console.log('\n檢測結果:');
+        // 6. Print report
+        console.log('\nResults:');
         console.log('-------------------');
-        console.log(`境內/雲端: ${resilience.summary.domestic.cloud}`);
-        console.log(`境內/直連: ${resilience.summary.domestic.direct}`);
-        console.log(`境外/雲端: ${resilience.summary.foreign.cloud}`);
-        console.log(`境外/直連: ${resilience.summary.foreign.direct}`);
+        console.log(`Domestic/cloud: ${resilience.summary.domestic.cloud}`);
+        console.log(`Domestic/direct: ${resilience.summary.domestic.direct}`);
+        console.log(`Foreign/cloud: ${resilience.summary.foreign.cloud}`);
+        console.log(`Foreign/direct: ${resilience.summary.foreign.direct}`);
 
         if (options.debug) {
-            console.log('\n[DEBUG] 詳細域名資訊:');
+            console.log('\n[DEBUG] Domain details:');
             console.log('-------------------');
             locationResults.forEach(result => {
                 console.log(`\n${result.domain}:`);
@@ -1912,11 +1911,11 @@ async function checkWebsiteResilience(url, options = {}) {
             });
         }
 
-        // 準備結果資料
+        // Build result payload
         const result = {
-            url: inputURL,           // 使用原始輸入的 URL
-            canonicalURL,            // 保存實際訪問的 URL
-            httpStatus,              // HTTP 響應狀態碼
+            url: inputURL,           // Original input URL
+            canonicalURL,            // URL actually visited
+            httpStatus,              // HTTP status
             timestamp: new Date().toISOString(),
             testParameters: {
                 customDNS: customDNS || null,
@@ -1938,54 +1937,51 @@ async function checkWebsiteResilience(url, options = {}) {
             )
         };
 
-        // 檢測 Cloudflare challenge
+        // Detect Cloudflare challenge
         const cloudflareChallenge = detectCloudflareChallenge(result.domainDetails);
         if (cloudflareChallenge) {
-            // 將錯誤資訊加入到結果中
+            // Attach error info and throw for catch handler
             Object.assign(result, cloudflareChallenge);
-            // 拋出錯誤，讓 catch 區塊處理
             throw new CloudflareChallengeError(result);
         }
 
-        // 如果指定要儲存結果
+        // Save result if requested
         if (options.save) {
-            // 確保目錄存在
+            // Ensure output directory exists
             await fs.mkdir('test-results', { recursive: true });
 
-            // 自動生成輸出檔名
-            // 如果原始 URL 是頂層網域，使用原始 URL；否則使用 canonical URL（如果有的話）
+            // Auto-generate filename: apex uses input URL, else canonical when present
             const urlForFilename = (isTopLevelDomain || !canonicalURL) ? url : canonicalURL;
             const urlObj = new URL(urlForFilename);
             let filename = `${urlObj.hostname}${urlObj.pathname.replace(/\//g, '_')}${
                 urlObj.search ? '_' + urlObj.search.replace(/[?&=]/g, '_') : ''
             }`.replace(/_+$/, '');
 
-            // 如果檔名太長，直接截斷到 95 字元
+            // Truncate long filenames to 95 chars
             if (filename.length > 95) {
                 filename = filename.slice(0, 95);
             }
 
             const outputPath = path.resolve(`test-results/${filename}.json`);
 
-            // 儲存結果
+            // Write result file
             await fs.writeFile(outputPath, JSON.stringify(result, null, 2));
-            console.log(`\n結果已儲存至: ${outputPath}`);
+            console.log(`\nResult saved to: ${outputPath}`);
 
-            // 檢查並刪除對應的錯誤檔案（如果存在）
-            // 同時檢查並刪除 www 和非 www 版本的錯誤檔案
+            // Remove stale error files (www and non-www variants)
             try {
                 const errorDir = path.join('test_results', '_error');
                 const hostname = urlObj.hostname;
 
-                // 生成兩個可能的檔名（www 和非 www 版本）
+                // Possible filenames (www and non-www)
                 const possibleFilenames = [];
 
-                // 當前 hostname 的檔名
+                // Current hostname filename
                 possibleFilenames.push(filename);
 
-                // 如果是 www 版本，也檢查非 www 版本
+                // If www, also check non-www filename
                 if (hostname.startsWith('www.')) {
-                    const nonWwwHostname = hostname.slice(4); // 移除 'www.'
+                    const nonWwwHostname = hostname.slice(4); // strip 'www.'
                     let nonWwwFilename = `${nonWwwHostname}${urlObj.pathname.replace(/\//g, '_')}${
                         urlObj.search ? '_' + urlObj.search.replace(/[?&=]/g, '_') : ''
                     }`.replace(/_+$/, '');
@@ -1994,7 +1990,7 @@ async function checkWebsiteResilience(url, options = {}) {
                     }
                     possibleFilenames.push(nonWwwFilename);
                 } else {
-                    // 如果是非 www 版本，也檢查 www 版本
+                    // If non-www, also check www filename
                     const wwwHostname = 'www.' + hostname;
                     let wwwFilename = `${wwwHostname}${urlObj.pathname.replace(/\//g, '_')}${
                         urlObj.search ? '_' + urlObj.search.replace(/[?&=]/g, '_') : ''
@@ -2005,46 +2001,46 @@ async function checkWebsiteResilience(url, options = {}) {
                     possibleFilenames.push(wwwFilename);
                 }
 
-                // 嘗試刪除所有可能的錯誤檔案
+                // Try deleting all matching error files
                 for (const possibleFilename of possibleFilenames) {
                     const errorFilePath = path.resolve(path.join(errorDir, `${possibleFilename}.error.json`));
                     try {
                         await fs.access(errorFilePath);
-                        // 檔案存在，刪除它
+                        // File exists; delete it
                         await fs.unlink(errorFilePath);
-                        console.log(`✓ 已刪除舊的錯誤檔案: ${possibleFilename}.error.json`);
+                        console.log(`✓ Removed stale error file: ${possibleFilename}.error.json`);
                     } catch {
-                        // 檔案不存在，不需要處理
+                        // File does not exist; ignore
                     }
                 }
             } catch (deleteError) {
-                console.warn(`無法檢查/刪除錯誤檔案: ${deleteError.message}`);
+                console.warn(`Could not check/remove error file: ${deleteError.message}`);
             }
         }
 
         return result;
     } catch (error) {
-        // 統一把所有錯誤視為測試錯誤，建立包含 errorReason 的結果物件
+        // Build error result with errorReason for all failures
         let errorResult = null;
 
-        // 如果錯誤已經有 result（CloudflareChallengeError 或 ZeroRequestError），直接使用
+        // Reuse result from CloudflareChallengeError or ZeroRequestError
         if ((error instanceof CloudflareChallengeError || error instanceof ZeroRequestError) && error.result) {
             errorResult = error.result;
         } else {
-            // 為其他錯誤建立結果物件
+            // Build result for other errors
             const httpStatusMatch = error.message?.match(/^HTTP (\d{3})/);
 
-            // 如果有從錯誤訊息中提取的狀態碼，優先使用；否則使用已取得的 httpStatus
+            // Prefer status from error message, else httpStatus from HAR
             const errorHttpStatus = httpStatusMatch ? parseInt(httpStatusMatch[1], 10) : httpStatus;
 
-            // 確保 URL 有 protocol（用於建立檔名）
-            // 如果原始 URL 是頂層網域，使用原始 URL；否則使用 canonical URL（如果有的話）
+            // Ensure URL has scheme (for filename)
+            // Apex uses input URL; otherwise canonical when available
             let urlForFilename = inputURL;
             if (urlForFilename && !urlForFilename.startsWith('http://') && !urlForFilename.startsWith('https://')) {
                 urlForFilename = 'https://' + urlForFilename;
             }
 
-            // 如果不是頂層網域且有 canonical URL，使用 canonical URL 來生成檔名
+            // Non-apex with canonical: use canonical for filename
             if (!isTopLevelDomain && canonicalURL) {
                 urlForFilename = canonicalURL;
             }
@@ -2077,20 +2073,19 @@ async function checkWebsiteResilience(url, options = {}) {
             };
         }
 
-        console.error(`檢測到測試錯誤: ${errorResult.errorReason || error.message}`);
+        console.error(`Test error detected: ${errorResult.errorReason || error.message}`);
 
-        // 將 result 附加到 error 物件上，讓 batch-test.js 可以讀取
+        // Attach result for batch-test.js
         error.result = errorResult;
 
-        // 儲存錯誤結果到 JSON 檔案
+        // Save error result JSON
         if (options.save) {
             try {
-                // 確保 test-results/_error 目錄存在
+                // Ensure test-results/_error exists
                 const errorDir = path.join('test-results', '_error');
                 await fs.mkdir(errorDir, { recursive: true });
 
-                // 從錯誤結果中取得 URL 資訊
-                // 如果原始 URL 是頂層網域，使用原始 URL；否則使用 canonical URL（如果有的話）
+                // URL for filename: apex uses input, else canonical
                 let urlToUse = errorResult.url;
                 if (!isTopLevelDomain && errorResult.canonicalURL) {
                     urlToUse = errorResult.canonicalURL;
@@ -2100,27 +2095,27 @@ async function checkWebsiteResilience(url, options = {}) {
                     urlObj.search ? '_' + urlObj.search.replace(/[?&=]/g, '_') : ''
                 }`.replace(/_+$/, '');
 
-                // 如果檔名太長，直接截斷到 95 字元（預留 .error.json 的空間）
+                // Truncate filename (room for .error.json suffix)
                 if (filename.length > 95) {
                     filename = filename.slice(0, 95);
                 }
 
                 const outputPath = path.resolve(path.join(errorDir, `${filename}.error.json`));
 
-                // 儲存包含錯誤資訊的結果
+                // Write error payload
                 await fs.writeFile(outputPath, JSON.stringify(errorResult, null, 2));
-                console.log(`\n錯誤結果已儲存至: ${outputPath}`);
+                console.log(`\nError result saved to: ${outputPath}`);
             } catch (saveError) {
-                console.error('無法儲存錯誤結果:', saveError.message);
+                console.error('Failed to save error result:', saveError.message);
             }
         }
 
-        // 重新拋出錯誤，讓上層處理
+        // Re-throw for caller
         throw error;
     }
 }
 
-// 如果直接執行此檔案（不是被 require）
+// When run directly (not required as a module)
 if (require.main === module) {
     const args = process.argv.slice(2);
     let url = args[args.length - 1];
@@ -2131,15 +2126,15 @@ if (require.main === module) {
     let adblockUrls = [];
     let debug = false;
     let useCache = true;
-    let timeout = 120000; // 預設 120 秒
-    let headless = undefined; // 預設為 undefined，使用自動重試邏輯
+    let timeout = 120000; // Default 120 seconds
+    let headless = undefined; // Default undefined; uses auto-retry logic
 
-    // 確保 URL 有 protocol
+    // Ensure URL has a scheme
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
     }
 
-    // 解析命令列參數
+    // Parse CLI arguments
     const dnsIndex = args.indexOf('--dns');
     if (dnsIndex !== -1 && args[dnsIndex + 1]) {
         customDNS = args[dnsIndex + 1];
@@ -2150,19 +2145,19 @@ if (require.main === module) {
         token = args[tokenIndex + 1];
     }
 
-    // 解析 timeout 參數
+    // Parse --timeout
     const timeoutIndex = args.indexOf('--timeout');
     if (timeoutIndex !== -1 && args[timeoutIndex + 1]) {
-        timeout = parseInt(args[timeoutIndex + 1], 10) * 1000; // 轉換為毫秒
+        timeout = parseInt(args[timeoutIndex + 1], 10) * 1000; // Convert to milliseconds
     }
 
-    // 檢查是否要儲存結果
+    // --save flag
     save = args.includes('--save');
 
-    // 檢查是否要開啟 debug 模式
+    // --debug flag
     debug = args.includes('--debug');
 
-    // 解析 adblock 選項：--adblock true/false（預設為 true）
+    // Parse --adblock true/false (default true)
     const adblockIndex = args.indexOf('--adblock');
     if (adblockIndex !== -1 && args[adblockIndex + 1]) {
         const adblockValue = args[adblockIndex + 1].toLowerCase();
@@ -2172,19 +2167,19 @@ if (require.main === module) {
             useAdblock = true;
         }
     }
-    // 如果未指定，保持預設值 true
+    // If omitted, default stays true
 
-    // 解析自訂 adblock 清單 URL
+    // Parse custom --adblock-url
     const adblockUrlIndex = args.indexOf('--adblock-url');
     if (adblockUrlIndex !== -1) {
-        // 支援多個 URL，用逗號分隔或多次指定
+        // Comma-separated or repeated URLs
         const urlArg = args[adblockUrlIndex + 1];
         if (urlArg) {
             adblockUrls = urlArg.split(',').map(u => u.trim());
         }
     }
 
-    // 解析快取選項：--cache true/false（預設為 true）
+    // Parse --cache true/false (default true)
     const cacheIndex = args.indexOf('--cache');
     if (cacheIndex !== -1 && args[cacheIndex + 1]) {
         const cacheValue = args[cacheIndex + 1].toLowerCase();
@@ -2194,9 +2189,9 @@ if (require.main === module) {
             useCache = true;
         }
     }
-    // 如果未指定，保持預設值 true
+    // If omitted, default stays true
 
-    // 解析 headless 選項：--headless true/false（預設為非 headless）
+    // Parse --headless true/false (default headed)
     const headlessIndex = args.indexOf('--headless');
     if (headlessIndex !== -1 && args[headlessIndex + 1]) {
         const headlessValue = args[headlessIndex + 1].toLowerCase();
@@ -2208,20 +2203,20 @@ if (require.main === module) {
     }
 
     if (!url || url.startsWith('--')) {
-        console.error('請提供要檢測的網址');
-        console.error('使用方式:');
+        console.error('Please provide a URL to check');
+        console.error('Usage:');
         console.error('  npm run check [--dns 8.8.8.8] [--save] https://example.com');
         console.error('  npm run check [--dns 8.8.8.8] [--ipinfo-token your-token] [--save] https://example.com');
-        console.error('  npm run check [--adblock false] https://example.com  # 不使用 adblock 篩選連線紀錄（預設為使用）');
-        console.error('  npm run check [--adblock-url url1,url2] https://example.com  # 使用自訂 adblock 清單');
-        console.error('  npm run check [--debug] https://example.com  # debug 模式，顯示詳細資訊');
-        console.error('  npm run check [--cache false] https://example.com  # 不使用快取，強制重新下載 adblock 清單與 ipinfo 資料（預設 true）');
-        console.error('  npm run check [--timeout N] https://example.com  # 設定頁面載入 timeout（秒，預設 120）');
-        console.error('  npm run check [--headless true] https://example.com  # 使用 headless 模式（預設為非 headless）');
+        console.error('  npm run check [--adblock false] https://example.com  # Disable adblock filtering (default: enabled)');
+        console.error('  npm run check [--adblock-url url1,url2] https://example.com  # Custom adblock lists');
+        console.error('  npm run check [--debug] https://example.com  # Debug mode with verbose output');
+        console.error('  npm run check [--cache false] https://example.com  # Disable cache; refresh adblock and ipinfo (default: true)');
+        console.error('  npm run check [--timeout N] https://example.com  # Page load timeout in seconds (default: 120)');
+        console.error('  npm run check [--headless true] https://example.com  # Headless browser (default: headed)');
     process.exit(1);
     }
 
-    // 執行檢測
+    // Run check
     assertPlaywrightReady()
         .then(() => checkWebsiteResilience(url, {
             customDNS,
@@ -2235,12 +2230,12 @@ if (require.main === module) {
             headless
         }))
         .then(() => {
-            console.log('檢測完成');
+            console.log('Check complete');
         })
         .catch(error => {
-            console.error('檢測失敗:', error);
+            console.error('Check failed:', error);
             if (debug) {
-                console.error('錯誤堆疊:', error.stack);
+                console.error('Stack trace:', error.stack);
             }
             process.exit(1);
         });

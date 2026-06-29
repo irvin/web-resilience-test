@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
 
-// 以目前腳本所在位置為基準，找到 test-results 目錄
+// Resolve test-results relative to this script
 const DIR = path.resolve(__dirname, 'test-results');
 const OUTPUT = path.join(DIR, 'statistic.tsv');
 const REPORT_IMG_DIR = path.resolve(__dirname, 'test-results', 'img');
@@ -15,7 +15,7 @@ const MERGED_LISTS_PATH = path.resolve(
   'merged_lists_tw.json',
 );
 
-// 正規化 URL 以便比對（移除 protocol、trailing slash、www. 前綴、轉小寫）
+// Normalize URL for comparison (strip protocol, trailing slash, www., lowercase)
 function normalizeUrl(url) {
   if (!url) return '';
   let normalized = url
@@ -23,7 +23,7 @@ function normalizeUrl(url) {
     .replace(/\/$/, '')
     .toLowerCase();
 
-  // 移除 www. 前綴（僅當開頭是 www. 時）
+  // Strip www. prefix when present
   if (normalized.startsWith('www.')) {
     normalized = normalized.substring(4);
   }
@@ -38,7 +38,7 @@ function parseReportDate(args = process.argv.slice(2)) {
     if (/^\d{4}-\d{2}-\d{2}$/.test(input)) {
       return input;
     }
-    throw new Error(`無效日期格式：${input}，請使用 YYYY-MM-DD`);
+    throw new Error(`Invalid date format: ${input}; use YYYY-MM-DD`);
   }
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -52,7 +52,7 @@ function parseDataCutoffDate(args = process.argv.slice(2)) {
   if (dataIndex === -1 || !args[dataIndex + 1]) return null;
   const input = args[dataIndex + 1].trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input)) {
-    throw new Error(`無效 --data 日期格式：${input}，請使用 YYYY-MM-DD`);
+    throw new Error(`Invalid --data date format: ${input}; use YYYY-MM-DD`);
   }
   return input;
 }
@@ -131,42 +131,46 @@ function renderOverallResultSvg(overall, reportDate) {
   const radius = 294;
   const total = overall.total || 1;
 
+  const CATEGORY_IMMOBILE = 'Immobile';
+  const CATEGORY_INTL_CLOUD = 'Intl. cloud';
+  const CATEGORY_RELOCATABLE = 'Relocatable';
+
   const segments = [
     {
-      label: '不會動',
+      label: CATEGORY_IMMOBILE,
       count: overall.highRisk,
       color: '#DC2626',
     },
     {
-      label: '國際雲',
+      label: CATEGORY_INTL_CLOUD,
       count: overall.uncertain,
       color: '#F59E0B',
     },
     {
-      label: '可能會動',
+      label: CATEGORY_RELOCATABLE,
       count: overall.localized,
       color: '#3B82F6',
     },
   ];
 
   const labelLayout = {
-    不會動: { textX: 1140, lineEndX: 1140, textTopY: 322, lineY: 338 },
-    國際雲: { textX: 72, lineEndX: 72, textTopY: 404, lineY: 420 },
-    可能會動: { textX: 72, lineEndX: 72, textTopY: 170, lineY: 140 },
+    [CATEGORY_IMMOBILE]: { textX: 1140, lineEndX: 1140, textTopY: 322, lineY: 338 },
+    [CATEGORY_INTL_CLOUD]: { textX: 72, lineEndX: 72, textTopY: 404, lineY: 420 },
+    [CATEGORY_RELOCATABLE]: { textX: 72, lineEndX: 72, textTopY: 170, lineY: 140 },
   };
   const textOffsetByLabel = {
-    國際雲: 0,
-    可能會動: 46,
+    [CATEGORY_INTL_CLOUD]: 0,
+    [CATEGORY_RELOCATABLE]: 46,
   };
   const lineAnchorYOffsetByLabel = {
-    國際雲: 24,
+    [CATEGORY_INTL_CLOUD]: 24,
   };
   const textAnchorYOffsetByLabel = {
-    國際雲: 24,
-    可能會動: 0,
+    [CATEGORY_INTL_CLOUD]: 24,
+    [CATEGORY_RELOCATABLE]: 0,
   };
   const horizontalLineYOffsetByLabel = {
-    可能會動: 4,
+    [CATEGORY_RELOCATABLE]: 4,
   };
   const globalLineYOffset = 4;
   const labelFontSize = 48;
@@ -193,7 +197,7 @@ function renderOverallResultSvg(overall, reportDate) {
 
     const midAngle = startAngle + angle / 2;
     const layout = labelLayout[segment.label];
-    const textAnchor = segment.label === '不會動' ? 'end' : 'start';
+    const textAnchor = segment.label === CATEGORY_IMMOBILE ? 'end' : 'start';
     const lineSide = layout.textX > cx ? 'right' : 'left';
     const dotRadius = radius - 16;
     const dotX = cx + dotRadius * Math.cos(midAngle);
@@ -247,7 +251,7 @@ async function renderSvgToPng(svgContent, outputPath) {
     await page.setContent(svgContent, { waitUntil: 'domcontentloaded' });
     const svgHandle = await page.$('svg');
     if (!svgHandle) {
-      throw new Error('無法在 SVG 內容中找到 <svg> 節點');
+      throw new Error('Could not find <svg> node in SVG content');
     }
     await svgHandle.screenshot({
       path: outputPath,
@@ -508,10 +512,10 @@ function renderOverallResultTsv(overall) {
   const total = overall.total || 0;
   const lines = [
     'category\tcount\tpercent',
-    ['不會動', String(overall.highRisk), formatPercent(overall.highRisk, total)].join('\t'),
-    ['國際雲', String(overall.uncertain), formatPercent(overall.uncertain, total)].join('\t'),
-    ['可能會動', String(overall.localized), formatPercent(overall.localized, total)].join('\t'),
-    ['全部', String(total), formatPercent(total, total)].join('\t'),
+    ['Immobile', String(overall.highRisk), formatPercent(overall.highRisk, total)].join('\t'),
+    ['Intl. cloud', String(overall.uncertain), formatPercent(overall.uncertain, total)].join('\t'),
+    ['Relocatable', String(overall.localized), formatPercent(overall.localized, total)].join('\t'),
+    ['Total', String(total), formatPercent(total, total)].join('\t'),
   ];
   return `${lines.join('\n')}\n`;
 }
@@ -551,11 +555,11 @@ function renderDependencyBreakdownTsv(breakdown) {
   const { total, counts } = breakdown;
   const fmt = (count) => `${count} (${formatPercent(count, total)})`;
   const lines = [
-    '類型\t境內\t境外\t總計',
-    ['公有雲', fmt(counts.publicCloudDomestic), fmt(counts.publicCloudForeign), fmt(counts.publicCloudTotal)].join('\t'),
-    ['非雲', fmt(counts.directDomestic), fmt(counts.directForeign), fmt(counts.directTotal)].join('\t'),
-    ['總計', fmt(counts.totalDomestic), fmt(counts.totalForeign), ''].join('\t'),
-    ['僅用到境外資源', '', fmt(counts.foreignOnly), ''].join('\t'),
+    'type\tdomestic\tforeign\ttotal',
+    ['Public cloud', fmt(counts.publicCloudDomestic), fmt(counts.publicCloudForeign), fmt(counts.publicCloudTotal)].join('\t'),
+    ['Non-cloud', fmt(counts.directDomestic), fmt(counts.directForeign), fmt(counts.directTotal)].join('\t'),
+    ['Total', fmt(counts.totalDomestic), fmt(counts.totalForeign), ''].join('\t'),
+    ['Foreign-only', '', fmt(counts.foreignOnly), ''].join('\t'),
   ];
   return `${lines.join('\n')}\n`;
 }
@@ -567,7 +571,7 @@ async function main() {
   const reportDate = parseReportDate();
   const dataCutoffDate = parseDataCutoffDate(args);
 
-  // 讀取 merged_lists_tw.json 建立順序映射
+  // Load merged_lists_tw.json for sort order
   const orderMap = new Map();
   const orderedUrls = [];
   try {
@@ -584,23 +588,23 @@ async function main() {
     });
   } catch (err) {
     console.error(
-      `無法讀取 merged_lists_tw.json：${err.message}，將使用檔案名稱排序`,
+      `Failed to read merged_lists_tw.json: ${err.message}; falling back to filename sort`,
     );
   }
 
   const entries = await fs.promises.readdir(DIR, { withFileTypes: true });
 
-  // 只取目錄下的 JSON 檔案（不含子目錄）
+  // JSON files in test-results root only (no subdirs)
   const jsonFiles = entries
     .filter(
       (e) =>
         e.isFile() &&
         e.name.toLowerCase().endsWith('.json') &&
-        !e.name.startsWith('.') // 排除 .DS_Store 等
+        !e.name.startsWith('.') // skip .DS_Store etc.
     )
     .map((e) => e.name);
 
-  // 收集所有資料
+  // Collect rows
   const dataMap = new Map();
   const jsonDataset = [];
 
@@ -613,7 +617,7 @@ async function main() {
       data = JSON.parse(content);
       jsonDataset.push(data);
     } catch (err) {
-      console.error(`無法讀取或解析 JSON：${file}`, err.message);
+      console.error(`Failed to read or parse JSON: ${file}`, err.message);
       continue;
     }
 
@@ -647,12 +651,12 @@ async function main() {
     });
   }
 
-  // 按照 merged_lists_tw.json 的順序排序
+  // Sort by merged_lists_tw.json order
   const sortedData = orderedUrls
     .filter((normalizedUrl) => dataMap.has(normalizedUrl))
     .map((normalizedUrl) => dataMap.get(normalizedUrl));
 
-  // 如果 merged_lists_tw.json 中沒有，但 test-results 中有，則附加在最後
+  // Append test-results-only URLs not in merged list
   const remainingData = Array.from(dataMap.entries())
     .filter(([normalizedUrl]) => !orderMap.has(normalizedUrl))
     .map(([, data]) => data);
@@ -670,13 +674,13 @@ async function main() {
     });
     snapshotDate = dataCutoffDate;
     console.log(
-      `已啟用 --data=${dataCutoffDate}，使用該日期（含）以前資料：${allData.length} 筆`
+      `--data=${dataCutoffDate} enabled; using data on or before that date: ${allData.length} row(s)`
     );
   }
 
   const lines = [];
 
-  // 標題列
+  // Header row
   lines.push(
     [
       'url',
@@ -693,7 +697,7 @@ async function main() {
     ].join('\t'),
   );
 
-  // 輸出資料
+  // Data rows
   for (const data of allData) {
     lines.push(
       [
@@ -713,13 +717,13 @@ async function main() {
   }
 
   await fs.promises.writeFile(OUTPUT, lines.join('\n'), 'utf8');
-  console.log(`已產生 TSV：${OUTPUT}`);
-  console.log(`共處理 ${allData.length} 筆資料`);
+  console.log(`Wrote TSV: ${OUTPUT}`);
+  console.log(`Processed ${allData.length} row(s)`);
 
   const overall = countOverallCategories(allData);
   const overallTsv = renderOverallResultTsv(overall);
   await fs.promises.writeFile(OVERALL_RESULT_TSV, overallTsv, 'utf8');
-  console.log(`已產生統計：${OVERALL_RESULT_TSV}`);
+  console.log(`Wrote stats: ${OVERALL_RESULT_TSV}`);
   const dependencyBreakdown = countDependencyBreakdown(allData);
   const dependencyBreakdownTsv = renderDependencyBreakdownTsv(
     dependencyBreakdown
@@ -729,7 +733,7 @@ async function main() {
     dependencyBreakdownTsv,
     'utf8'
   );
-  console.log(`已產生統計：${DEPENDENCY_BREAKDOWN_TSV}`);
+  console.log(`Wrote stats: ${DEPENDENCY_BREAKDOWN_TSV}`);
   const overallSvg = renderOverallResultSvg(overall, snapshotDate);
   await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
   const overallSvgPath = path.join(
@@ -737,20 +741,20 @@ async function main() {
     `overall-result-${snapshotDate}.svg`
   );
   await fs.promises.writeFile(overallSvgPath, overallSvg, 'utf8');
-  console.log(`已產生圖表：${overallSvgPath}`);
+  console.log(`Wrote chart: ${overallSvgPath}`);
   const overallPngPath = path.join(
     REPORT_IMG_DIR,
     `overall-result-${snapshotDate}.png`
   );
   await renderSvgToPng(overallSvg, overallPngPath);
-  console.log(`已產生圖表：${overallPngPath}`);
+  console.log(`Wrote chart: ${overallPngPath}`);
   if (!hasDateArg && !hasDataArg) {
     const latestOverallSvgPath = path.join(REPORT_IMG_DIR, 'overall-result.svg');
     await fs.promises.writeFile(latestOverallSvgPath, overallSvg, 'utf8');
-    console.log(`已產生圖表：${latestOverallSvgPath}`);
+    console.log(`Wrote chart: ${latestOverallSvgPath}`);
     const latestOverallPngPath = path.join(REPORT_IMG_DIR, 'overall-result.png');
     await renderSvgToPng(overallSvg, latestOverallPngPath);
-    console.log(`已產生圖表：${latestOverallPngPath}`);
+    console.log(`Wrote chart: ${latestOverallPngPath}`);
   }
 
   const resourceDistribution = countResourceDistribution(jsonDataset);
@@ -762,7 +766,7 @@ async function main() {
     resourceDistributionTsv,
     'utf8'
   );
-  console.log(`已產生統計：${RESOURCE_DISTRIBUTION_TSV}`);
+  console.log(`Wrote stats: ${RESOURCE_DISTRIBUTION_TSV}`);
 
   const resourceSvg = renderResourceDistributionSvg(
     resourceDistribution,
@@ -773,21 +777,21 @@ async function main() {
     `resource-distribution-${snapshotDate}.svg`
   );
   await fs.promises.writeFile(resourceSvgPath, resourceSvg, 'utf8');
-  console.log(`已產生圖表：${resourceSvgPath}`);
+  console.log(`Wrote chart: ${resourceSvgPath}`);
   if (!hasDateArg && !hasDataArg) {
     const latestResourceSvgPath = path.join(
       REPORT_IMG_DIR,
       'resource-distribution.svg'
     );
     await fs.promises.writeFile(latestResourceSvgPath, resourceSvg, 'utf8');
-    console.log(`已產生圖表：${latestResourceSvgPath}`);
+    console.log(`Wrote chart: ${latestResourceSvgPath}`);
   }
 }
 
-// 如果直接執行此檔案（不是被 require）
+// When run directly (not required)
 if (require.main === module) {
   main().catch((err) => {
-    console.error('執行失敗：', err);
+    console.error('Run failed:', err);
     process.exit(1);
   });
 }

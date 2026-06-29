@@ -1,8 +1,8 @@
-// 從 test-results 中匯出所有 RTT 樣本成 CSV
-// 使用方式：
+// Export all RTT samples from test-results to CSV
+// Usage:
 //   node export-rtt-csv.js
 //
-// 會在專案根目錄產生 rtt.csv，欄位為：
+// Writes rtt.csv in the project root with columns:
 // file, originalUrl, domain, ip, ipinfo_country, cloud_country, detection_method, rtt
 
 const fs = require('fs');
@@ -29,15 +29,15 @@ function csvEscape(value) {
 
 function main() {
     if (!fs.existsSync(TEST_RESULTS_DIR)) {
-        console.error(`找不到目錄：${TEST_RESULTS_DIR}`);
+        console.error(`Directory not found: ${TEST_RESULTS_DIR}`);
         process.exit(1);
     }
 
     const files = listResultFiles(TEST_RESULTS_DIR);
-    console.log(`掃描檔案數量：${files.length}`);
+    console.log(`Scanning ${files.length} file(s)`);
 
     const rows = [];
-    // CSV 標題列
+    // CSV header
     rows.push([
         'file',
         'originalUrl',
@@ -55,7 +55,7 @@ function main() {
         try {
             data = JSON.parse(content);
         } catch (e) {
-            console.warn(`無法解析 JSON：${filePath}，略過`);
+            console.warn(`Invalid JSON: ${filePath}; skipping`);
             continue;
         }
 
@@ -95,10 +95,9 @@ function main() {
     }
 
     fs.writeFileSync(OUTPUT_CSV, rows.join('\n'), 'utf8');
-    console.log(`已輸出 RTT CSV：${OUTPUT_CSV}`);
+    console.log(`Wrote RTT CSV: ${OUTPUT_CSV}`);
 }
 
 if (require.main === module) {
     main();
 }
-
