@@ -79,6 +79,34 @@ function delay(ms) {
 }
 
 /**
+ * Delete previous success/result JSON files in test-results/ root.
+ * Keeps subdirectories such as _logs and _error untouched.
+ * @returns {Promise<number>} number of files removed
+ */
+async function cleanTestResults(resultsDir = path.join(__dirname, 'test-results')) {
+    let entries;
+    try {
+        entries = await fs.readdir(resultsDir, { withFileTypes: true });
+    } catch (err) {
+        if (err.code === 'ENOENT') {
+            return 0;
+        }
+        throw err;
+    }
+
+    const targets = entries.filter(
+        (e) => e.isFile() && e.name.toLowerCase().endsWith('.json') && !e.name.startsWith('.')
+    );
+
+    let removed = 0;
+    for (const entry of targets) {
+        await fs.unlink(path.join(resultsDir, entry.name));
+        removed += 1;
+    }
+    return removed;
+}
+
+/**
  * Batch test websites
  */
 async function batchTest(options = {}) {
@@ -97,11 +125,18 @@ async function batchTest(options = {}) {
         testListPath,
         debug = false,
         timeout = 120000,
+        cleanResults = false,
         argument = null
     } = options;
 
     if (!testListPath) {
         throw new Error('Test list file path is required');
+    }
+
+    if (cleanResults && startFrom > 0) {
+        throw new Error(
+            '--clean-results cannot be combined with --start-from > 0 (would delete results then skip early sites)'
+        );
     }
 
     console.log('='.repeat(60));
@@ -112,8 +147,16 @@ async function batchTest(options = {}) {
     console.log(`Concurrency: ${concurrency}`);
     console.log(`Start index: ${startFrom}`);
     console.log(`Request delay: ${delayMs}ms`);
+    console.log(`Clean prior results: ${cleanResults ? 'yes' : 'no'}`);
     console.log('='.repeat(60));
     console.log('');
+
+    if (cleanResults) {
+        console.log('Cleaning prior test-results/*.json ...');
+        const removed = await cleanTestResults();
+        console.log(`Removed ${removed} result file(s) (subdirs _logs/_error kept)`);
+        console.log('');
+    }
 
     // Load website list
     console.log('Loading website list...');
@@ -270,7 +313,8 @@ async function batchTest(options = {}) {
                 adblockUrls,
                 useCache,
                 headless,
-                timeout
+                timeout,
+                cleanResults
             },
             statistics: {
                 total: stats.total,
@@ -329,6 +373,7 @@ if (require.main === module) {
     let headless = undefined;
     let debug = false;
     let timeout = 120000; // Default 120 seconds
+    let cleanResults = false;
 
     // Parse --limit
     const limitIndex = args.indexOf('--limit');
@@ -408,6 +453,9 @@ if (require.main === module) {
     // Parse --debug
     debug = args.includes('--debug');
 
+    // Parse --clean-results (opt-in wipe of test-results/*.json before batch)
+    cleanResults = args.includes('--clean-results');
+
     // Parse --timeout
     const timeoutIndex = args.indexOf('--timeout');
     if (timeoutIndex !== -1 && args[timeoutIndex + 1]) {
@@ -418,7 +466,8 @@ if (require.main === module) {
     const validOptions = [
         '--limit', '--start-from', '--delay', '--concurrency',
         '--dns', '--ipinfo-token', '--adblock', '--adblock-url',
-        '--cache', '--headless', '--debug', '--timeout', '--help', '-h'
+        '--cache', '--headless', '--debug', '--clean-results',
+        '--timeout', '--help', '-h'
     ];
     const optionsWithValue = [
         '--limit', '--start-from', '--delay', '--concurrency',
@@ -482,6 +531,7 @@ if (require.main === module) {
         console.log('  --cache false          Disable cache; force refresh adblock and ipinfo (default: true)');
         console.log('  --headless true        Headless browser (default: headed, visible window)');
         console.log('  --debug                Debug mode with verbose output');
+        console.log('  --clean-results        Delete test-results/*.json before run (keeps _logs/_error)');
         console.log('  --timeout N            Page load timeout in seconds (default: 120)');
         console.log('  --help, -h             Show this help');
         console.log('');
@@ -490,6 +540,7 @@ if (require.main === module) {
         console.log('  node batch-test.js --limit 50 --start-from 10 --delay 3000 top-traffic-list-taiwan/merged_lists_tw.json');
         console.log('  node batch-test.js --limit 100 --dns 8.8.8.8 --ipinfo-token your_token top-traffic-list-taiwan/merged_lists_tw.json');
         console.log('  node batch-test.js --debug --adblock-url https://filter.futa.gg/hosts_abp.txt --limit 10 top-traffic-list-taiwan/merged_lists_tw.json');
+        console.log('  node batch-test.js --clean-results --headless true top-traffic-list-taiwan/merged_lists_tw.json');
         process.exit(0);
     }
 
@@ -518,6 +569,7 @@ if (require.main === module) {
             testListPath,
             debug,
             timeout,
+            cleanResults,
             argument: formatCommandLineDisplay(process.argv)
         }))
         .catch(error => {
