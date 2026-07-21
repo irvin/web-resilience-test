@@ -120,10 +120,6 @@
     "url": "https://watchout.tw"
   },
   {
-    "website": "www.article19.org",
-    "url": "https://www.article19.org"
-  },
-  {
     "website": "www.awakening.org.tw",
     "url": "https://www.awakening.org.tw"
   },
@@ -140,32 +136,12 @@
     "url": "https://www.freiheit.org"
   },
   {
-    "website": "www.laf.org.tw",
-    "url": "https://www.laf.org.tw"
-  },
-  {
-    "website": "www.mc.ntu.edu.tw",
-    "url": "https://www.mc.ntu.edu.tw"
+    "website": "laf.org.tw",
+    "url": "https://laf.org.tw"
   },
   {
     "website": "www.moi.gov.tw",
-    "url": "https://www.moi.gov.tw"
-  },
-  {
-    "website": "www.nsysu.edu.tw",
-    "url": "https://www.nsysu.edu.tw"
-  },
-  {
-    "website": "www.nthu.edu.tw",
-    "url": "https://www.nthu.edu.tw"
-  },
-  {
-    "website": "www.ntu.edu.tw",
-    "url": "https://www.ntu.edu.tw"
-  },
-  {
-    "website": "www.stust.edu.tw",
-    "url": "https://www.stust.edu.tw"
+    "url": "https://moi.gov.tw"
   },
   {
     "website": "www.twrf.org.tw",
