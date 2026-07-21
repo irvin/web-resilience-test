@@ -4,13 +4,14 @@
 ### Authors
 
 Irvin Chen (陳心一)  
+ORCID: [https://orcid.org/0009-0002-1059-7130](https://orcid.org/0009-0002-1059-7130)  
 Open Culture Foundation ([ocf.tw](https://ocf.tw))  
 MozTW, Mozilla Taiwan Community ([moztw.org](https://moztw.org))  
 
 ### Dates
 
 Published: 2026-05-22  
-Last Updated: 2026-07-21
+Last Updated: 2026-07-22
 
 ### Acknowledgments
 

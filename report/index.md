@@ -3,14 +3,15 @@
 
 ### 作者
 
-陳心一 Irvin Chen   
+陳心一 Irvin Chen  
+ORCID: [https://orcid.org/0009-0002-1059-7130](https://orcid.org/0009-0002-1059-7130)  
 開放文化基金會 Open Culture Foundation ([ocf.tw](https://ocf.tw))  
 MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))  
 
 ### 更新日期
 
 Published: 2026-03-23  
-Last Updated: 2026-07-21
+Last Updated: 2026-07-22
 
 ### 誌謝
 

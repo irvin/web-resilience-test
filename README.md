@@ -448,9 +448,9 @@ api.example.com: X (US (Amazon))
 
 During the ISIF research project (through 31 December 2026), this project is licensed under [CC BY-NC-ND 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/) (Attribution—NonCommercial—NoDerivatives 4.0).
 
-After 31 December 2026, project data and scripts will be released to the public domain. For uses beyond CC BY-NC-ND 4.0 during the research period, contact Irvin Chen (Open Culture Foundation): irvin@moztw.org (cc hi@ocf.tw).
+After 31 December 2026, project data and scripts will be released to the public domain. For uses beyond CC BY-NC-ND 4.0 during the research period, contact Irvin Chen (Open Culture Foundation; ORCID: [https://orcid.org/0009-0002-1059-7130](https://orcid.org/0009-0002-1059-7130)): irvin@ocf.tw (cc hi@ocf.tw).
 
-Full terms and suggested attribution are in [LICENSE](LICENSE).
+Full terms and suggested attribution are in [LICENSE](LICENSE). See also [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
 
 ## 🙏 Acknowledgments
 

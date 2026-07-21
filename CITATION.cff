@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: "If you use this software, data, or report, please cite it as below."
+title: "web-resilience-test"
+abstract: "Tools and reports for measuring Taiwanese website resilience under international submarine-cable disruption scenarios."
+authors:
+  - family-names: Chen
+    given-names: Irvin
+    orcid: "https://orcid.org/0009-0002-1059-7130"
+    affiliation: "Open Culture Foundation"
+    email: "irvin@ocf.tw"
+license: CC-BY-NC-ND-4.0
+repository-code: "https://github.com/irvin/web-resilience-test"
+url: "https://resilience.ocf.tw/web/"
+preferred-citation:
+  type: report
+  title: "When Submarine Cables Go Dark: Understanding and Preparing for the Risks of Taiwan's International Internet Disconnection"
+  authors:
+    - family-names: Chen
+      given-names: Irvin
+      orcid: "https://orcid.org/0009-0002-1059-7130"
+      affiliation: "Open Culture Foundation"
+  year: 2026
+  url: "https://resilience.ocf.tw/web/report/"
+references:
+  - type: conference-paper
+    title: "Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation"
+    authors:
+      - family-names: "Le Pochat"
+        given-names: Victor
+      - family-names: "Van Goethem"
+        given-names: Tom
+      - family-names: Tajalizadehkhoob
+        given-names: Samaneh
+      - family-names: Korczyński
+        given-names: Maciej
+      - family-names: Joosen
+        given-names: Wouter
+    year: 2019
+    conference:
+      name: "Network and Distributed System Security Symposium (NDSS 2019)"
+    doi: "10.14722/ndss.2019.23386"
+  - type: conference-paper
+    title: "LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System"
+    authors:
+      - family-names: Hendriks
+        given-names: Remi
+      - family-names: Luckie
+        given-names: Matthew
+      - family-names: Jonker
+        given-names: Mattijs
+      - family-names: Sommese
+        given-names: Raffaele
+      - family-names: "van Rijswijk-Deij"
+        given-names: Roland
+    year: 2025
+    conference:
+      name: "ACM Internet Measurement Conference (IMC 2025)"
+    start: 445
+    end: 461
+    doi: "10.1145/3730567.3764484"

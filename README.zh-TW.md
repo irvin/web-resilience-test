@@ -452,9 +452,9 @@ api.example.com: X (US (Amazon))
 
 本專案在 ISIF 研究專案期間（2026 年 12 月 31 日前）採用 [CC BY-NC-ND 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/)（姓名標示─非商業性─禁止改作 4.0 國際）。
 
-2026 年 12 月 31 日後，本專案之資料與腳本將釋出至公有領域（Public Domain）。研究期間若需超出 CC BY-NC-ND 4.0 限制之使用，請聯絡 Irvin Chen（Open Culture Foundation）：irvin@moztw.org（請 cc hi@ocf.tw）。
+2026 年 12 月 31 日後，本專案之資料與腳本將釋出至公有領域（Public Domain）。研究期間若需超出 CC BY-NC-ND 4.0 限制之使用，請聯絡 Irvin Chen（Open Culture Foundation；ORCID：[https://orcid.org/0009-0002-1059-7130](https://orcid.org/0009-0002-1059-7130)）：irvin@ocf.tw（請 cc hi@ocf.tw）。
 
-完整條款與建議署名格式請見 [LICENSE](LICENSE)。
+完整條款與建議署名格式請見 [LICENSE](LICENSE)。機器可讀引用資訊見 [`CITATION.cff`](CITATION.cff)。
 
 ## 🙏 致謝
 

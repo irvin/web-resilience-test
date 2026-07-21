@@ -111,6 +111,7 @@ section.tables-slide > ul {
 ![bg right:38% contain](img/text-report-qr.png)
 
 Irvin Chen  
+ORCID: [https://orcid.org/0009-0002-1059-7130](https://orcid.org/0009-0002-1059-7130)  
 Open Culture Foundation  
 
 Report: [`resilience.ocf.tw/web/report`](https://resilience.ocf.tw/web/report/) →
