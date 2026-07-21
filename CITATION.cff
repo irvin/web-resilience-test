@@ -21,6 +21,7 @@ preferred-citation:
       affiliation: "Open Culture Foundation"
   year: 2026
   url: "https://resilience.ocf.tw/web/report/"
+  notes: "Supported by a grant from the APNIC Foundation (ROR: https://ror.org/01y4y6h16), via the Information Society Innovation Fund (ISIF Asia)."
 references:
   - type: conference-paper
     title: "Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation"

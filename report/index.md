@@ -16,7 +16,7 @@ Last Updated: 2026-07-22
 ### 誌謝
 
 <img src="img/APNIC-Foundation-and-ISIF-Logo-CMYK-stacked-01-a.svg" alt="" style="height: 100px;" /><br>
-This work was supported by a grant from the [APNIC Foundation](https://apnic.foundation/), via the [Information Society Innovation Fund (ISIF Asia)](https://apnic.foundation/home/isifasia/).
+This work was supported by a grant from the [APNIC Foundation](https://apnic.foundation/) ([ROR: 01y4y6h16](https://ror.org/01y4y6h16)), via the [Information Society Innovation Fund (ISIF Asia)](https://apnic.foundation/home/isifasia/).
 
 <p><a title="g0v 數位韌性松" href="https://g0v.hackmd.io/@paulpengtw/DigiResiTh0n-home" target="_blank"><img src="img/g0v_logo.svg" alt="" style="height: 3em;"></a>
 </p>

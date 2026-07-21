@@ -454,4 +454,4 @@ Full terms and suggested attribution are in [LICENSE](LICENSE). See also [`CITAT
 
 ## 🙏 Acknowledgments
 
-This work was supported by a grant from the APNIC Foundation, via the Information Society Innovation Fund (ISIF Asia).
+This work was supported by a grant from the [APNIC Foundation](https://apnic.foundation/) ([ROR: 01y4y6h16](https://ror.org/01y4y6h16)), via the Information Society Innovation Fund (ISIF Asia).
