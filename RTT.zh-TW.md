@@ -37,95 +37,48 @@ const RTT_THRESHOLD = 15;
      - 設定 `cloud_provider.detection_method = 'rtt'`
      - 記錄 `cloud_provider.rtt` 數值（供後續分析使用）
 
-4. **如果 RTT 測試失敗**：在 `cloud_provider` 中記錄失敗資訊（不影響境內/境外分類）：
+4. **如果 RTT 測試失敗**：在 `cloud_provider` 中記錄失敗資訊；由於沒有取得台灣位置的正面證據，該 endpoint 維持 `foreign/cloud` 分類：
    - 設定 `cloud_provider.detection_method = 'rtt'`
    - 設定 `cloud_provider.rtt = null`
    - 設定 `cloud_provider.rtt_error` 為簡短原因：`timeout`、`no_response`、`parse_error` 或 `command_failed`
 
 ## 使用 15ms 作為門檻的選擇依據
 
-RTT 是網路封包從發送端到接收端再返回所需的時間。我們對測試數據中的共 2245 筆 RTT 數值資料進行統計，結果如下：
+RTT 是網路封包從發送端到接收端再返回所需的時間。目前資料共有 3,640 筆網站—hostname observation 進入 RTT fallback，其中 3,064 筆成功取得數字最小 RTT。同一網站載入時，對同一 hostname 的多筆 request 會先去重；同一 hostname 若出現在不同網站，則各自計算。
 
 ### 統計資料
 
-平均值	46.96230869ms
-中位數	6.066ms
-最大值	417.717ms
+| 指標 | 數值 |
+|---|---:|
+| 平均值 | 20.837ms |
+| 中位數 | 6.867ms |
+| p90 | 61.361ms |
+| 最大值 | 316.711ms |
 
-分群計數
-ms	count
-<2ms	0
-2~4ms	72
-4~6	1041
-6~8	106
-8~10	14
-12		2
-14		0
-16		2
-18		2
-20		4
-25		4
-30		6
-35		68
-40		152
-45		58
-50		67
-60		63
-70		28
-80		1
-90		6
-100	4
-110	4
-120	1
-130	29
-140	329
-150	111
-160	14
-170	3
-180	5
-190	5
-200	14
-220	16
-240	3
-260	1
-280	4
-300	5
-350	0
-400	0
-<450ms	1
-
-百分位	數值
-p10	4.2894
-p15	4.4616
-p20	4.603
-p25	4.75675
-p30	4.8813
-p35	5.02735
-p40	5.2126
-p45	5.4673
-p50	6.057
-p55	9.279
-p60	35.315
-p65	38.3235
-p70	49.3116
-p75	65.93
-p80	134.1582
-p85	135.85385
-p90	137.2175
-p95	142.74965
+| 最小 RTT 區間 | 數量 | 成功 RTT 占比 |
+|---:|---:|---:|
+| 0–<5ms | 206 | 6.7% |
+| 5–<10ms | 2,090 | 68.2% |
+| 10–<15ms | 98 | 3.2% |
+| 15–<20ms | 12 | 0.4% |
+| 20–<30ms | 20 | 0.7% |
+| 30–<50ms | 270 | 8.8% |
+| 50–<100ms | 247 | 8.1% |
+| 100–<200ms | 100 | 3.3% |
+| ≥200ms | 21 | 0.7% |
 
 ### 分析
 
-根據以下散布圖及上述統計資料，可以發現有三個集中群，分別是： 2~10ms、30~70ms、120~160ms
+10–30ms 的過渡區間共有 130 筆（成功 RTT 的 4.2%）。本研究在此相對稀疏區間內採用較保守的 `RTT < 15ms` 條件，以降低把低延遲的鄰近境外節點誤判為境內的風險。
 
-![RTT 散佈圖](./images/rtt-distribution.png)
+![RTT distribution](./graphs/rtt_scatter-plot.svg)
 
-第一區間的數值明顯為境內資源，因此我們呈現雙峰分布的谷底中點 15ms 作為研判資源是否來自雲端服務境內節點的門檻值。
+網站層級的 sensitivity analysis 顯示，在 10、15、20ms 三種門檻下，共有 2,147／2,179 個網站（98.5%）維持相同分類。相較 15ms，10ms 會使 27 個網站（1.2%）改判，20ms 則使 5 個網站（0.2%）改判。
 
 ## 潛在限制
 
 1. **測試環境依賴**：此數值依賴當地的網路環境結構，如果無法適用於台灣以外的國家或地區。
-2. **邊緣情況**：對於雙峰谷底的 10~30ms 區間，共有 20 個資料點，這些連線的境內境外判定則可能有誤。
+2. **邊緣情況**：RTT 本身並非地理位置 ground truth；10–30ms 過渡區間內的 130 筆 observation 具有較高的不確定性。
 
 ## 後續改進方向
 
@@ -133,17 +86,14 @@ p95	142.74965
 
 ### 2. 分層判讀
 
-對於難以分類的 10~30ms 區間，採用信心度作為更細緻的分層：
-- **RTT < 15ms**：幾乎肯定在台灣（高信心）
-- **15ms ≤ RTT < 25ms**：可能在台灣（中信心）
-- **RTT ≥ 25ms**：傾向國外（低信心）
+對於難以分類的 10–30ms 區間，後續版本可結合其他獨立的位置證據，而不是把 latency 視為地理位置 ground truth。
 
 ## 相關工具與檔案
 
 ### 分析工具
 
 1. **`export-rtt-csv.js`**
-   - 用途：匯出所有 RTT 測試結果為 CSV 格式
+   - 用途：匯出所有 RTT fallback observation（包含失敗紀錄）為 CSV 格式
    - 使用方式：`node export-rtt-csv.js`
    - 輸出：`rtt.csv`，包含所有 RTT 測試的詳細資訊
 
@@ -152,16 +102,23 @@ p95	142.74965
 1. **`rtt.csv`**
    - 格式：CSV，包含以下欄位：
      - `file`：來源 JSON 檔名
-     - `originalUrl`：原始測試 URL
+     - `site_url`：受測網站 URL
+     - `original_url`：移除 query string 與 fragment 後的資源 request URL
      - `domain`：ipinfo.domain
      - `ip`：ipinfo.ip
      - `ipinfo_country`：ipinfo.country
      - `cloud_country`：cloud_provider.country（若有，通常是 `tw`）
-     - `detection_method`：檢測方法（`header`、`laces` 或 `rtt`）
-     - `rtt`：實際 RTT 數值（毫秒），失敗時為 `null`
+     - `category`：依目前門檻得到的最終 domain 分類
+     - `detection_method`：`rtt`
+     - `rtt`：實際 RTT 數值（毫秒），失敗時留白
      - `rtt_error`：RTT 失敗時的失敗原因（`timeout`、`no_response`、`parse_error`、`command_failed`）
 
-2. **`test-results/*.json`**
+2. **自動產生的 RTT 統計檔案**
+   - `test-results/rtt-summary.tsv`：fallback 覆蓋範圍與結果計數
+   - `test-results/rtt-distribution.tsv`：成功 RTT 的區間分布
+   - `test-results/rtt-threshold-sensitivity.tsv`：10、15、20ms 下的網站分類
+
+3. **`test-results/*.json`**
    - 每個網站的測試結果 JSON 檔案
    - 包含 `domainDetails` 陣列，每個元素可能包含 `cloud_provider.rtt`、`cloud_provider.laces`、`cloud_provider.detection_method`，以及 RTT 失敗時的 `cloud_provider.rtt_error`
 
@@ -174,4 +131,4 @@ p95	142.74965
 
 ---
 
-*最後更新：2026-06-27*
+*最後更新：2026-07-22*

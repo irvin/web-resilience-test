@@ -52,6 +52,7 @@ Among 2,179 websites commonly used in Taiwan that we tested, 39.3% are “foreig
 - [Implementation and data processing](#implementation-and-data-processing)
   - [Collecting test data](#collecting-test-data)
   - [Single-site test flow](#single-site-test-flow)
+  - [RTT classification coverage and threshold sensitivity](#rtt-classification-coverage-and-threshold-sensitivity)
   - [Batch test flow](#batch-test-flow)
   - [Per-site result pages](#per-site-result-pages)
 - [Results](#results)
@@ -333,6 +334,50 @@ Results are aggregated into summary tables.
        - `Cloudflare challenge`: target site uses Cloudflare's challenge protection mechanism to prevent abuse.
        - `HTTP 4xx`
        - `Timeout`
+
+### RTT classification coverage and threshold sensitivity
+
+<!-- `generate_statistic.js` computes these values from `test-results/*.json` and writes `test-results/rtt-summary.tsv`, `test-results/rtt-distribution.tsv`, and `test-results/rtt-threshold-sensitivity.tsv`; `export-rtt-csv.js` writes the observation-level RTT fallback records to `rtt.csv`. -->
+
+RTT is the final stage of location classification: a public-cloud resource enters RTT only when IPinfo, response headers, and LACeS cannot determine its location. The test tool pings the resource five times and uses the minimum RTT; below 15 ms, it is classified as an international public-cloud node in Taiwan.
+
+Across 2,179 successfully tested websites, the browser recorded 262,926 raw HTTP requests. After excluding advertising and other filtered items and deduplicating hostnames within each site, 19,046 resources remained for classification. Of these, 1,243 sites entered the RTT stage, covering 976 distinct hostnames and 3,640 observations; details are in the table below.
+
+| Metric                 |  Count | Share                          |
+|:-----------------------|-------:|--------------------------------|
+| Sites tested           |  2,179 |                                |
+| Sites with RTT fallback|  1,243 | 57.0% of sites tested          |
+| Resources to classify  | 19,046 |                                |
+| Entered RTT stage      |  3,640 | 19.1% of resources to classify |
+| RTT measured           |  3,064 | 84.2% of RTT-stage resources   |
+| Min RTT < 15 ms        |  2,394 | 78.1% of measured RTTs         |
+| Min RTT ≥ 15 ms        |    670 | 21.9% of measured RTTs         |
+
+The distribution of the 3,064 measured RTTs is shown below. Each point is one successful measurement; the horizontal axis is an observation index, and the vertical axis is logarithmic. Values are bimodal; the 10–30 ms transition range holds 130 observations (4.2%).
+
+Based on this distribution, we use a relatively conservative `< 15 ms` threshold within the sparse interval to classify a resource as domestic, reducing the risk of misclassifying a foreign resource as domestic.
+
+| RTT range   | Count | Share |
+|-------------|------:|------:|
+| 0–<5 ms     |   206 |  6.7% |
+| 5–<10 ms    | 2,090 | 68.2% |
+| 10–<15 ms   |    98 |  3.2% |
+| 15–<20 ms   |    12 |  0.4% |
+| 20–<30 ms   |    20 |  0.7% |
+| 30–<50 ms   |   270 |  8.8% |
+| 50–<100 ms  |   247 |  8.1% |
+| 100–<200 ms |   100 |  3.3% |
+| ≥200 ms     |    21 |  0.7% |
+
+![RTT distribution](./img/rtt-scatter-plot.en.svg)
+
+Changing the threshold to 10 ms or 20 ms affects only 32 website classifications: at 10 ms, 27 sites move from cloud-dependent to foreign-dependent; at 20 ms, 5 move from foreign-dependent to cloud-dependent. The number of locally-contained sites is unchanged.
+
+| RTT threshold | Foreign-dependent | Cloud-dependent | Locally-contained | Sites reclassified |
+|---------------|-------------------|-----------------|-------------------|--------------------|
+| 10 ms         | 883 (40.5%)       | 1,053 (48.3%)   | 243 (11.2%)       | 27 (1.2%)          |
+| 15 ms         | 856 (39.3%)       | 1,080 (49.6%)   | 243 (11.2%)       |                    |
+| 20 ms         | 851 (39.1%)       | 1,085 (49.8%)   | 243 (11.2%)       | 5 (0.2%)           |
 
 ### Batch test flow
 

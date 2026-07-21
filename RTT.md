@@ -37,102 +37,48 @@ The implementation logic in `no-global-connection-check.js` is as follows:
      - Set `cloud_provider.detection_method = 'rtt'`
      - Record `cloud_provider.rtt` value (for later analysis)
    
-4. **If the RTT test fails**: Record failure details in `cloud_provider` (does not affect domestic/foreign classification):
+4. **If the RTT test fails**: Record failure details in `cloud_provider`; because no positive Taiwan-location evidence is available, the endpoint remains classified as `foreign/cloud`:
    - Set `cloud_provider.detection_method = 'rtt'`
    - Set `cloud_provider.rtt = null`
    - Set `cloud_provider.rtt_error` to a brief reason: `timeout`, `no_response`, `parse_error`, or `command_failed`
 
 ## Rationale for Using 15ms as the Threshold
 
-RTT is the time required for a network packet to travel from the sender to the receiver and back. We analyzed 2,245 RTT values from the test data; results are as follows:
+RTT is the time required for a network packet to travel from the sender to the receiver and back. In the current dataset, 3,640 site–hostname observations reached the RTT fallback and 3,064 produced a numeric minimum RTT. Multiple requests to the same hostname within one site load are deduplicated; the same hostname on different sites is counted once for each site.
 
 ### Statistics
 
 | Metric | Value |
 |--------|-------|
-| Mean | 46.96230869ms |
-| Median | 6.066ms |
-| Maximum | 417.717ms |
+| Mean | 20.837ms |
+| Median | 6.867ms |
+| p90 | 61.361ms |
+| Maximum | 316.711ms |
 
-Bucket counts
-
-| ms | count |
-|----|-------|
-| <2ms | 0 |
-| 2~4ms | 72 |
-| 4~6 | 1041 |
-| 6~8 | 106 |
-| 8~10 | 14 |
-| 12 | 2 |
-| 14 | 0 |
-| 16 | 2 |
-| 18 | 2 |
-| 20 | 4 |
-| 25 | 4 |
-| 30 | 6 |
-| 35 | 68 |
-| 40 | 152 |
-| 45 | 58 |
-| 50 | 67 |
-| 60 | 63 |
-| 70 | 28 |
-| 80 | 1 |
-| 90 | 6 |
-| 100 | 4 |
-| 110 | 4 |
-| 120 | 1 |
-| 130 | 29 |
-| 140 | 329 |
-| 150 | 111 |
-| 160 | 14 |
-| 170 | 3 |
-| 180 | 5 |
-| 190 | 5 |
-| 200 | 14 |
-| 220 | 16 |
-| 240 | 3 |
-| 260 | 1 |
-| 280 | 4 |
-| 300 | 5 |
-| 350 | 0 |
-| 400 | 0 |
-| <450ms | 1 |
-
-Percentiles
-
-| Percentile | Value |
-|------------|-------|
-| p10 | 4.2894 |
-| p15 | 4.4616 |
-| p20 | 4.603 |
-| p25 | 4.75675 |
-| p30 | 4.8813 |
-| p35 | 5.02735 |
-| p40 | 5.2126 |
-| p45 | 5.4673 |
-| p50 | 6.057 |
-| p55 | 9.279 |
-| p60 | 35.315 |
-| p65 | 38.3235 |
-| p70 | 49.3116 |
-| p75 | 65.93 |
-| p80 | 134.1582 |
-| p85 | 135.85385 |
-| p90 | 137.2175 |
-| p95 | 142.74965 |
+| Minimum RTT range | Count | Share of measured RTTs |
+|---:|---:|---:|
+| 0–<5ms | 206 | 6.7% |
+| 5–<10ms | 2,090 | 68.2% |
+| 10–<15ms | 98 | 3.2% |
+| 15–<20ms | 12 | 0.4% |
+| 20–<30ms | 20 | 0.7% |
+| 30–<50ms | 270 | 8.8% |
+| 50–<100ms | 247 | 8.1% |
+| 100–<200ms | 100 | 3.3% |
+| ≥200ms | 21 | 0.7% |
 
 ### Analysis
 
-Based on the scatter plot below and the statistics above, three clusters are visible: 2~10ms, 30~70ms, and 120~160ms.
+The 10–30ms transition range contains 130 observations (4.2% of successful RTT measurements). We select the conservative criterion of `RTT < 15ms` within this relatively sparse interval, reducing the risk of treating a low-latency nearby foreign node as domestic.
 
-![RTT distribution](./images/rtt-distribution.png)
+![RTT distribution](./graphs/rtt_scatter-plot.svg)
 
-Values in the first interval clearly represent domestic resources. We therefore use the midpoint of the bimodal distribution valley—15ms—as the threshold for judging whether a resource comes from a domestic cloud node.
+A site-level sensitivity analysis shows that 2,147 of 2,179 sites (98.5%) retain the same classification across thresholds of 10, 15, and 20ms. Relative to 15ms, 27 sites (1.2%) change classification at 10ms and 5 sites (0.2%) change at 20ms.
 
 ## Potential Limitations
 
 1. **Test environment dependency**: This value depends on the local network topology and may not apply outside Taiwan or other regions.
-2. **Edge cases**: In the 10~30ms valley between the two peaks, there are 20 data points where domestic vs. foreign classification may be incorrect.
+2. **Edge cases**: RTT alone is not geographic ground truth. The 130 observations in the 10–30ms transition range have greater classification uncertainty.
 
 ## Future Improvements
 
@@ -140,17 +86,14 @@ Values in the first interval clearly represent domestic resources. We therefore 
 
 ### 2. Tiered interpretation
 
-For the hard-to-classify 10~30ms range, use confidence tiers:
-- **RTT < 15ms**: Almost certainly in Taiwan (high confidence)
-- **15ms ≤ RTT < 25ms**: Possibly in Taiwan (medium confidence)
-- **RTT ≥ 25ms**: Likely abroad (low confidence)
+For the hard-to-classify 10–30ms range, future versions could combine RTT with additional independent location evidence rather than treating latency as geographic ground truth.
 
 ## Related Tools and Files
 
 ### Analysis tools
 
 1. **`export-rtt-csv.js`**
-   - Purpose: Export all RTT test results to CSV
+   - Purpose: Export every RTT fallback observation, including failures, to CSV
    - Usage: `node export-rtt-csv.js`
    - Output: `rtt.csv` with detailed RTT test information
 
@@ -159,16 +102,23 @@ For the hard-to-classify 10~30ms range, use confidence tiers:
 1. **`rtt.csv`**
    - Format: CSV with fields:
      - `file`: Source JSON filename
-     - `originalUrl`: Original test URL
+     - `site_url`: Tested website URL
+     - `original_url`: Resource request URL with query strings and fragments removed
      - `domain`: ipinfo.domain
      - `ip`: ipinfo.ip
      - `ipinfo_country`: ipinfo.country
      - `cloud_country`: cloud_provider.country (if present, usually `tw`)
-     - `detection_method`: Detection method (`header`, `laces`, or `rtt`)
-     - `rtt`: Actual RTT value (milliseconds), or `null` on failure
+     - `category`: Final domain category at the configured threshold
+     - `detection_method`: `rtt`
+     - `rtt`: Actual RTT value in milliseconds; blank on failure
      - `rtt_error`: Failure reason when RTT fails (`timeout`, `no_response`, `parse_error`, `command_failed`)
 
-2. **`test-results/*.json`**
+2. **Generated RTT statistics**
+   - `test-results/rtt-summary.tsv`: fallback coverage and outcome counts
+   - `test-results/rtt-distribution.tsv`: measured RTT histogram
+   - `test-results/rtt-threshold-sensitivity.tsv`: site classifications at 10, 15, and 20ms
+
+3. **`test-results/*.json`**
    - Per-site test result JSON files
    - Contains `domainDetails` array; each element may include `cloud_provider.rtt`, `cloud_provider.laces`, `cloud_provider.detection_method`, and `cloud_provider.rtt_error` (on RTT failure)
 
@@ -181,4 +131,4 @@ For the hard-to-classify 10~30ms range, use confidence tiers:
 
 ---
 
-*Last updated: 2026-06-27*
+*Last updated: 2026-07-22*

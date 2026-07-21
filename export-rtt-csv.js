@@ -1,9 +1,10 @@
-// Export all RTT samples from test-results to CSV
+// Export all RTT fallback observations from test-results to CSV
 // Usage:
 //   node export-rtt-csv.js
 //
 // Writes rtt.csv in the project root with columns:
-// file, originalUrl, domain, ip, ipinfo_country, cloud_country, detection_method, rtt
+// file, site_url, original_url, domain, ip, ipinfo_country, cloud_country,
+// category, detection_method, rtt, rtt_error
 
 const fs = require('fs');
 const path = require('path');
@@ -15,7 +16,8 @@ function listResultFiles(dir) {
     return fs
         .readdirSync(dir, { withFileTypes: true })
         .filter((ent) => ent.isFile() && ent.name.endsWith('.json'))
-        .map((ent) => path.join(dir, ent.name));
+        .map((ent) => path.join(dir, ent.name))
+        .sort();
 }
 
 function csvEscape(value) {
@@ -25,6 +27,11 @@ function csvEscape(value) {
         return `"${str.replace(/"/g, '""')}"`;
     }
     return str;
+}
+
+function stripUrlQueryAndFragment(value) {
+    if (value === null || value === undefined) return '';
+    return String(value).replace(/[?#].*$/, '');
 }
 
 function main() {
@@ -40,13 +47,16 @@ function main() {
     // CSV header
     rows.push([
         'file',
-        'originalUrl',
+        'site_url',
+        'original_url',
         'domain',
         'ip',
         'ipinfo_country',
         'cloud_country',
+        'category',
         'detection_method',
-        'rtt'
+        'rtt',
+        'rtt_error'
     ].join(','));
 
     for (const filePath of files) {
@@ -67,34 +77,42 @@ function main() {
             const cp = detail.cloud_provider;
             const ipinfo = detail.ipinfo || {};
 
-            if (!cp || typeof cp.rtt !== 'number' || cp.detection_method !== 'rtt') {
+            if (!cp || cp.detection_method !== 'rtt') {
                 continue;
             }
 
-            const originalUrl = detail.originalUrl || '';
+            const siteUrl = data.url || '';
+            // Query strings can contain public site keys or access tokens that
+            // are irrelevant to RTT analysis and unsafe to publish.
+            const originalUrl = stripUrlQueryAndFragment(detail.originalUrl);
             const domain = ipinfo.domain || '';
             const ip = ipinfo.ip || '';
             const ipinfoCountry = ipinfo.country || '';
             const cloudCountry = cp.country || '';
+            const category = detail.category || '';
             const detectionMethod = cp.detection_method || '';
-            const rtt = cp.rtt;
+            const rtt = typeof cp.rtt === 'number' ? cp.rtt : '';
+            const rttError = cp.rtt_error || '';
 
             const row = [
                 csvEscape(fileName),
+                csvEscape(siteUrl),
                 csvEscape(originalUrl),
                 csvEscape(domain),
                 csvEscape(ip),
                 csvEscape(ipinfoCountry),
                 csvEscape(cloudCountry),
+                csvEscape(category),
                 csvEscape(detectionMethod),
-                rtt
+                csvEscape(rtt),
+                csvEscape(rttError)
             ].join(',');
 
             rows.push(row);
         }
     }
 
-    fs.writeFileSync(OUTPUT_CSV, rows.join('\n'), 'utf8');
+    fs.writeFileSync(OUTPUT_CSV, `${rows.join('\n')}\n`, 'utf8');
     console.log(`Wrote RTT CSV: ${OUTPUT_CSV}`);
 }
 

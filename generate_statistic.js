@@ -1,6 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
+const {
+  collectRttStatistics,
+  renderRttDistributionTsv,
+  renderRttSensitivityTsv,
+  renderRttSummaryTsv,
+} = require('./rtt-statistics');
 
 // Resolve test-results relative to this script
 const DIR = path.resolve(__dirname, 'test-results');
@@ -9,6 +15,11 @@ const REPORT_IMG_DIR = path.resolve(__dirname, 'test-results', 'img');
 const RESOURCE_DISTRIBUTION_TSV = path.join(DIR, 'resource-distribution.tsv');
 const OVERALL_RESULT_TSV = path.join(DIR, 'overall-result.tsv');
 const DEPENDENCY_BREAKDOWN_TSV = path.join(DIR, 'dependency-breakdown.tsv');
+const RTT_SUMMARY_TSV = path.join(DIR, 'rtt-summary.tsv');
+const RTT_DISTRIBUTION_TSV = path.join(DIR, 'rtt-distribution.tsv');
+const RTT_SENSITIVITY_TSV = path.join(DIR, 'rtt-threshold-sensitivity.tsv');
+const GRAPH_DIR = path.resolve(__dirname, 'graphs');
+const PUBLISHED_REPORT_IMG_DIR = path.resolve(__dirname, 'report', 'img');
 const MERGED_LISTS_PATH = path.resolve(
   __dirname,
   'top-traffic-list-taiwan',
@@ -348,6 +359,78 @@ async function renderSvgToPng(svgContent, outputPath) {
   }
 }
 
+function renderRttScatterPlotSvg(stats, snapshotDate, options = {}) {
+  const locale = options.locale || DEFAULT_CHART_LOCALE;
+  const isEnglish = locale === 'en';
+  const width = options.width || 1200;
+  const height = options.height || 700;
+  const margin = { top: 94, right: 62, bottom: 82, left: 96 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  const logMin = Math.log10(2);
+  const logMax = Math.log10(500);
+  const yFor = (value) =>
+    margin.top +
+    ((logMax - Math.log10(Math.max(2, Math.min(500, value)))) /
+      (logMax - logMin)) *
+      plotHeight;
+  const values = stats.measuredObservations.map((item) => item.rtt);
+  const xFor = (index) =>
+    margin.left +
+    (values.length <= 1 ? 0 : (index / (values.length - 1)) * plotWidth);
+  const yTicks = [2, 4, 6, 10, 15, 20, 30, 50, 100, 200, 500];
+  const xTicks = [0, 500, 1000, 1500, 2000, 2500, 3000].filter(
+    (tick) => tick <= values.length,
+  );
+  const title = 'RTT distribution';
+  const subtitle = isEnglish
+    ? `${values.length.toLocaleString('en-US')} successful minimum-RTT observations from the current dataset`
+    : `目前資料中 ${values.length.toLocaleString('en-US')} 筆成功取得的最小 RTT observation`;
+  const xLabel = isEnglish ? 'RTT observation index' : 'RTT observation 序號';
+  const yLabel = isEnglish
+    ? 'Minimum RTT (ms, logarithmic scale)'
+    : '最小 RTT（ms，對數尺度）';
+  const dataLabel = isEnglish ? 'Data snapshot' : '資料日期';
+  const grid = yTicks
+    .map((tick) => {
+      const y = yFor(tick);
+      return [
+        `<line x1="${margin.left}" y1="${y}" x2="${width - margin.right}" y2="${y}" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="4 6" />`,
+        `<text x="${margin.left - 16}" y="${y + 6}" text-anchor="end" font-family="Arial, sans-serif" font-size="18" fill="#4B5563">${tick}</text>`,
+      ].join('');
+    })
+    .join('');
+  const xAxisTicks = xTicks
+    .map((tick) => {
+      const x = margin.left + (tick / Math.max(1, values.length)) * plotWidth;
+      return [
+        `<line x1="${x}" y1="${height - margin.bottom}" x2="${x}" y2="${height - margin.bottom + 8}" stroke="#6B7280" />`,
+        `<text x="${x}" y="${height - margin.bottom + 32}" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#4B5563">${tick.toLocaleString('en-US')}</text>`,
+      ].join('');
+    })
+    .join('');
+  const points = values
+    .map((value, index) => {
+      return `<circle cx="${xFor(index).toFixed(2)}" cy="${yFor(value).toFixed(2)}" r="2.25" fill="#2563EB" fill-opacity="0.42" />`;
+    })
+    .join('');
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    '<rect width="100%" height="100%" fill="#FFFFFF" />',
+    `<text x="${margin.left}" y="42" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="30" font-weight="600" fill="#111827">${escapeSvgText(title)}</text>`,
+    `<text x="${margin.left}" y="72" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="18" fill="#6B7280">${escapeSvgText(subtitle)}</text>`,
+    grid,
+    points,
+    `<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#374151" stroke-width="1.5" />`,
+    `<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#374151" stroke-width="1.5" />`,
+    xAxisTicks,
+    `<text x="${margin.left + plotWidth / 2}" y="${height - 18}" text-anchor="middle" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="19" fill="#374151">${escapeSvgText(xLabel)}</text>`,
+    `<text x="25" y="${margin.top + plotHeight / 2}" transform="rotate(-90 25 ${margin.top + plotHeight / 2})" text-anchor="middle" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="19" fill="#374151">${escapeSvgText(yLabel)}</text>`,
+    `<text x="${width - margin.right}" y="${height - 18}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="16" fill="#9CA3AF">${escapeSvgText(dataLabel)}: ${snapshotDate}</text>`,
+    '</svg>',
+  ].join('');
+}
+
 const PROVIDER_RULES = [
   { provider: 'Google', patterns: [/google/i] },
   { provider: 'Cloudflare', patterns: [/cloudflare/i] },
@@ -659,6 +742,47 @@ async function writeSvgChart(fileName, svgContent) {
   return outputPath;
 }
 
+async function writeRttCharts(stats, snapshotDate, { writeLatest }) {
+  await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
+  const zhTwSvg = renderRttScatterPlotSvg(stats, snapshotDate, {
+    locale: 'zh-TW',
+  });
+  const enSvg = renderRttScatterPlotSvg(stats, snapshotDate, { locale: 'en' });
+
+  await writeSvgChart(`rtt-scatter-plot-${snapshotDate}.zh-TW.svg`, zhTwSvg);
+  await writeSvgChart(`rtt-scatter-plot-${snapshotDate}.en.svg`, enSvg);
+
+  if (!writeLatest) return;
+
+  await writeSvgChart('rtt-scatter-plot.zh-TW.svg', zhTwSvg);
+  await writeSvgChart('rtt-scatter-plot.en.svg', enSvg);
+  await fs.promises.mkdir(PUBLISHED_REPORT_IMG_DIR, { recursive: true });
+  await fs.promises.writeFile(
+    path.join(PUBLISHED_REPORT_IMG_DIR, 'rtt-scatter-plot.zh-TW.svg'),
+    zhTwSvg,
+    'utf8',
+  );
+  await fs.promises.writeFile(
+    path.join(PUBLISHED_REPORT_IMG_DIR, 'rtt-scatter-plot.en.svg'),
+    enSvg,
+    'utf8',
+  );
+  console.log(`Synced RTT charts to: ${PUBLISHED_REPORT_IMG_DIR}`);
+
+  await fs.promises.mkdir(GRAPH_DIR, { recursive: true });
+  const graphSvgPath = path.join(GRAPH_DIR, 'rtt_scatter-plot.svg');
+  const graphPngPath = path.join(GRAPH_DIR, 'rtt_scatter-plot.png');
+  const graphSvg = renderRttScatterPlotSvg(stats, snapshotDate, {
+    locale: 'en',
+    width: 900,
+    height: 700,
+  });
+  await fs.promises.writeFile(graphSvgPath, graphSvg, 'utf8');
+  await renderSvgToPng(graphSvg, graphPngPath);
+  console.log(`Wrote chart: ${graphSvgPath}`);
+  console.log(`Wrote chart: ${graphPngPath}`);
+}
+
 async function writeOverallResultCharts(overall, snapshotDate, { writeLatest }) {
   await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
 
@@ -784,6 +908,7 @@ async function main() {
 
   // Collect rows
   const dataMap = new Map();
+  const jsonDataMap = new Map();
   const jsonDataset = [];
 
   for (const file of jsonFiles) {
@@ -801,6 +926,7 @@ async function main() {
 
     const url = data.url ?? '';
     const normalizedUrl = normalizeUrl(url);
+    jsonDataMap.set(normalizedUrl, { file, data });
     const timestamp = data.timestamp ?? '';
     const domesticCloud = data.test_results?.domestic?.cloud ?? 0;
     const domesticDirect = data.test_results?.domestic?.direct ?? 0;
@@ -855,6 +981,16 @@ async function main() {
       `--data=${dataCutoffDate} enabled; using data on or before that date: ${allData.length} row(s)`
     );
   }
+
+  const selectedJsonRecords = allData
+    .map((row) => jsonDataMap.get(normalizeUrl(row.url)))
+    .filter(Boolean);
+  const selectedUrlKeys = new Set(
+    selectedJsonRecords.map((record) => normalizeUrl(record.data.url)),
+  );
+  const selectedJsonDataset = jsonDataset.filter((data) =>
+    selectedUrlKeys.has(normalizeUrl(data.url)),
+  );
 
   const lines = [];
 
@@ -915,7 +1051,7 @@ async function main() {
   const writeLatest = !hasDateArg && !hasDataArg;
   await writeOverallResultCharts(overall, snapshotDate, { writeLatest });
 
-  const resourceDistribution = countResourceDistribution(jsonDataset);
+  const resourceDistribution = countResourceDistribution(selectedJsonDataset);
   const resourceDistributionTsv = renderResourceDistributionTsv(
     resourceDistribution
   );
@@ -929,6 +1065,27 @@ async function main() {
   await writeResourceDistributionCharts(resourceDistribution, snapshotDate, {
     writeLatest,
   });
+
+  const rttStats = collectRttStatistics(selectedJsonRecords);
+  await fs.promises.writeFile(
+    RTT_SUMMARY_TSV,
+    renderRttSummaryTsv(rttStats),
+    'utf8',
+  );
+  console.log(`Wrote stats: ${RTT_SUMMARY_TSV}`);
+  await fs.promises.writeFile(
+    RTT_DISTRIBUTION_TSV,
+    renderRttDistributionTsv(rttStats),
+    'utf8',
+  );
+  console.log(`Wrote stats: ${RTT_DISTRIBUTION_TSV}`);
+  await fs.promises.writeFile(
+    RTT_SENSITIVITY_TSV,
+    renderRttSensitivityTsv(rttStats),
+    'utf8',
+  );
+  console.log(`Wrote stats: ${RTT_SENSITIVITY_TSV}`);
+  await writeRttCharts(rttStats, snapshotDate, { writeLatest });
 }
 
 // When run directly (not required)
@@ -942,6 +1099,7 @@ if (require.main === module) {
 module.exports = {
   main,
   renderOverallResultSvg,
+  renderRttScatterPlotSvg,
   renderResourceDistributionSvg,
   CHART_LOCALES,
   CHART_LOCALE_IDS,
