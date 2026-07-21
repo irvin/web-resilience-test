@@ -38,16 +38,35 @@
 
 ### 檔名規則
 
+圖表同時產出繁體中文與英文。
+
+**overall-result** 有兩套繁中標籤：
+
+- `.zh-TW` — 報告用語：境外依賴型 / 雲端依賴型 / 本地型
+- **無語系 suffix** — Profile 用語：不會動 / 國際雲 / 可能會動
+
+這兩套繁中 overall 圖**不是** byte-identical。`resource-distribution` 的無 suffix 檔案仍為 `.zh-TW` 的相容 alias，維持 byte-identical。
+
 - 日期版（固定會產生）：
-  - `overall-result-YYYY-MM-DD.svg`
-  - `resource-distribution-YYYY-MM-DD.svg`
+  - `overall-result-YYYY-MM-DD.zh-TW.svg` / `.png`
+  - `overall-result-YYYY-MM-DD.en.svg` / `.png`
+  - `overall-result-YYYY-MM-DD.svg` / `.png`（Profile 繁中標籤）
+  - `resource-distribution-YYYY-MM-DD.zh-TW.svg`
+  - `resource-distribution-YYYY-MM-DD.en.svg`
+  - `resource-distribution-YYYY-MM-DD.svg`（= `.zh-TW`）
   - 其中 `YYYY-MM-DD` 為 snapshot 日期
 - 無日期版（latest）：
   - 僅在**未指定 `--date` 且未指定 `--data`**時額外產生
-  - `overall-result.svg`
-  - `resource-distribution.svg`
+  - `overall-result.zh-TW.svg` / `.png`
+  - `overall-result.en.svg` / `.png`
+  - `overall-result.svg` / `.png`（Profile 繁中標籤）
+  - `resource-distribution.zh-TW.svg`
+  - `resource-distribution.en.svg`
+  - `resource-distribution.svg`（= `.zh-TW`）
 
-> `report/index.md` 圖片引用建議對應日期版，避免不同版本資料被 latest 覆蓋。
+英文圖表一律使用明確的 `.en` suffix。分類標籤字級為繁中的 `(2/3)×1.2`，折成兩行，且兩行都維持在橫線上方。
+
+> `report/index.md` 應引用 `.zh-TW`；Profile 中文首頁使用無 suffix 的 `overall-result.png`；[`en.md`](en.md) 應引用 `.en`。
 
 ## 共用視覺規格（兩張圖一致）
 
@@ -79,8 +98,24 @@
 
 - 百分比顯示格式：統一 `1` 位小數（例如 `40.9%`）
 - 圖例位置：固定於右上或圖下單列（同一版型選一種並固定）
-- 日期註記：右下固定 `Data snapshot: YYYY-MM-DD`
+- 日期註記：右下固定 `資料日期: YYYY-MM-DD`（英文：`Data snapshot: YYYY-MM-DD`）
 - 指標總量（網站數或 requests 總數）：顯示於副標行
+- 僅介面文字依語系變化；幾何、百分比、以及來自 TSV 的 provider 名稱在各語系必須一致
+
+### 圖表顯示標籤（與報告用語對齊）
+
+TSV category key 維持 `Immobile` / `Intl. cloud` / `Relocatable`；圖表顯示文字與此分離：
+
+| 語意 | TSV key | 繁中顯示 | 英文顯示 |
+|---|---|---|---|
+| 境外依賴 | Immobile | 境外依賴型（`.zh-TW`）/ 不會動（無 suffix） | Foreign-dependent（折行） |
+| 雲端依賴 | Intl. cloud | 雲端依賴型（`.zh-TW`）/ 國際雲（無 suffix） | Cloud-dependent（折行） |
+| 本地 | Relocatable | 本地型（`.zh-TW`）/ 可能會動（無 suffix） | Locally-contained（折行） |
+| 網站總數單位 | — | 個網站 | websites |
+| 資源總數單位 | — | 筆資源請求 | requests |
+| 小比例合併項目 | — | 其他（<1%） | Others (<1%) |
+
+`resource-distribution.tsv` 的 provider 名稱不得翻譯。
 
 ## 圖表定義
 
@@ -105,7 +140,9 @@
 ### 標題建議
 
 - 標題：`整體結果`
-- 副標：`n = {網站總數} websites`
+- 副標：`n = {網站總數} 個網站`
+- 分段標籤：境外依賴型 / 雲端依賴型 / 本地型
+  （英文：Foreign-dependent / Cloud-dependent / Locally-contained）
 
 ## 2) 資源來源分布（對應 `report/index.md`「資源來源分布」）
 
@@ -124,7 +161,9 @@
 ### 標題建議
 
 - 標題：`資源來源分布`
-- 副標：`requests by normalized provider`
+- 副標：`n = {請求總數} 筆資源請求`
+- 小比例合併標籤：`其他（<1%）`（英文：`Others (<1%)`）
+- Provider 標籤：兩個語系皆逐字使用 TSV `name` 欄
 
 ## 供應商歸一化原則（初版）
 
@@ -136,10 +175,10 @@
 
 ## 產出與報告引用
 
-- 圖檔輸出：`report/img/*.svg`
+- 圖檔輸出：`test-results/img/*.svg`（以及 overall-result PNG）；需要時再同步至 `report/img/`
 - 報告檔引用：
-  - `![](./img/overall-result-YYYY-MM-DD.svg)`
-  - `![](./img/resource-distribution-YYYY-MM-DD.svg)`
+  - 中文報告：`![](./img/overall-result.zh-TW.svg)` / `![](./img/resource-distribution.zh-TW.svg)`
+  - 英文報告：`![](./img/overall-result.en.svg)` / `![](./img/resource-distribution.en.svg)`
 
 ## 後續實作建議
 

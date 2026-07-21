@@ -38,16 +38,35 @@ This document defines chart output for `report/index.md` (see also [`en.md`](en.
 
 ### Filename rules
 
+Charts are generated in Traditional Chinese and English.
+
+For **overall-result** charts there are two Traditional Chinese label sets:
+
+- `.zh-TW` — report wording: 境外依賴型 / 雲端依賴型 / 本地型
+- undated / dated files **without** a locale suffix — Profile wording: 不會動 / 國際雲 / 可能會動
+
+These two Chinese variants are **not** byte-identical. `resource-distribution` undated files remain aliases of `.zh-TW` and stay byte-identical.
+
 - Dated (always produced):
-  - `overall-result-YYYY-MM-DD.svg`
-  - `resource-distribution-YYYY-MM-DD.svg`
+  - `overall-result-YYYY-MM-DD.zh-TW.svg` / `.png`
+  - `overall-result-YYYY-MM-DD.en.svg` / `.png`
+  - `overall-result-YYYY-MM-DD.svg` / `.png` (Profile Chinese labels)
+  - `resource-distribution-YYYY-MM-DD.zh-TW.svg`
+  - `resource-distribution-YYYY-MM-DD.en.svg`
+  - `resource-distribution-YYYY-MM-DD.svg` (= `.zh-TW`)
   - `YYYY-MM-DD` is the snapshot date
 - Undated (latest):
   - Produced only when **neither** `--date` **nor** `--data` is set
-  - `overall-result.svg`
-  - `resource-distribution.svg`
+  - `overall-result.zh-TW.svg` / `.png`
+  - `overall-result.en.svg` / `.png`
+  - `overall-result.svg` / `.png` (Profile Chinese labels)
+  - `resource-distribution.zh-TW.svg`
+  - `resource-distribution.en.svg`
+  - `resource-distribution.svg` (= `.zh-TW`)
 
-> In `report/index.md` (and [`en.md`](en.md)), prefer dated image paths so versions are not overwritten by latest files.
+English charts always use an explicit `.en` suffix. Category labels use `(2/3)×1.2` of the Chinese label font size, wrap onto two lines, and keep both lines above the horizontal leader.
+
+> In `report/index.md`, prefer `.zh-TW` image paths. Profile Chinese homepage uses undated `overall-result.png`. In [`en.md`](en.md), prefer `.en` image paths.
 
 ## Shared visual spec (both charts)
 
@@ -79,8 +98,24 @@ This document defines chart output for `report/index.md` (see also [`en.md`](en.
 
 - Percentages: one decimal place (e.g. `40.9%`)
 - Legend: fixed top-right or single row below (pick one layout and keep it)
-- Date note: bottom-right `Data snapshot: YYYY-MM-DD`
+- Date note: bottom-right `Data snapshot: YYYY-MM-DD` (繁中：`資料日期: YYYY-MM-DD`)
 - Totals (site count or request count): show in subtitle
+- Locale-controlled UI strings only; geometry, percentages, and provider names from TSV stay identical across locales
+
+### Chart display labels (aligned with report wording)
+
+TSV category keys stay `Immobile` / `Intl. cloud` / `Relocatable`. Chart display labels are separate:
+
+| Meaning | TSV key | English display | Traditional Chinese display |
+|---|---|---|---|
+| Foreign dependency | Immobile | Foreign-dependent (wrapped) | 境外依賴型（`.zh-TW`）/ 不會動（無 suffix） |
+| Cloud dependency | Intl. cloud | Cloud-dependent (wrapped) | 雲端依賴型（`.zh-TW`）/ 國際雲（無 suffix） |
+| Locally contained | Relocatable | Locally-contained (wrapped) | 本地型（`.zh-TW`）/ 可能會動（無 suffix） |
+| Site count unit | — | websites | 個網站 |
+| Request count unit | — | requests | 筆資源請求 |
+| Rolled-up small providers | — | Others (<1%) | 其他（<1%） |
+
+Provider names from `resource-distribution.tsv` are never translated.
 
 ## Chart definitions
 
@@ -105,7 +140,9 @@ This document defines chart output for `report/index.md` (see also [`en.md`](en.
 ### Suggested titles
 
 - Title: `Overall results` (繁中報告：`整體結果`)
-- Subtitle: `n = {total sites} websites`
+- Subtitle: `n = {total sites} websites` (繁中：`n = {網站總數} 個網站`)
+- Segment labels: Foreign-dependent / Cloud-dependent / Locally-contained
+  (繁中：境外依賴型 / 雲端依賴型 / 本地型)
 
 ## 2) Resource source distribution (section “資源來源分布” / “Resource source distribution”)
 
@@ -124,7 +161,9 @@ This document defines chart output for `report/index.md` (see also [`en.md`](en.
 ### Suggested titles
 
 - Title: `Resource source distribution` (繁中：`資源來源分布`)
-- Subtitle: `requests by normalized provider`
+- Subtitle: `n = {total requests} requests` (繁中：`n = {請求總數} 筆資源請求`)
+- Rolled-up remainder label: `Others (<1%)` (繁中：`其他（<1%）`)
+- Provider labels: verbatim from TSV `name` column in both locales
 
 ## Provider normalization (initial)
 
@@ -136,10 +175,10 @@ This document defines chart output for `report/index.md` (see also [`en.md`](en.
 
 ## Output and report references
 
-- Files: `report/img/*.svg`
+- Files: `test-results/img/*.svg` (and overall-result PNG); sync into `report/img/` as needed
 - Markdown:
-  - `![](./img/overall-result-YYYY-MM-DD.svg)`
-  - `![](./img/resource-distribution-YYYY-MM-DD.svg)`
+  - Chinese report: `![](./img/overall-result.zh-TW.svg)` / `![](./img/resource-distribution.zh-TW.svg)`
+  - English report: `![](./img/overall-result.en.svg)` / `![](./img/resource-distribution.en.svg)`
 
 ## Next steps
 

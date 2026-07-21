@@ -102,6 +102,73 @@ function escapeSvgText(text) {
     .replace(/'/g, '&apos;');
 }
 
+const CHART_LOCALES = {
+  'zh-TW': {
+    categories: {
+      highRisk: '境外依賴型',
+      uncertain: '雲端依賴型',
+      localized: '本地型',
+    },
+    websitesUnit: '個網站',
+    requestsUnit: '筆資源請求',
+    others: '其他（<1%）',
+    dataSnapshot: '資料日期',
+  },
+  // Short Traditional Chinese labels for undated overall-result.* (Profile homepage).
+  zh: {
+    categories: {
+      highRisk: '不會動',
+      uncertain: '國際雲',
+      localized: '可能會動',
+    },
+    websitesUnit: '個網站',
+    requestsUnit: '筆資源請求',
+    others: '其他（<1%）',
+    dataSnapshot: '資料日期',
+  },
+  en: {
+    // Multi-line labels; fontScale applies to category label + percent only.
+    categories: {
+      highRisk: ['Foreign-', 'dependent'],
+      uncertain: ['Cloud-', 'dependent'],
+      localized: ['Locally-', 'contained'],
+    },
+    labelFontScale: (2 / 3) * 1.2,
+    percentFontSize: 38,
+    websitesUnit: 'websites',
+    requestsUnit: 'requests',
+    others: 'Others (<1%)',
+    dataSnapshot: 'Data snapshot',
+  },
+};
+
+// Locales that map to filename suffixes (.zh-TW / .en). Alias `zh` is undated overall-result.* only.
+const CHART_LOCALE_IDS = ['zh-TW', 'en'];
+const OVERALL_ALIAS_LOCALE = 'zh';
+const DEFAULT_CHART_LOCALE = 'zh-TW';
+const OVERALL_LABEL_FONT_SIZE = 48;
+const OVERALL_PERCENT_FONT_SIZE = 43;
+
+function getChartLocale(locale) {
+  return CHART_LOCALES[locale] || CHART_LOCALES[DEFAULT_CHART_LOCALE];
+}
+
+function getCategoryLabelLines(label) {
+  if (Array.isArray(label)) return label.map(String);
+  return [String(label)];
+}
+
+function renderOverallCategoryLabelText(layout, textAnchor, labelLines, fontSize, lineHeight) {
+  const tspans = labelLines
+    .map((line, index) => {
+      const escaped = escapeSvgText(line);
+      if (index === 0) return escaped;
+      return `<tspan x="${layout.textX}" dy="${lineHeight}">${escaped}</tspan>`;
+    })
+    .join('');
+  return `<text x="${layout.textX}" y="${layout.labelTopY}" text-anchor="${textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="${fontSize}" font-weight="400" fill="#6B7280">${tspans}</text>`;
+}
+
 function deriveSnapshotDate(allData, fallbackDate) {
   let maxTs = null;
 
@@ -121,7 +188,9 @@ function deriveSnapshotDate(allData, fallbackDate) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function renderOverallResultSvg(overall, reportDate) {
+function renderOverallResultSvg(overall, reportDate, options = {}) {
+  const locale = options.locale || DEFAULT_CHART_LOCALE;
+  const t = getChartLocale(locale);
   const width = 1200;
   const height = 700;
   const marginLeft = 72;
@@ -131,50 +200,56 @@ function renderOverallResultSvg(overall, reportDate) {
   const radius = 294;
   const total = overall.total || 1;
 
-  const CATEGORY_IMMOBILE = 'Immobile';
-  const CATEGORY_INTL_CLOUD = 'Intl. cloud';
-  const CATEGORY_RELOCATABLE = 'Relocatable';
-
   const segments = [
     {
-      label: CATEGORY_IMMOBILE,
+      id: 'highRisk',
+      label: t.categories.highRisk,
       count: overall.highRisk,
       color: '#DC2626',
     },
     {
-      label: CATEGORY_INTL_CLOUD,
+      id: 'uncertain',
+      label: t.categories.uncertain,
       count: overall.uncertain,
       color: '#F59E0B',
     },
     {
-      label: CATEGORY_RELOCATABLE,
+      id: 'localized',
+      label: t.categories.localized,
       count: overall.localized,
       color: '#3B82F6',
     },
   ];
 
   const labelLayout = {
-    [CATEGORY_IMMOBILE]: { textX: 1140, lineEndX: 1140, textTopY: 322, lineY: 338 },
-    [CATEGORY_INTL_CLOUD]: { textX: 72, lineEndX: 72, textTopY: 404, lineY: 420 },
-    [CATEGORY_RELOCATABLE]: { textX: 72, lineEndX: 72, textTopY: 170, lineY: 140 },
+    highRisk: { textX: 1140, lineEndX: 1140, textTopY: 322, lineY: 338 },
+    uncertain: { textX: 72, lineEndX: 72, textTopY: 404, lineY: 420 },
+    localized: { textX: 72, lineEndX: 72, textTopY: 170, lineY: 140 },
   };
-  const textOffsetByLabel = {
-    [CATEGORY_INTL_CLOUD]: 0,
-    [CATEGORY_RELOCATABLE]: 46,
+  const textOffsetById = {
+    uncertain: 0,
+    localized: 46,
   };
-  const lineAnchorYOffsetByLabel = {
-    [CATEGORY_INTL_CLOUD]: 24,
+  const lineAnchorYOffsetById = {
+    uncertain: 24,
   };
-  const textAnchorYOffsetByLabel = {
-    [CATEGORY_INTL_CLOUD]: 24,
-    [CATEGORY_RELOCATABLE]: 0,
+  const textAnchorYOffsetById = {
+    uncertain: 24,
+    localized: 0,
   };
-  const horizontalLineYOffsetByLabel = {
-    [CATEGORY_RELOCATABLE]: 4,
+  const horizontalLineYOffsetById = {
+    localized: 4,
   };
   const globalLineYOffset = 4;
-  const labelFontSize = 48;
-  const connectorTextGap = labelFontSize * 4;
+  // Connector geometry stays on the base Chinese font metrics so pie/connectors match across locales.
+  const connectorTextGap = OVERALL_LABEL_FONT_SIZE * 4;
+  const fontScale = t.labelFontScale || 1;
+  const labelFontSize = Math.round(OVERALL_LABEL_FONT_SIZE * fontScale);
+  const percentFontSize =
+    t.percentFontSize != null
+      ? t.percentFontSize
+      : Math.round(OVERALL_PERCENT_FONT_SIZE * fontScale);
+  const labelLineHeight = Math.round(labelFontSize * 1.15);
 
   let startAngle = -Math.PI / 2;
   const paths = [];
@@ -196,24 +271,28 @@ function renderOverallResultSvg(overall, reportDate) {
     );
 
     const midAngle = startAngle + angle / 2;
-    const layout = labelLayout[segment.label];
-    const textAnchor = segment.label === CATEGORY_IMMOBILE ? 'end' : 'start';
+    const layout = labelLayout[segment.id];
+    const textAnchor = segment.id === 'highRisk' ? 'end' : 'start';
     const lineSide = layout.textX > cx ? 'right' : 'left';
     const dotRadius = radius - 16;
     const dotX = cx + dotRadius * Math.cos(midAngle);
     const dotY = cy + dotRadius * Math.sin(midAngle);
     const baseLineY = cy + (radius - 1) * Math.sin(midAngle);
-    const lineAnchorYOffset = lineAnchorYOffsetByLabel[segment.label] || 0;
-    const textAnchorYOffset = textAnchorYOffsetByLabel[segment.label] || 0;
-    const lineY = baseLineY + lineAnchorYOffset + globalLineYOffset;
-    const textOffset = textOffsetByLabel[segment.label] || 0;
+    const lineAnchorYOffset = lineAnchorYOffsetById[segment.id] || 0;
+    const textAnchorYOffset = textAnchorYOffsetById[segment.id] || 0;
+    const textOffset = textOffsetById[segment.id] || 0;
     const textBaseY = baseLineY + textAnchorYOffset;
     const lineTextY = textBaseY + textOffset;
     const lineLabelY =
       lineTextY +
       (lineAnchorYOffset - textAnchorYOffset) +
-      (horizontalLineYOffsetByLabel[segment.label] || 0);
-    const labelTopY = lineTextY - 8;
+      (horizontalLineYOffsetById[segment.id] || 0);
+    const labelLines = getCategoryLabelLines(segment.label);
+    // Keep the bottom label line at the same baseline as single-line charts so
+    // wrapped English lines stack upward and stay above the horizontal rule.
+    const labelBottomLineY = lineTextY - 8;
+    const labelTopY =
+      labelBottomLineY - labelLineHeight * (labelLines.length - 1);
     const labelPercentY = lineTextY + 48;
     const bendX =
       lineSide === 'right'
@@ -223,8 +302,14 @@ function renderOverallResultSvg(overall, reportDate) {
     labels.push(
       `<circle cx="${dotX}" cy="${dotY}" r="4" fill="#9CA3AF" />`,
       `<polyline points="${dotX},${dotY} ${bendX},${lineLabelY} ${layout.lineEndX},${lineLabelY}" fill="none" stroke="#6B7280" stroke-width="2.5" />`,
-      `<text x="${layout.textX}" y="${labelTopY}" text-anchor="${textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="48" font-weight="400" fill="#6B7280">${escapeSvgText(segment.label)}</text>`,
-      `<text x="${layout.textX}" y="${labelPercentY}" text-anchor="${textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="43" font-weight="400" fill="#6B7280">${formatPercent(segment.count, total)}</text>`
+      renderOverallCategoryLabelText(
+        { textX: layout.textX, labelTopY },
+        textAnchor,
+        labelLines,
+        labelFontSize,
+        labelLineHeight
+      ),
+      `<text x="${layout.textX}" y="${labelPercentY}" text-anchor="${textAnchor}" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="${percentFontSize}" font-weight="400" fill="#6B7280">${formatPercent(segment.count, total)}</text>`
     );
 
     startAngle = endAngle;
@@ -233,10 +318,10 @@ function renderOverallResultSvg(overall, reportDate) {
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
     `<rect width="100%" height="100%" fill="#EDEDED" />`,
-    `<text x="${width - marginRight}" y="72" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="24" font-weight="400" fill="#9CA3AF">n = ${overall.total.toLocaleString('en-US')} websites</text>`,
+    `<text x="${width - marginRight}" y="72" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="24" font-weight="400" fill="#9CA3AF">n = ${overall.total.toLocaleString('en-US')} ${t.websitesUnit}</text>`,
     paths.join(''),
     labels.join(''),
-    `<text x="${width - marginRight}" y="${height - 20}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="19" font-weight="400" fill="#9CA3AF">Data snapshot: ${reportDate}</text>`,
+    `<text x="${width - marginRight}" y="${height - 20}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="19" font-weight="400" fill="#9CA3AF">${t.dataSnapshot}: ${reportDate}</text>`,
     `</svg>`,
   ].join('');
 }
@@ -347,7 +432,10 @@ function countResourceDistribution(jsonDataset) {
   return { totalRequests, items };
 }
 
-function renderResourceDistributionSvg(distribution, reportDate, minPercent = 1) {
+function renderResourceDistributionSvg(distribution, reportDate, options = {}) {
+  const locale = options.locale || DEFAULT_CHART_LOCALE;
+  const minPercent = options.minPercent ?? 1;
+  const t = getChartLocale(locale);
   const width = 1200;
   const height = 700;
   const marginLeft = 36;
@@ -365,7 +453,7 @@ function renderResourceDistributionSvg(distribution, reportDate, minPercent = 1)
   const pieItems = [...visibleItems];
   if (otherCount > 0) {
     pieItems.push({
-      provider: 'Others (<1%)',
+      provider: t.others,
       count: otherCount,
       percent: (otherCount / total) * 100,
     });
@@ -486,10 +574,10 @@ function renderResourceDistributionSvg(distribution, reportDate, minPercent = 1)
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
     `<rect width="100%" height="100%" fill="#EDEDED" />`,
-    `<text x="${width - 56}" y="72" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="24" font-weight="400" fill="#9CA3AF">n = ${totalRequests.toLocaleString('en-US')} requests</text>`,
+    `<text x="${width - 56}" y="72" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="24" font-weight="400" fill="#9CA3AF">n = ${totalRequests.toLocaleString('en-US')} ${t.requestsUnit}</text>`,
     paths.join(''),
     labelShapes.join(''),
-    `<text x="${width - 56}" y="${height - 20}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="19" font-weight="400" fill="#9CA3AF">Data snapshot: ${reportDate}</text>`,
+    `<text x="${width - 56}" y="${height - 20}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size="19" font-weight="400" fill="#9CA3AF">${t.dataSnapshot}: ${reportDate}</text>`,
     `</svg>`,
   ].join('');
 }
@@ -562,6 +650,96 @@ function renderDependencyBreakdownTsv(breakdown) {
     ['Foreign-only', '', fmt(counts.foreignOnly), ''].join('\t'),
   ];
   return `${lines.join('\n')}\n`;
+}
+
+async function writeSvgChart(fileName, svgContent) {
+  const outputPath = path.join(REPORT_IMG_DIR, fileName);
+  await fs.promises.writeFile(outputPath, svgContent, 'utf8');
+  console.log(`Wrote chart: ${outputPath}`);
+  return outputPath;
+}
+
+async function writeOverallResultCharts(overall, snapshotDate, { writeLatest }) {
+  await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
+
+  const zhTwSvg = renderOverallResultSvg(overall, snapshotDate, {
+    locale: 'zh-TW',
+  });
+  const zhAliasSvg = renderOverallResultSvg(overall, snapshotDate, {
+    locale: OVERALL_ALIAS_LOCALE,
+  });
+  const enSvg = renderOverallResultSvg(overall, snapshotDate, { locale: 'en' });
+
+  await writeSvgChart(`overall-result-${snapshotDate}.zh-TW.svg`, zhTwSvg);
+  await writeSvgChart(`overall-result-${snapshotDate}.en.svg`, enSvg);
+  await writeSvgChart(`overall-result-${snapshotDate}.svg`, zhAliasSvg);
+
+  const zhTwPngDated = path.join(
+    REPORT_IMG_DIR,
+    `overall-result-${snapshotDate}.zh-TW.png`
+  );
+  await renderSvgToPng(zhTwSvg, zhTwPngDated);
+  console.log(`Wrote chart: ${zhTwPngDated}`);
+
+  const zhAliasPngDated = path.join(
+    REPORT_IMG_DIR,
+    `overall-result-${snapshotDate}.png`
+  );
+  await renderSvgToPng(zhAliasSvg, zhAliasPngDated);
+  console.log(`Wrote chart: ${zhAliasPngDated}`);
+
+  const enPngDated = path.join(
+    REPORT_IMG_DIR,
+    `overall-result-${snapshotDate}.en.png`
+  );
+  await renderSvgToPng(enSvg, enPngDated);
+  console.log(`Wrote chart: ${enPngDated}`);
+
+  if (writeLatest) {
+    await writeSvgChart('overall-result.zh-TW.svg', zhTwSvg);
+    await writeSvgChart('overall-result.en.svg', enSvg);
+    await writeSvgChart('overall-result.svg', zhAliasSvg);
+
+    const zhTwPngLatest = path.join(REPORT_IMG_DIR, 'overall-result.zh-TW.png');
+    await fs.promises.copyFile(zhTwPngDated, zhTwPngLatest);
+    console.log(`Wrote chart: ${zhTwPngLatest}`);
+
+    const zhAliasPngLatest = path.join(REPORT_IMG_DIR, 'overall-result.png');
+    await fs.promises.copyFile(zhAliasPngDated, zhAliasPngLatest);
+    console.log(`Wrote chart: ${zhAliasPngLatest}`);
+
+    const enPngLatest = path.join(REPORT_IMG_DIR, 'overall-result.en.png');
+    await fs.promises.copyFile(enPngDated, enPngLatest);
+    console.log(`Wrote chart: ${enPngLatest}`);
+  }
+}
+
+async function writeResourceDistributionCharts(
+  distribution,
+  snapshotDate,
+  { writeLatest }
+) {
+  await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
+
+  const svgs = {};
+  for (const locale of CHART_LOCALE_IDS) {
+    svgs[locale] = renderResourceDistributionSvg(distribution, snapshotDate, {
+      locale,
+      minPercent: 1,
+    });
+  }
+  const zhSvg = svgs['zh-TW'];
+  const enSvg = svgs.en;
+
+  await writeSvgChart(`resource-distribution-${snapshotDate}.zh-TW.svg`, zhSvg);
+  await writeSvgChart(`resource-distribution-${snapshotDate}.en.svg`, enSvg);
+  await writeSvgChart(`resource-distribution-${snapshotDate}.svg`, zhSvg);
+
+  if (writeLatest) {
+    await writeSvgChart('resource-distribution.zh-TW.svg', zhSvg);
+    await writeSvgChart('resource-distribution.en.svg', enSvg);
+    await writeSvgChart('resource-distribution.svg', zhSvg);
+  }
 }
 
 async function main() {
@@ -734,28 +912,8 @@ async function main() {
     'utf8'
   );
   console.log(`Wrote stats: ${DEPENDENCY_BREAKDOWN_TSV}`);
-  const overallSvg = renderOverallResultSvg(overall, snapshotDate);
-  await fs.promises.mkdir(REPORT_IMG_DIR, { recursive: true });
-  const overallSvgPath = path.join(
-    REPORT_IMG_DIR,
-    `overall-result-${snapshotDate}.svg`
-  );
-  await fs.promises.writeFile(overallSvgPath, overallSvg, 'utf8');
-  console.log(`Wrote chart: ${overallSvgPath}`);
-  const overallPngPath = path.join(
-    REPORT_IMG_DIR,
-    `overall-result-${snapshotDate}.png`
-  );
-  await renderSvgToPng(overallSvg, overallPngPath);
-  console.log(`Wrote chart: ${overallPngPath}`);
-  if (!hasDateArg && !hasDataArg) {
-    const latestOverallSvgPath = path.join(REPORT_IMG_DIR, 'overall-result.svg');
-    await fs.promises.writeFile(latestOverallSvgPath, overallSvg, 'utf8');
-    console.log(`Wrote chart: ${latestOverallSvgPath}`);
-    const latestOverallPngPath = path.join(REPORT_IMG_DIR, 'overall-result.png');
-    await renderSvgToPng(overallSvg, latestOverallPngPath);
-    console.log(`Wrote chart: ${latestOverallPngPath}`);
-  }
+  const writeLatest = !hasDateArg && !hasDataArg;
+  await writeOverallResultCharts(overall, snapshotDate, { writeLatest });
 
   const resourceDistribution = countResourceDistribution(jsonDataset);
   const resourceDistributionTsv = renderResourceDistributionTsv(
@@ -768,24 +926,9 @@ async function main() {
   );
   console.log(`Wrote stats: ${RESOURCE_DISTRIBUTION_TSV}`);
 
-  const resourceSvg = renderResourceDistributionSvg(
-    resourceDistribution,
-    snapshotDate
-  );
-  const resourceSvgPath = path.join(
-    REPORT_IMG_DIR,
-    `resource-distribution-${snapshotDate}.svg`
-  );
-  await fs.promises.writeFile(resourceSvgPath, resourceSvg, 'utf8');
-  console.log(`Wrote chart: ${resourceSvgPath}`);
-  if (!hasDateArg && !hasDataArg) {
-    const latestResourceSvgPath = path.join(
-      REPORT_IMG_DIR,
-      'resource-distribution.svg'
-    );
-    await fs.promises.writeFile(latestResourceSvgPath, resourceSvg, 'utf8');
-    console.log(`Wrote chart: ${latestResourceSvgPath}`);
-  }
+  await writeResourceDistributionCharts(resourceDistribution, snapshotDate, {
+    writeLatest,
+  });
 }
 
 // When run directly (not required)
@@ -796,4 +939,10 @@ if (require.main === module) {
   });
 }
 
-module.exports = { main };
+module.exports = {
+  main,
+  renderOverallResultSvg,
+  renderResourceDistributionSvg,
+  CHART_LOCALES,
+  CHART_LOCALE_IDS,
+};
