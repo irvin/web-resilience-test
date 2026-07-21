@@ -217,7 +217,7 @@ The unit of study is “websites” (Web), not direct equivalence to app availab
 
 There is no authoritative “sites Taiwanese people use” list. We merged:
 
-- [Tranco List](https://tranco-list.eu/) — global top 1M list, we use `.tw` domains only.
+- [Tranco List](https://tranco-list.eu/)[^tranco] — global top 1M list, we use `.tw` domains only.
 - [Cloudflare Radar](https://radar.cloudflare.com/) — Taiwan traffic top 100 list
 - [AhrefsTop](https://ahrefstop.com/websites/taiwan) — Taiwan organic search top 100 list
 - [SimilarWeb](https://www.similarweb.com/top-websites/taiwan/) — Taiwan top 50 list
@@ -282,7 +282,7 @@ Tools and projects:
 
 We developed [web-resilience-test](https://github.com/irvin/web-resilience-test) to open each target homepage site-by-site with a programmatic headless browser and record all resource connections during load.
 
-For resources of each page, the tool aggregates request domains, filters known ad domains, and uses IPinfo / headers / LACeS anycast API / ping RTT to infer geographic and logical location (e.g. which public cloud provider).
+For resources of each page, the tool aggregates request domains, filters known ad domains, and uses IPinfo / headers / LACeS anycast API[^laces] / ping RTT to infer geographic and logical location (e.g. which public cloud provider).
 
 Results are aggregated into summary tables.
 
@@ -316,7 +316,7 @@ Results are aggregated into summary tables.
      - If result shows `country=TW`, log as domestic connection
      - Otherwise, we check ASN to find if the request is from multinational public cloud (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft), then do further checks:
        - Headers: look for known location markers in response headers like `cf-ray`, `x-amz-cf-pop`, `x-served-by`, `x-azure-ref`, and `x-msedge-ref` (values containing `TPE` indicate a Taiwan PoP).
-       - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs); if `locations` includes Taiwan and `confidence` is `confident` (or higher), classify as domestic (see [`LACeS.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.md)).
+       - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces]; if `locations` includes Taiwan and `confidence` is `confident` (or higher), classify as domestic (see [`LACeS.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.md)).
        - RTT: if the above methods are inconclusive, ping the resource 5× and take the minimum RTT; if `RTT < 15ms`, categorize it as a domestic resource.
 
      Note: we also built [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) from full request data for ASN mapping, open-sourced for other research and projects.
@@ -587,4 +587,6 @@ Suggested follow-ups:
 [^africa-thirdparty]: Aqsa Kashaf, Jiachen Dou, Margarita Belova, Maria Apostolaki, Yuvraj Agarwal, Vyas Sekar, *A First Look at Third-Party Service Dependencies of Web Services in Africa*, Carnegie Mellon University, Princeton University, https://netsyn.princeton.edu/sites/g/files/toruqf3201/files/documents/pam23_0.pdf
 [^thirdparty-centralization]: Rashna Kumar, Sana Asif, Elise Lee, Fabián E. Bustamante, *Third-party Service Dependencies and Centralization Around the World*, Northwestern University, https://arxiv.org/abs/2111.12253
 [^thirdparty-dependencies]: Aqsa Kashaf, Vyas Sekar, Yuvraj Agarwal, *Analyzing Third Party Service Dependencies in Modern Web Services: Have We Learned from the Mirai-Dyn Incident?*, https://doi.org/10.1145/3419394.3423664
+[^tranco]: Victor Le Pochat, Tom Van Goethem, Samaneh Tajalizadehkhoob, Maciej Korczyński, and Wouter Joosen, *Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation*, Proceedings of the 26th Annual Network and Distributed System Security Symposium (NDSS 2019), https://doi.org/10.14722/ndss.2019.23386
 [^dependency-analyzer]: Yasin Alhamwy, Paul Mertens, Oliver Hohlfeld, *Poster: Web Dependency Analyzer to Identify Resource Dependencies and their Impact on Rendering*, https://doi.org/10.1145/3646547.3689683
+[^laces]: Remi Hendriks, Matthew Luckie, Mattijs Jonker, Raffaele Sommese, and Roland van Rijswijk-Deij, *LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System*, Proceedings of the 2025 ACM Internet Measurement Conference (IMC '25), https://doi.org/10.1145/3730567.3764484

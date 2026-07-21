@@ -6,6 +6,8 @@ For Traditional Chinese documentation, see [`LACeS.zh-TW.md`](LACeS.zh-TW.md).
 
 When IPinfo reports a non-Taiwan country for a target cloud ASN, and HTTP headers do not indicate a Taiwan PoP (`TPE`), the tool queries the [LACeS Anycast Census API](https://manycast.net/api/docs) before falling back to RTT ping.
 
+LACeS is described in Hendriks et al., *LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System* (IMC ’25); see [Citation](#citation).
+
 ## API
 
 - **Base URL:** `https://manycast.net/api/v1/ip/{ip}`
@@ -88,6 +90,10 @@ ipinfo → (non-TW + target ASN) → header check → LACeS API → RTT ping
 - Integration: `checkIPLocation()` between header and RTT steps
 - Output: `cloud_provider.detection_method === 'laces'` with nested `cloud_provider.laces`
 
+## Citation
+
+Remi Hendriks, Matthew Luckie, Mattijs Jonker, Raffaele Sommese, and Roland van Rijswijk-Deij. 2025. *LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System*. In *Proceedings of the 2025 ACM Internet Measurement Conference (IMC '25)*. Association for Computing Machinery, New York, NY, USA, 445–461. https://doi.org/10.1145/3730567.3764484
+
 ---
 
-*Last updated: 2026-06-27*
+*Last updated: 2026-07-22*

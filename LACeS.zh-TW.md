@@ -6,6 +6,8 @@
 
 當 IPinfo 回報非台灣國家、且目標 ASN 屬於國際公有雲，而 HTTP header 又未標示台灣節點（`TPE`）時，工具會在 RTT ping 之前，先查詢 [LACeS Anycast Census API](https://manycast.net/api/docs)。
 
+LACeS 出自 Hendriks 等人，*LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System*（IMC ’25）；完整書目見[引用](#引用)。
+
 ## API
 
 - **Base URL：** `https://manycast.net/api/v1/ip/{ip}`
@@ -88,6 +90,10 @@ ipinfo →（非 TW 且目標 ASN）→ header 檢查 → LACeS API → RTT ping
 - 整合：`checkIPLocation()` 的 header 與 RTT 之間
 - 輸出：`cloud_provider.detection_method === 'laces'` 與巢狀 `cloud_provider.laces`
 
+## 引用
+
+Remi Hendriks, Matthew Luckie, Mattijs Jonker, Raffaele Sommese, Roland van Rijswijk-Deij. 2025. 〈LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System〉. *Proceedings of the 2025 ACM Internet Measurement Conference (IMC '25)*. Association for Computing Machinery, New York, NY, USA, 445–461. https://doi.org/10.1145/3730567.3764484
+
 ---
 
-*最後更新：2026-06-27*
+*最後更新：2026-07-22*

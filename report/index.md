@@ -217,7 +217,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 目前尚無「台灣人常用網站」的權威清單，因此本研究整併以下多個來源，整理出不重複的測試網站清單。
 
-- [Tranco List](https://tranco-list.eu/) - 全球前 100 萬網站排名，取 .tw 的網站。
+- [Tranco List](https://tranco-list.eu/)[^tranco] - 全球前 100 萬網站排名，取 .tw 的網站。
 - [Cloudflare Radar](https://radar.cloudflare.com/) - Cloudflare 的台灣流量排名（前 100 名）
 - [AhrefsTop](https://ahrefstop.com/websites/taiwan) - Ahrefs 的台灣 Organic Search 流量排名（前 100 名）
 - [SimilarWeb](https://www.similarweb.com/top-websites/taiwan/) - SimilarWeb 的台灣網站流量排名（前 50 名）
@@ -282,7 +282,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 本研究開發 [web-resilience-test](https://github.com/irvin/web-resilience-test) 工具，針對上述研究標的網站的首頁，運用程式化的 headless 瀏覽器進行逐站開啟，並紀錄其頁面載入時的所有資源連線。
 
-接著，本工具針對每一項資源，統計所有請求的網域，並排除已知為廣告用途的網域。接著針對這些網域，透過 IPinfo / header 資訊 / LACeS anycast API / ping RTT，判斷其實際地理位置及邏輯位置（例如來自哪一個公有雲服務）。
+接著，本工具針對每一項資源，統計所有請求的網域，並排除已知為廣告用途的網域。接著針對這些網域，透過 IPinfo / header 資訊 / LACeS anycast API[^laces] / ping RTT，判斷其實際地理位置及邏輯位置（例如來自哪一個公有雲服務）。
 
 最後，本工具針對所有測試結果進行統計，整理成結果數據表格。
 
@@ -316,7 +316,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
      - 如果查詢的資料顯示 `country=TW`，則紀錄為境內連線
      - 若查詢的結果顯示 `country` 非 `TW`，則根據連線的 ASN，判定是否來自國際公有雲節點（Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft），並進入下一步的進階判定：
        - Header 判定：檢查連線的 response header，是否包含 `cf-ray`、`x-amz-cf-pop`、`x-served-by`、`x-azure-ref`、`x-msedge-ref` 等雲端系統已知的位置標記（內容含 `TPE` 即視為台灣節點）。
-       - Anycast 判定：若 header 無法判定，查詢 [LACeS Anycast Census API](https://manycast.net/api/docs)；若 `locations` 含台灣且 `confidence` 為 `confident`（或以上），則判斷為台灣境內資源（詳見 [`LACeS.zh-TW.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.zh-TW.md)）。
+       - Anycast 判定：若 header 無法判定，查詢 [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces]；若 `locations` 含台灣且 `confidence` 為 `confident`（或以上），則判斷為台灣境內資源（詳見 [`LACeS.zh-TW.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.zh-TW.md)）。
        - RTT 判定：若前述方法皆無法判定，則針對該資源進行 `ping` 5 次，取最小 RTT。如果 `RTT < 15ms`，則將其判斷為台灣境內資源。
 
      註：本研究另參酌測試過程的完整 request 資料，建立公有雲的對應 ASN 清單 [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json)，除供判定使用外，也同步開源供其他研究與專案參考。
@@ -596,4 +596,6 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 [^africa-thirdparty]: Aqsa Kashaf, Jiachen Dou, Margarita Belova, Maria Apostolaki, Yuvraj Agarwal, Vyas Sekar，〈A First Look at Third-Party Service Dependencies of Web Services in Africa〉，Carnegie Mellon University、Princeton University，https://netsyn.princeton.edu/sites/g/files/toruqf3201/files/documents/pam23_0.pdf
 [^thirdparty-centralization]: Rashna Kumar, Sana Asif, Elise Lee, Fabián E. Bustamante，〈Third-party Service Dependencies and Centralization Around the World〉，Northwestern University，https://arxiv.org/abs/2111.12253
 [^thirdparty-dependencies]: Aqsa Kashaf, Vyas Sekar, Yuvraj Agarwal，〈Analyzing Third Party Service Dependencies in Modern Web Services: Have We Learned from the Mirai-Dyn Incident?〉，https://doi.org/10.1145/3419394.3423664
+[^tranco]: Victor Le Pochat, Tom Van Goethem, Samaneh Tajalizadehkhoob, Maciej Korczyński, Wouter Joosen，〈Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation〉，Proceedings of the 26th Annual Network and Distributed System Security Symposium (NDSS 2019)，https://doi.org/10.14722/ndss.2019.23386
 [^dependency-analyzer]: Yasin Alhamwy, Paul Mertens, Oliver Hohlfeld，〈Poster: Web Dependency Analyzer to Identify Resource Dependencies and their Impact on Rendering〉，https://doi.org/10.1145/3646547.3689683
+[^laces]: Remi Hendriks, Matthew Luckie, Mattijs Jonker, Raffaele Sommese, Roland van Rijswijk-Deij，〈LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System〉，Proceedings of the 2025 ACM Internet Measurement Conference (IMC '25)，https://doi.org/10.1145/3730567.3764484
