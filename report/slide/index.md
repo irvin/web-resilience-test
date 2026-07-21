@@ -168,7 +168,7 @@ Most of the time, users do not notice, because traffic can be rerouted. The real
 <!--
 This map shows the cable status in early January, after the earthquakes around December 27, 2025.
 
-At that time, close to half of Taiwan's international cable systems had problems. Full repairs were not completed until last week, in mid-May 2026.
+At that time, close to half of Taiwan's international cable systems had problems. Full repairs were not completed until mid-May 2026.
 
 So this is not just a theory. When international connectivity is badly reduced, the real question is: which services can people still use?
 
@@ -186,16 +186,16 @@ Websites commonly used in Taiwan
 
 Latest dataset:
 
-- **2,157** sites tested
-- **1,859** sites completed
-- Data as of **2026-04-17**
+- **2,509** sites tested
+- **2,179** sites completed
+- Data as of **2026-07-21**
 
 <!--
 We tested websites commonly used in Taiwan. This is not the same as testing only Taiwanese websites.
 
 If people in Taiwan rely on Google, Gmail, social platforms, e-commerce, news, government services, or community sites, they are part of the resilience picture.
 
-In the latest dataset, we tested 2,157 sites, and 1,859 tests completed successfully. The data is from April 17.
+In the latest dataset, we tested 2,509 sites, and 2,179 tests completed successfully. The data is from July 21.
 
 For now, the unit is the website homepage. It is not a full service test yet, but it gives us a repeatable starting point.
 -->
@@ -224,29 +224,29 @@ Finally, we classify the site by the risks we can observe from the homepage.
 
 ---
 
-## Overall Result: **89.3%** Need Attention
+## Overall Result: **88.8%** Need Attention
 
-![bg right:50% contain Overall result](img/overall-result.svg)
+![bg right:50% contain Overall result](img/overall-result.en.svg)
 
 | Category          | Sites  | Share |
 |-------------------|-------:|------:|
-| Foreign-dependent | 874    | 47.0% |
-| Cloud-dependent   | 787    | 42.3% |
-| Locally-contained | 198    | 10.7% |
+| Foreign-dependent |    856 | 39.3% |
+| Cloud-dependent   |  1,080 | 49.6% |
+| Locally-contained |    243 | 11.2% |
 
 <!--
-The headline result is this: 89.3 percent of tested sites need attention.
+The headline result is this: 88.8 percent of tested sites need attention.
 
-47 percent are foreign-dependent. They load at least one resource from outside Taiwan.
+39.3 percent are foreign-dependent. They load at least one resource from outside Taiwan.
 
-42.3 percent are cloud-dependent. They look local in the beginning, but they rely on Taiwan nodes of multi-national cloud providers.
+49.6 percent are cloud-dependent. They look local in the beginning, but they rely on Taiwan nodes of multi-national cloud providers.
 
 This does not mean they will all fail. It means we should verify them before a real outage.
 -->
 
 ---
 
-## 10.7% !== Safe
+## 11.2% !== Safe
 
 This is a **risk map**, not a live outage simulation.
 
@@ -259,7 +259,7 @@ Even if the homepage looks local -
 - Actual routing paths
 
 <!--
-Only 10.7 percent look locally contained from the homepage. But they also needs care.
+Only 11.2 percent look locally contained from the homepage. But they also need care.
 
 If a homepage loads all observed resources from Taiwan, that does not prove the whole service is local.
 
@@ -269,17 +269,16 @@ So this is a risk map. It is not a live outage simulation, and it is not a final
 -->
 ---
 
-## 42.3% Cloud-dependent sites
+## 49.6% Cloud-dependent sites
 
 Can they keep serving when connectivity is isolated?
 
 | Provider Taiwan nodes | Sites |
-|---|---:|
-| Google | 726 |
-| Cloudflare | 251 |
-| AWS | 118 |
-| Akamai | 94 |
-
+|-----------------------|------:|
+| Google                |   965 |
+| Cloudflare            |   480 |
+| AWS                   |   138 |
+| Akamai                |   104 |
 
 <!--
 The cloud-dependent group is especially important.
@@ -299,29 +298,29 @@ So the real question is: can these seemingly localized services keep running whe
 
 <!-- _class: invert tables-slide -->
 
-| Sites                | Domestic | Foreign |  Total |
+| Sites                      | Domestic | Foreign |  Total |
 | -------------------------- | -------: | ------: | -----: |
-| Multinational public cloud |    1,582 |     802 |  1,641 |
-| Non-cloud                  |    1,363 |     195 |  1,436 |
-| Total                      |    1,793 |     874 |        |
+| Multinational public cloud |    1,881 |     754 |  1,910 |
+| Non-cloud                  |    1,623 |     245 |  1,709 |
+| Total                      |    2,140 |     856 |        |
 
 | Provider   | Domestic nodes | Foreign nodes |
 | ---------- | -------------: | ------------: |
-| Google     |          1,444 |            32 |
-| Cloudflare |            672 |           298 |
-| Amazon     |            414 |           231 |
-| Akamai     |            352 |             9 |
-| Fastly     |            122 |           218 |
-| Microsoft  |              5 |           167 |
+| Google     |          1,685 |            56 |
+| Cloudflare |          1,016 |            17 |
+| Amazon     |            512 |           309 |
+| Akamai     |            338 |            11 |
+| Fastly     |              6 |           257 |
+| Microsoft  |            140 |            77 |
 
-- 88.3% use multinational public cloud resources
-- Only 3.6% use foreign resources exclusively
+- 87.7% use multinational public cloud resources
+- Only 1.8% use foreign resources exclusively
 - Provider behavior differs substantially
 
 <!--
 This table shows two important points.
 
-First, localization already helps. Only 3.6 percent of sites use foreign resources exclusively. Many websites, including foreign services, already serve many resources from Taiwan.
+First, localization already helps. Only 1.8 percent of sites use foreign resources exclusively. Many websites, including foreign services, already serve many resources from Taiwan.
 
 Second, provider behavior is very different. Some providers serve most observed resources from Taiwan nodes. Others have a much more mixed pattern.
 
@@ -334,7 +333,7 @@ So the answer is not simply "avoid cloud" or "host everything locally." CDNs and
 
 Resource dependency is **highly concentrated**.
 
-![h:450 Resource source distribution](img/resource-distribution.svg)
+![h:450 Resource source distribution](img/resource-distribution.en.svg)
 
 <!--
 Now we look at all resources loaded by the tested website homepages.
@@ -354,16 +353,16 @@ Foreign dependency is lower in government and education sites.
 
 | Type | Sites tested | Foreign dependencies | Share |
 | --- | ---: | ---: | ---: |
-| Government | 200 | 20 | 10.0% |
-| Education | 225 | 37 | 16.4% |
-| All sites | 1,859 | 874 | 47.0% |
+| Government | 235 | 16 | 6.8% |
+| Education | 255 | 34 | 13.3% |
+| All sites | 2,179 | 856 | 39.3% |
 
 <!--
 There is one positive finding.
 
 Government and education sites have lower foreign dependency than the overall dataset.
 
-Only 10 percent of government sites had observed foreign dependency, compared with 47 percent overall. Education sites were also below the average.
+Only 6.8 percent of government sites had observed foreign dependency, compared with 39.3 percent overall. Education sites were also below the average.
 
 This does not prove they are fully safe. But it suggests a better starting point in public-sector and academic-network environments.
 -->
@@ -422,7 +421,7 @@ If you work on cloud services or infrastructure, this is also a design question 
 - Traceroute, library, sector, and resource-type analysis
 - Identify high-traffic, low-resilience sites & resources
 
-## How about App?
+## What about apps?
 
 - OCF is developing a mobile app testing service
 
@@ -433,7 +432,7 @@ We can run fault injection and block foreign resources. We can test real user jo
 
 We also need deeper cloud resilience tests: control planes, origins, cache, authentication.
 
-And of course, many people use mobile apps more than websites. OCF is developing a mobile app testing service. Stay turned later this year.
+And of course, many people use mobile apps more than websites. OCF is developing a mobile app testing service. Stay tuned later this year.
 -->
 
 ---
@@ -446,7 +445,7 @@ Check your website at [`resilience.ocf.tw`](https://resilience.ocf.tw/) →
 
 - g0v Digital Resilience Hackathon  
 
-- Meet at APAN62, Aug 12th at Auckland
+- Meet us at APAN62 on Aug 12 in Auckland
 
 ## Channels *海纜又被鯊魚咬斷了*
 
