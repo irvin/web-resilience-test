@@ -116,12 +116,12 @@
 <h1 id="海纜斷光會怎樣認識台灣的國際網路中斷風險">海纜斷光會怎樣？認識台灣的國際網路中斷風險</h1>
 <h2 id="when-submarine-cables-go-dark-understanding-and-preparing-for-the-risks-of-taiwans-international-internet-disconnection">When Submarine Cables Go Dark: Understanding and Preparing for the Risks of Taiwan’s International Internet Disconnection</h2>
 <h3 id="作者">作者</h3>
-<p>陳心一 Irvin Chen<br>開放文化基金會 Open Culture Foundation (<a href="https://ocf.tw">ocf.tw</a>)<br>MozTW, Mozilla 台灣社群 (<a href="https://moztw.org">moztw.org</a>)  </p>
+<p>陳心一 Irvin Chen<br>ORCID: <a href="https://orcid.org/0009-0002-1059-7130">https://orcid.org/0009-0002-1059-7130</a><br>開放文化基金會 Open Culture Foundation (<a href="https://ocf.tw">ocf.tw</a>)<br>MozTW, Mozilla 台灣社群 (<a href="https://moztw.org">moztw.org</a>)  </p>
 <h3 id="更新日期">更新日期</h3>
-<p>Published: 2026-03-23<br>Last Updated: 2026-05-26</p>
+<p>Published: 2026-03-23<br>Last Updated: 2026-07-22</p>
 <h3 id="誌謝">誌謝</h3>
 <p><img src="img/APNIC-Foundation-and-ISIF-Logo-CMYK-stacked-01-a.svg" alt="" style="height: 100px;" /><br>
-This work was supported by a grant from the <a href="https://apnic.foundation/">APNIC Foundation</a>, via the <a href="https://apnic.foundation/home/isifasia/">Information Society Innovation Fund (ISIF Asia)</a>.</p>
+This work was supported by a grant from the <a href="https://apnic.foundation/">APNIC Foundation</a> (<a href="https://ror.org/01y4y6h16">ROR: 01y4y6h16</a>), via the <a href="https://apnic.foundation/home/isifasia/">Information Society Innovation Fund (ISIF Asia)</a>.</p>
 <p><a title="g0v 數位韌性松" href="https://g0v.hackmd.io/@paulpengtw/DigiResiTh0n-home" target="_blank"><img src="img/g0v_logo.svg" alt="" style="height: 3em;"></a>
 </p>
 <p><a title="開放文化基金會" href="https://ocf.tw/" target="_blank"><img src="img/Logo_Compact-OCF_Purple.svg" alt="" style="height: 2em;"></a></p>
@@ -129,7 +129,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <h2 id="摘要">摘要</h2>
 <p>本研究探討當台灣發生大規模國際海底電纜中斷時，日常常用網路服務的可用性。透過瀏覽器觀測網站首頁資源要求，追蹤頁面依賴資源的來源，作為風險評估指標。</p>
 <p>本研究聚焦兩項核心議題：（一）台灣常用網站對境外資源的依賴程度（二）台灣常用網站對跨國雲服務境內節點的依賴程度，並發展量測的方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。</p>
-<p>經檢測 1859 個台灣常用網站，結果顯示，47.0% 的網站為第一類「境外依賴型」，存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 42.3% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點資源，在境外連線中斷時的實際可用性，存在高度不確定。</p>
+<p>經檢測 2,179 個台灣常用網站，結果顯示，39.3% 的網站為第一類「境外依賴型」，存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 49.6% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點資源，在境外連線中斷時的實際可用性，存在高度不確定。</p>
 <h2 id="目錄">目錄</h2>
 <ul>
 <li><a href="#%E6%91%98%E8%A6%81">摘要</a></li>
@@ -262,14 +262,14 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <h3 id="建立常用網站清單">建立常用網站清單</h3>
 <p>目前尚無「台灣人常用網站」的權威清單，因此本研究整併以下多個來源，整理出不重複的測試網站清單。</p>
 <ul>
-<li><a href="https://tranco-list.eu/">Tranco List</a> - 全球前 100 萬網站排名，取 .tw 的網站。</li>
+<li><a href="https://tranco-list.eu/">Tranco List</a><sup class="footnote-ref"><a id="fnref-tranco" href="#fn-tranco">29</a></sup> - 全球前 100 萬網站排名，取 .tw 的網站。</li>
 <li><a href="https://radar.cloudflare.com/">Cloudflare Radar</a> - Cloudflare 的台灣流量排名（前 100 名）</li>
 <li><a href="https://ahrefstop.com/websites/taiwan">AhrefsTop</a> - Ahrefs 的台灣 Organic Search 流量排名（前 100 名）</li>
 <li><a href="https://www.similarweb.com/top-websites/taiwan/">SimilarWeb</a> - SimilarWeb 的台灣網站流量排名（前 50 名）</li>
 <li><a href="https://www.semrush.com/trending-websites/tw/all">Semrush</a> - Semrush 的台灣網站流量排名（前 100 名）</li>
 </ul>
-<p>測試清單 <a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json">merged_lists_tw.json</a> 更新於 2026 年 1 月 6 日，共納入 2109 個網站，並依照流量高低先後排序，可用以衡量特定網站重要性。</p>
-<p>除以上 2109 網站外，本研究另加入數個手動指定測試站點<a href="https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json">manual_curated_list_tw.json</a>（例如 OCF、SITCON、g0v 等）以涵蓋台灣開源與數位韌性社群關注個案。</p>
+<p>測試清單 <a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json">merged_lists_tw.json</a> 更新於 2026 年 7 月 20 日，共納入 2,467 個網站，並依照流量高低先後排序，可用以衡量特定網站重要性。</p>
+<p>本研究另透過 <a href="https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json">manual_curated_list_tw.json</a> 加入 OCF、SITCON、g0v 等數個手動指定測試站點，以涵蓋台灣開源與數位韌性社群關注個案。</p>
 <p>相關清單與 script 開源於 <a href="https://github.com/irvin/top-traffic-website-list-taiwan/">top-traffic-website-list-taiwan</a> 專案。</p>
 <h3 id="測試環境">測試環境</h3>
 <p>本研究使用一般台灣常見的家用網路環境進行測試，包括以下屬性：</p>
@@ -280,7 +280,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <li>相關環境資訊記錄在測試 log 中，方便後續比較或重現</li>
 </ul>
 <h2 id="研究方法">研究方法</h2>
-<p>網站的可用性不僅取決於是否能成功建立網路連線，亦取決於其能否取得所依賴的多重資源（如 JavaScript、樣式表、圖片與 API）。現代網站通常由多個不同網域所提供的資源組成，這些資源共同決定最終呈現給使用者的內容與功能。既有研究指出，可透過 headless 瀏覽器分析網站資源請求行為，推導網站對第三方網域資源的依賴關係<sup class="footnote-ref"><a id="fnref-dependency-analyzer" href="#fn-dependency-analyzer">29</a></sup><sup class="footnote-ref"><a id="fnref-thirdparty-centralization-2" href="#fn-thirdparty-centralization">27</a></sup>。</p>
+<p>網站的可用性不僅取決於是否能成功建立網路連線，亦取決於其能否取得所依賴的多重資源（如 JavaScript、樣式表、圖片與 API）。現代網站通常由多個不同網域所提供的資源組成，這些資源共同決定最終呈現給使用者的內容與功能。既有研究指出，可透過 headless 瀏覽器分析網站資源請求行為，推導網站對第三方網域資源的依賴關係<sup class="footnote-ref"><a id="fnref-dependency-analyzer" href="#fn-dependency-analyzer">30</a></sup><sup class="footnote-ref"><a id="fnref-thirdparty-centralization-2" href="#fn-thirdparty-centralization">27</a></sup>。</p>
 <p>本研究在「以網站資源請求行為為基礎的依賴暴露分析」之方法基礎上，將依賴結構分析延伸至「國際連線中斷」之系統性條件情境，進一步觀察其對實際服務可用性的影響。</p>
 <p>由於網站的後端架構、資料傳輸、控制面依賴、與雲端內部運作機制，無法直接從外部觀測，本研究不試圖驗證完整系統依賴關係，而聚焦於網站前端可觀測的網路資源請求行為（network requests），並據此建立可操作化指標。</p>
 <h3 id="指標定義與風險分類框架">指標定義與風險分類框架</h3>
@@ -311,7 +311,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </ul>
 <h3 id="擷取測試資料">擷取測試資料</h3>
 <p>本研究開發 <a href="https://github.com/irvin/web-resilience-test">web-resilience-test</a> 工具，針對上述研究標的網站的首頁，運用程式化的 headless 瀏覽器進行逐站開啟，並紀錄其頁面載入時的所有資源連線。</p>
-<p>接著，本工具針對每一項資源，統計所有請求的網域，並排除已知為廣告用途的網域。接著針對這些網域，透過 IPinfo / header 資訊 / ping RTT，判斷其實際地理位置及邏輯位置（例如來自哪一個公有雲服務）。</p>
+<p>接著，本工具針對每一項資源，統計所有請求的網域，並排除已知為廣告用途的網域。接著針對這些網域，透過 IPinfo / header 資訊 / LACeS anycast API<sup class="footnote-ref"><a id="fnref-laces" href="#fn-laces">31</a></sup> / ping RTT，判斷其實際地理位置及邏輯位置（例如來自哪一個公有雲服務）。</p>
 <p>最後，本工具針對所有測試結果進行統計，整理成結果數據表格。</p>
 <h3 id="單一網站測試流程">單一網站測試流程</h3>
 <p><a href="https://github.com/irvin/web-resilience-test/blob/main_w_tw_result/no-global-connection-check.js"><code>no-global-connection-check.js</code></a> 用在單一網站的測試，流程如下：</p>
@@ -354,8 +354,9 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <li>針對前述 hostname 清單，呼叫 IPinfo API，取得其位置資料</li>
 <li>如果查詢的資料顯示 <code>country=TW</code>，則紀錄為境內連線</li>
 <li>若查詢的結果顯示 <code>country</code> 非 <code>TW</code>，則根據連線的 ASN，判定是否來自國際公有雲節點（Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft），並進入下一步的進階判定：<ul>
-<li>Header 判定：檢查連線的 response header，是否包含 <code>cf-ray</code>、<code>x-amz-cf-pop</code>、<code>x-served-by</code> 等雲端系統已知的位置標記。</li>
-<li>RTT 判定：若無法從 header 擷取到明確的位置資訊，則針對該資源進行 <code>ping</code> 5 次，取最小 RTT。如果 <code>RTT &lt; 15ms</code>，則將其判斷為台灣境內資源。</li>
+<li>Header 判定：檢查連線的 response header，是否包含 <code>cf-ray</code>、<code>x-amz-cf-pop</code>、<code>x-served-by</code>、<code>x-azure-ref</code>、<code>x-msedge-ref</code> 等雲端系統已知的位置標記（內容含 <code>TPE</code> 即視為台灣節點）。</li>
+<li>Anycast 判定：若 header 無法判定，查詢 <a href="https://manycast.net/api/docs">LACeS Anycast Census API</a><sup class="footnote-ref"><a id="fnref-laces-2" href="#fn-laces">31</a></sup>；若 <code>locations</code> 含台灣且 <code>confidence</code> 為 <code>confident</code>（或以上），則判斷為台灣境內資源（詳見 <a href="https://github.com/irvin/web-resilience-test/blob/main/LACeS.zh-TW.md"><code>LACeS.zh-TW.md</code></a>）。</li>
+<li>RTT 判定：若前述方法皆無法判定，則針對該資源進行 <code>ping</code> 5 次，取最小 RTT。如果 <code>RTT &lt; 15ms</code>，則將其判斷為台灣境內資源。</li>
 </ul>
 </li>
 </ul>
@@ -389,23 +390,23 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <p>本研究使用 <a href="https://github.com/irvin/web-resilience-test-profile">web-resilience-test-profile</a> 工具，將個別測試結果編譯成個別靜態頁面，並架設 <a href="https://resilience.ocf.tw/">https://resilience.ocf.tw/</a> 網站，供公眾自由查詢個別網站的韌性狀態。（例如 <a href="https://resilience.ocf.tw/web/ocf.tw/">海纜斷掉時，ocf.tw 會動嗎？</a>）。</p>
 <p>本工具從測試到編譯出結果頁面，在兩千個網站的數量級時，如以預設值（平行測試 4 個網站，平行編譯 8 個網站），需時約 30~60 分鐘。最新的測試結果，目前公布於 <a href="https://github.com/irvin/web-resilience-test-result">web-resilience-test-result</a> 專案，以及 <a href="https://resilience.ocf.tw/">resilience.ocf.tw</a> 網站。</p>
 <h2 id="研究結果">研究結果</h2>
-<p>本研究共測試了 2157 個網站，其中 1859 個網站完成測試。</p>
+<p>本研究共測試了 2,509 個網站，其中 2,179 個網站完成測試。</p>
 <ul>
-<li>資料彙整日期：2026 年 4 月 17 日</li>
-<li>測試網站清單： <ul>
-<li><a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json">merged_lists_tw.json@553b50a</a> </li>
-<li><a href="https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json">manual_curated_list_tw.json@28160ed</a></li>
+<li>資料彙整日期：2026 年 7 月 21 日</li>
+<li>測試網站清單：<ul>
+<li><a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json">merged_lists_tw.json@1c3a020</a></li>
+<li><a href="https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json">manual_curated_list_tw.json@42505f5</a></li>
 </ul>
 </li>
-<li>測試結果總表： <a href="https://github.com/irvin/web-resilience-test-result/blob/39080848acd5872f97dbe3d606676c664e92ce7f/statistic.tsv">statistic.tsv@3908084</a></li>
-<li>國際公有雲統計： <a href="https://github.com/irvin/web-resilience-test-result/blob/39080848acd5872f97dbe3d606676c664e92ce7f/asn_taiwan_ratio.tsv">asn_taiwan_ratio.tsv@3908084</a></li>
+<li>測試結果總表： <a href="https://github.com/irvin/web-resilience-test-result/blob/eb30e97278a5f5a2e9faf58e4ee248f90aedbbd2/statistic.tsv">statistic.tsv@eb30e97</a></li>
+<li>國際公有雲統計： <a href="https://github.com/irvin/web-resilience-test-result/blob/eb30e97278a5f5a2e9faf58e4ee248f90aedbbd2/asn_taiwan_ratio.tsv">asn_taiwan_ratio.tsv@eb30e97</a></li>
 </ul>
 <h3 id="整體結果">整體結果</h3>
-<p>在本研究的分類框架下，47.0% 的網站為「境外依賴型」，呈現境外資源依賴暴露，顯示其在海纜斷光情境下，<strong>具有較高的直接失效風險</strong>；另有 42.3% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性<strong>具有高度不確定性</strong>，僅有 10.7% 的網站為「本地型」，無呈現依賴暴露，維持正常運作的可能性較高。整體而言，共有 89.3% 的網站屬於需進一步關注的高風險或高不確定性類型。</p>
-<p><img src="./img/overall-result.svg" alt=""></p>
+<p>在本研究的分類框架下，39.3% 的網站為「境外依賴型」，呈現境外資源依賴暴露，顯示其在海纜斷光情境下，<strong>具有較高的直接失效風險</strong>；另有 49.6% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性<strong>具有高度不確定性</strong>，僅有 11.2% 的網站為「本地型」，無呈現依賴暴露，維持正常運作的可能性較高。整體而言，共有 88.8% 的網站屬於需進一步關注的高風險或高不確定性類型。</p>
+<p><img src="./img/overall-result.zh-TW.svg" alt=""></p>
 <h3 id="結果說明">結果說明</h3>
 <!--
-資料出處：web-resilience-test/test-results/overall_result.tsv
+資料出處：web-resilience-test/test-results/overall-result.tsv
 -->
 
 <p>境外依賴型：網站本身就來自境外，或開啟時有擷取境外資源，故存在高度失效風險。</p>
@@ -421,89 +422,105 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </thead>
 <tbody><tr>
 <td>境外依賴型（存在境外資源依賴暴露）</td>
-<td align="right">874</td>
-<td align="right">47.0%</td>
+<td align="right">856</td>
+<td align="right">39.3%</td>
 </tr>
 <tr>
 <td>雲端依賴型（無境外資源依賴暴露，存在跨國雲本地節點依賴）</td>
-<td align="right">787</td>
-<td align="right">42.3%</td>
+<td align="right">1,080</td>
+<td align="right">49.6%</td>
 </tr>
 <tr>
 <td>本地型（無呈現依賴暴露）</td>
-<td align="right">198</td>
-<td align="right">10.7%</td>
+<td align="right">243</td>
+<td align="right">11.2%</td>
 </tr>
 <tr>
 <td>總計</td>
-<td align="right">1859</td>
+<td align="right">2,179</td>
 <td align="right">100.0%</td>
 </tr>
 </tbody></table>
 <h3 id="國際公有雲依賴狀態分析">國際公有雲依賴狀態分析</h3>
 <!--
 資料出處：web-resilience-test/test-results/asn_taiwan_ratio.tsv
-參考 generate_statistic.js 產生之「Resilience=1 網站公有雲使用總結」區段及「各公有雲使用情況」區段
+參考 generate_statistic.js 產生之「Resilience=1 public cloud summary」區段及「Per-provider usage」區段
 -->
 
 <p>統計第二類「雲端依賴型」的所有網站，對於不同「國際公有雲在台灣節點」的資源請求，我們得到以下結果：</p>
 <ul>
-<li>Google Cloud Platform 境內節點：共 726 個網站依賴</li>
-<li>Cloudflare 境內節點：共 251 個網站依賴</li>
-<li>Amazon Web Services 境內節點：共 118 個網站依賴</li>
-<li>Akamai 境內節點：共 94 個網站依賴</li>
-<li>Fastly 境內節點：共 34 個網站依賴</li>
-<li>Azure 境內節點：共 3 個網站依賴</li>
+<li>Google Cloud Platform 境內節點：共 965 個網站依賴</li>
+<li>Cloudflare 境內節點：共 480 個網站依賴</li>
+<li>Amazon Web Services 境內節點：共 138 個網站依賴</li>
+<li>Akamai 境內節點：共 104 個網站依賴</li>
+<li>Microsoft Azure 境內節點：共 38 個網站依賴</li>
+<li>Fastly 境內節點：共 4 個網站依賴</li>
 </ul>
-<p>無國際依賴的 985 個網站中，共有 726 個網站需取用 GCP 境內節點的資源，占比超過七成（73.7%）。</p>
+<p>（同一網站可能同時使用多家供應商，各列相加不等於網站總數。）</p>
+<p>無國際依賴的 1,323 個網站中，共有 965 個網站需取用 GCP 境內節點的資源，占比超過七成（72.9%）。</p>
 <p>據此可知，如果 GCP 等公有雲服務，在境外網路中斷時，境內節點無法維持正常運作，將會造成非常高的衝擊。換言之，這些公有雲服務的韌性，是網站能否在海纜障礙的情境下，維持正常運作的關鍵因素。</p>
 <h3 id="國際公有雲資源位置">國際公有雲資源位置</h3>
 <!--
 資料出處：web-resilience-test/test-results/asn_taiwan_ratio.tsv
-參考 generate_statistic.js 產生之「公司合計統計」區段
+參考 generate_statistic.js 產生之「Company totals」區段
 -->
 
-<p>我們另外檢視所有對國際公有雲境內外位置請求資源的的網站數分佈，發現以下結果：</p>
+<p>我們另外檢視所有對國際公有雲境內外節點的資源請求分佈，發現以下結果：</p>
 <table>
 <thead>
 <tr>
 <th>名稱</th>
-<th>網站數 (國內節點)</th>
-<th>網站數 (國際節點)</th>
+<th align="right">網站數 (國內節點)</th>
+<th align="right">網站數 (國際節點)</th>
+<th align="right">請求數 (國內節點)</th>
+<th align="right">請求數 (國際節點)</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>Google</td>
-<td>1444</td>
-<td>32</td>
+<td align="right">1,685</td>
+<td align="right">56</td>
+<td align="right">7,393</td>
+<td align="right">63</td>
 </tr>
 <tr>
 <td>Cloudflare</td>
-<td>672</td>
-<td>298</td>
+<td align="right">1,016</td>
+<td align="right">17</td>
+<td align="right">3,051</td>
+<td align="right">21</td>
 </tr>
 <tr>
 <td>Amazon</td>
-<td>414</td>
-<td>231</td>
+<td align="right">512</td>
+<td align="right">309</td>
+<td align="right">1,382</td>
+<td align="right">522</td>
 </tr>
 <tr>
 <td>Akamai</td>
-<td>352</td>
-<td>9</td>
+<td align="right">338</td>
+<td align="right">11</td>
+<td align="right">446</td>
+<td align="right">13</td>
 </tr>
 <tr>
 <td>Fastly</td>
-<td>122</td>
-<td>218</td>
+<td align="right">6</td>
+<td align="right">257</td>
+<td align="right">6</td>
+<td align="right">369</td>
 </tr>
 <tr>
 <td>Microsoft</td>
-<td>5</td>
-<td>167</td>
+<td align="right">140</td>
+<td align="right">77</td>
+<td align="right">196</td>
+<td align="right">143</td>
 </tr>
 </tbody></table>
-<p>以 Google 雲端為例，資源來自其境內節點的佔比居然高達 97.8%，境外節點僅佔約 2.2%。此結果顯示 CDN 等相關技術發展，對於資料在地化（Data Localization）的實際助益。另外也表示，這些在台節點保存鏡相資源之持續可用時間，將是境外擁塞或斷線時，影響一般網站的服務之存續狀態的關鍵要素。</p>
+<p>（單一網站可能同時取用同一供應商的境內與境外節點，因此兩欄會重疊，不可相加為供應商總服務網站數。）</p>
+<p>以 Google 雲端資源請求數計算，7,456 筆 Google 請求中有 7,393 筆判定為境內節點，比例約 99.2%；境外節點請求僅計 63 筆，約 0.8%。此結果顯示 CDN 等相關技術發展，對於資料在地化（Data Localization）的實際助益。另外也表示，這些在台節點保存之鏡相資源的持續可用時間，將是境外擁塞或斷線時，影響一般網站服務存續時間的關鍵要素。</p>
 <p>對於境內資源比例較低的公有雲服務，可進一步評估其是否具備在國內建立完整鏡相備援、快取持續與應變運作機制的可行性。</p>
 <h3 id="資源位置雲平台依賴狀態統計">資源位置／雲平台依賴狀態統計</h3>
 <!--
@@ -533,33 +550,33 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </thead>
 <tbody><tr>
 <td>國際公有雲</td>
-<td>1582 (85.1%)</td>
-<td>802 (43.1%)</td>
-<td>1641 (88.3%)</td>
+<td>1,881 (86.3%)</td>
+<td>754 (34.6%)</td>
+<td>1,910 (87.7%)</td>
 </tr>
 <tr>
 <td>非雲</td>
-<td>1363 (73.3%)</td>
-<td>195 (10.5%)</td>
-<td>1436 (77.2%)</td>
+<td>1,623 (74.5%)</td>
+<td>245 (11.2%)</td>
+<td>1,709 (78.4%)</td>
 </tr>
 <tr>
 <td>總計</td>
-<td>1793 (96.4%)</td>
-<td>874 (47.0%)</td>
+<td>2,140 (98.2%)</td>
+<td>856 (39.3%)</td>
 <td></td>
 </tr>
 </tbody></table>
-<p>88.3% 的網站依賴國際公有雲資源，其中包含 85.1% 的網站依賴境內公有雲資源，以及 43.1% 的網站依賴境外公有雲資源。</p>
-<p>另外，在 874 個有境外資源依賴的網站中，多數仍同時取用境內資源，只有 66 個（3.6%）網站僅使用境外資源。顯見 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。</p>
+<p>87.7% 的網站依賴國際公有雲資源，其中包含 86.3% 的網站依賴境內公有雲資源，以及 34.6% 的網站依賴境外公有雲資源。</p>
+<p>另外，在 856 個有境外資源依賴的網站中，多數仍同時取用境內資源，只有 39 個網站僅使用境外資源，僅占全部 2,179 個網站 1.8%。顯見 CDN 等相關技術發展，對於資料在地化（Data Localization）與提升網路韌性的實際助益。</p>
 <h3 id="資源來源分布">資源來源分布</h3>
 <!--
 資料出處：web-resilience-test/test-results/resource-distribution.tsv
 -->
 
-<p>如果將所有資源請求，根據 ASN 進行統計排序，可發現網站依賴資源高度集中於大型供應商。其中超過 5% 的來源有 Google、Cloudflare、Amazon、中華電信及 Facebook。Google 佔比最高，達 40.9%，Cloudflare 佔比 15.4%，Amazon 佔比 10.3%。</p>
+<p>如果將所有資源請求，根據 ASN 進行統計排序，可發現網站依賴資源高度集中於大型供應商。其中超過 5% 的來源有 Google、Cloudflare、Amazon、中華電信及 Facebook。Google 佔比最高，達 39.7%，Cloudflare 佔比 16.4%，Amazon 佔比 10.4%。</p>
 <p>分析個別網站檢測資料，來自 Google 的主要資源有 GTM 等；而 Cloudflare 則提供 <a href="https://www.cloudflare.com/zh-tw/cdnjs/">cdnjs</a> JavaScript CDN 與 WAF 等基礎架構與服務。這些常用基礎服務，共同構成當代網路服務韌性的關鍵環節。</p>
-<p><img src="./img/resource-distribution.svg" alt=""></p>
+<p><img src="./img/resource-distribution.zh-TW.svg" alt=""></p>
 <table>
 <thead>
 <tr>
@@ -570,112 +587,112 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </thead>
 <tbody><tr>
 <td>Google</td>
-<td align="right">6,452</td>
-<td align="right">40.9%</td>
+<td align="right">7,525</td>
+<td align="right">39.7%</td>
 </tr>
 <tr>
 <td>Cloudflare</td>
-<td align="right">2,435</td>
-<td align="right">15.4%</td>
+<td align="right">3,109</td>
+<td align="right">16.4%</td>
 </tr>
 <tr>
 <td>Amazon</td>
-<td align="right">1,627</td>
-<td align="right">10.3%</td>
+<td align="right">1,979</td>
+<td align="right">10.4%</td>
 </tr>
 <tr>
 <td>Data Communication (CHT)</td>
-<td align="right">1,234</td>
-<td align="right">7.8%</td>
+<td align="right">1,645</td>
+<td align="right">8.7%</td>
 </tr>
 <tr>
 <td>Facebook</td>
-<td align="right">1,013</td>
-<td align="right">6.4%</td>
+<td align="right">1,460</td>
+<td align="right">7.7%</td>
 </tr>
 <tr>
 <td>Akamai</td>
-<td align="right">599</td>
-<td align="right">3.8%</td>
+<td align="right">518</td>
+<td align="right">2.7%</td>
 </tr>
 <tr>
 <td>Fastly</td>
-<td align="right">442</td>
-<td align="right">2.8%</td>
-</tr>
-<tr>
-<td>Taiwan Academic (TANet)</td>
-<td align="right">285</td>
-<td align="right">1.8%</td>
+<td align="right">375</td>
+<td align="right">2.0%</td>
 </tr>
 <tr>
 <td>Microsoft</td>
-<td align="right">284</td>
+<td align="right">346</td>
 <td align="right">1.8%</td>
 </tr>
 <tr>
+<td>Taiwan Academic (TANet)</td>
+<td align="right">321</td>
+<td align="right">1.7%</td>
+</tr>
+<tr>
+<td>Yahoo</td>
+<td align="right">115</td>
+<td align="right">0.6%</td>
+</tr>
+<tr>
 <td>Oracle</td>
-<td align="right">95</td>
+<td align="right">110</td>
+<td align="right">0.6%</td>
+</tr>
+<tr>
+<td>Taiwan Fixed Network</td>
+<td align="right">107</td>
 <td align="right">0.6%</td>
 </tr>
 <tr>
 <td>New Century</td>
 <td align="right">93</td>
-<td align="right">0.6%</td>
-</tr>
-<tr>
-<td>Taiwan Fixed Network</td>
-<td align="right">79</td>
 <td align="right">0.5%</td>
 </tr>
 <tr>
+<td>OVH SAS</td>
+<td align="right">81</td>
+<td align="right">0.4%</td>
+</tr>
+<tr>
 <td>Automattic</td>
-<td align="right">59</td>
-<td align="right">0.4%</td>
-</tr>
-<tr>
-<td>Yahoo</td>
-<td align="right">58</td>
-<td align="right">0.4%</td>
-</tr>
-<tr>
-<td>Incapsula</td>
-<td align="right">56</td>
-<td align="right">0.4%</td>
-</tr>
-<tr>
-<td>Baidu</td>
-<td align="right">54</td>
+<td align="right">66</td>
 <td align="right">0.3%</td>
 </tr>
 <tr>
 <td>Zenlayer</td>
-<td align="right">53</td>
+<td align="right">60</td>
 <td align="right">0.3%</td>
 </tr>
 <tr>
-<td>Sony</td>
-<td align="right">47</td>
+<td>Incapsula</td>
+<td align="right">54</td>
 <td align="right">0.3%</td>
 </tr>
 <tr>
-<td>internet content provider (yahoo jp)</td>
+<td>Yuan-Jhen Info</td>
 <td align="right">44</td>
-<td align="right">0.3%</td>
-</tr>
-<tr>
-<td>Byteplus</td>
-<td align="right">34</td>
 <td align="right">0.2%</td>
 </tr>
 <tr>
 <td>Magnite</td>
-<td align="right">33</td>
+<td align="right">40</td>
 <td align="right">0.2%</td>
 </tr>
 <tr>
-<td>AboveNet</td>
-<td align="right">25</td>
+<td>Datacamp</td>
+<td align="right">37</td>
+<td align="right">0.2%</td>
+</tr>
+<tr>
+<td>Sony</td>
+<td align="right">36</td>
+<td align="right">0.2%</td>
+</tr>
+<tr>
+<td>Byteplus</td>
+<td align="right">32</td>
 <td align="right">0.2%</td>
 </tr>
 </tbody></table>
@@ -686,8 +703,8 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 
 <p>分析政府網站與教育機構的韌性狀態，如果僅看對境外資源的依賴，我們發現：</p>
 <ul>
-<li>測試網站中含 200 個政府網站（包含 <code>gov.tw</code> 與 <code>*.gov.tw</code>），其中 20 個有境外連線，比例為 10.0%。</li>
-<li>測試網站中含 225 個教育網站（<code>*.edu.tw</code>），其中僅 37 個有境外連線，比例為 16.4%。</li>
+<li>測試結果中含 235 個政府網站（包含 <code>gov.tw</code> 與 <code>*.gov.tw</code>），其中 16 個有境外連線，比例為 6.8%。</li>
+<li>測試結果中含 255 個教育網站（<code>*.edu.tw</code>），其中 34 個有境外連線，比例為 13.3%。</li>
 </ul>
 <table>
 <thead>
@@ -700,26 +717,24 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </thead>
 <tbody><tr>
 <td>政府網站</td>
-<td align="right">200</td>
-<td align="right">20</td>
-<td align="right">10.0%</td>
+<td align="right">235</td>
+<td align="right">16</td>
+<td align="right">6.8%</td>
 </tr>
 <tr>
 <td>教育網站</td>
-<td align="right">225</td>
-<td align="right">37</td>
-<td align="right">16.4%</td>
+<td align="right">255</td>
+<td align="right">34</td>
+<td align="right">13.3%</td>
 </tr>
 <tr>
 <td>全部</td>
-<td align="right">1859</td>
-<td align="right">874</td>
-<td align="right">47.0%</td>
+<td align="right">2,179</td>
+<td align="right">856</td>
+<td align="right">39.3%</td>
 </tr>
 </tbody></table>
-<p>此結果顯示，政府與教育網站，在資源層面上的境外依賴，相對整體表現（47%）呈現相對較低的現象。顯示公部門與學術網路環境在本地可用性上可能具較高基礎，但其完整服務韌性仍需進一步檢驗後端依賴與使用流程。</p>
-<!-- TODO: add 失敗樣本分析 -->
-
+<p>此結果顯示，政府與教育網站，相對整體狀況，對境外資源的依賴程度較低。公部門與學術網路環境，在本地可用性上，具較高基礎。但其完整服務韌性，仍需進一步檢驗後端依賴與使用流程。</p>
 <h2 id="研究建議">研究建議</h2>
 <p>針對本研究的發現，我們歸納出政策面與技術面等以下建議，以提高台灣整體數位服務的韌性：</p>
 <p>綜合本研究發現，台灣常用網站的主要風險，並非來自少數完全位於境外的服務，而廣泛存在於對境外資源、與跨國公有雲在台節點的依賴結構中。因此，提升韌性的策略不應限於聚焦「服務是否在台灣」，而應進一步檢驗其資源供應鏈、雲端控制面、與關鍵使用流程，是否具備本地持續運作能力。</p>
@@ -746,7 +761,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <ol>
 <li><p>本研究以網站連線請求 (requests) 的來源位置作為主要觀測對象，未直接對請求進行完整實際路徑分析（例如 traceroute），或使用 VPN 境外跳板進行他地路徑分析。故對目前取用之境內資源與頁面，是否屬於 anycast 或 CDN 節點，尚待進一步測試。</p>
 </li>
-<li><p>本研究所衡量之「境外依賴」與「雲端依賴」，均屬於瀏覽器前端（front-end）資源層之可觀測依賴暴露，並不等同於網站完整後端架構之實際依賴關係。就算前端觀測到的資源都位於境內，其後端資料庫存取、API、或任何其他後端服務，仍可能依賴境外資源或服務。故不能將測試結果中 11% 之「前端資源都位於境內與非國際公有雲」的網站，認定為「在境外網路斷線時一定可用」。</p>
+<li><p>本研究所衡量之「境外依賴」與「雲端依賴」，均屬於瀏覽器前端（front-end）資源層之可觀測依賴暴露，並不等同於網站完整後端架構之實際依賴關係。就算前端觀測到的資源都位於境內，其後端資料庫存取、API、或任何其他後端服務，仍可能依賴境外資源或服務。故不能將測試結果中 11.2% 之「本地型」網站（前端資源皆位於境內且非國際公有雲上），認定為「在境外網路斷線時一定可用」。</p>
 </li>
 <li><p>網站資源與網頁置於跨國雲服務在台灣節點，並不代表該服務在海纜中斷時必可獨立運作。其實際可用性仍可能受到以下（不限於）因素影響：</p>
 <ul>
@@ -795,7 +810,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <li id="fn-twnic-bandwidth">TWNIC 財團法人台灣網路資訊中心，〈連線頻寬登錄查詢系統〉，<a href="https://map.twnic.tw/main02.php">https://map.twnic.tw/main02.php</a> <a href="#fnref-twnic-bandwidth" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
 <li id="fn-deloitte-report">Cary Stier，〈The economic impact of disruptions to Internet connectivity: A Report for Facebook〉，Deloitte，2016 年 10 月，<a href="https://www.deloitte.com/content/dam/assets-shared/legacy/docs/perspectives/2022/economic-impact-disruptions-to-internet-connectivity-deloitte.pdf">https://www.deloitte.com/content/dam/assets-shared/legacy/docs/perspectives/2022/economic-impact-disruptions-to-internet-connectivity-deloitte.pdf</a> <a href="#fnref-deloitte-report" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
 <li id="fn-dns-paper-1">David Conrad，〈Towards Improving DNS Security, Stability, and Resiliency〉，<a href="https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf">https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf</a> <a href="#fnref-dns-paper-1" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
-<li id="fn-dns-paper-2">Lars Kröhnke, Jelte Jansen, Harald Vranken，〈Resilience of the Domain Name System: A Case Study of the .nl-domain〉，<a href="https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf">https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf</a> <a href="#fnref-dns-paper-2" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
+<li id="fn-dns-paper-2">Lars Kröhnke, Jelte Jansen, Harald Vranken，〈Resilience of the Domain Name System: A Case Study of the .nl-domain〉，<a href="https://doi.org/10.1016/j.comnet.2018.04.015">https://doi.org/10.1016/j.comnet.2018.04.015</a> <a href="#fnref-dns-paper-2" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
 <li id="fn-routing-paper-1">Jian Wu, Ying Zhang, Z. Morley Mao, Kang G. Shin，〈Internet Routing Resilience to Failures: Analysis and Implications〉，<a href="https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf">https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf</a> <a href="#fnref-routing-paper-1" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
 <li id="fn-routing-paper-2">Dan Pei, Lixia Zhang (UCLA), Dan Massey (USC/ISI)，〈A Framework for Resilient Internet Routing Protocols〉，<a href="https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf">https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf</a> <a href="#fnref-routing-paper-2" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
 <li id="fn-csis-cables">Erin L. Murphy，〈Redundancy, Resiliency, and Repair: Securing Subsea Cable Infrastructure〉，Center for Strategic and International Studies，<a href="https://www.csis.org/analysis/redundancy-resiliency-and-repair-securing-subsea-cable-infrastructure">https://www.csis.org/analysis/redundancy-resiliency-and-repair-securing-subsea-cable-infrastructure</a> <a href="#fnref-csis-cables" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
@@ -804,7 +819,9 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <li id="fn-africa-thirdparty">Aqsa Kashaf, Jiachen Dou, Margarita Belova, Maria Apostolaki, Yuvraj Agarwal, Vyas Sekar，〈A First Look at Third-Party Service Dependencies of Web Services in Africa〉，Carnegie Mellon University、Princeton University，<a href="https://netsyn.princeton.edu/sites/g/files/toruqf3201/files/documents/pam23_0.pdf">https://netsyn.princeton.edu/sites/g/files/toruqf3201/files/documents/pam23_0.pdf</a> <a href="#fnref-africa-thirdparty" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
 <li id="fn-thirdparty-centralization">Rashna Kumar, Sana Asif, Elise Lee, Fabián E. Bustamante，〈Third-party Service Dependencies and Centralization Around the World〉，Northwestern University，<a href="https://arxiv.org/abs/2111.12253">https://arxiv.org/abs/2111.12253</a> <a href="#fnref-thirdparty-centralization" class="footnote-backref" aria-label="回到正文引用處（第 1 處）" title="回到正文引用處（第 1 處）">↩1</a> <a href="#fnref-thirdparty-centralization-2" class="footnote-backref" aria-label="回到正文引用處（第 2 處）" title="回到正文引用處（第 2 處）">↩2</a></li>
 <li id="fn-thirdparty-dependencies">Aqsa Kashaf, Vyas Sekar, Yuvraj Agarwal，〈Analyzing Third Party Service Dependencies in Modern Web Services: Have We Learned from the Mirai-Dyn Incident?〉，<a href="https://doi.org/10.1145/3419394.3423664">https://doi.org/10.1145/3419394.3423664</a> <a href="#fnref-thirdparty-dependencies" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
+<li id="fn-tranco">Victor Le Pochat, Tom Van Goethem, Samaneh Tajalizadehkhoob, Maciej Korczyński, Wouter Joosen，〈Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation〉，Proceedings of the 26th Annual Network and Distributed System Security Symposium (NDSS 2019)，<a href="https://doi.org/10.14722/ndss.2019.23386">https://doi.org/10.14722/ndss.2019.23386</a> <a href="#fnref-tranco" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
 <li id="fn-dependency-analyzer">Yasin Alhamwy, Paul Mertens, Oliver Hohlfeld，〈Poster: Web Dependency Analyzer to Identify Resource Dependencies and their Impact on Rendering〉，<a href="https://doi.org/10.1145/3646547.3689683">https://doi.org/10.1145/3646547.3689683</a> <a href="#fnref-dependency-analyzer" class="footnote-backref" aria-label="回到正文引用處" title="回到正文引用處">↩</a></li>
+<li id="fn-laces">Remi Hendriks, Matthew Luckie, Mattijs Jonker, Raffaele Sommese, Roland van Rijswijk-Deij，〈LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System〉，Proceedings of the 2025 ACM Internet Measurement Conference (IMC &#39;25)，<a href="https://doi.org/10.1145/3730567.3764484">https://doi.org/10.1145/3730567.3764484</a> <a href="#fnref-laces" class="footnote-backref" aria-label="回到正文引用處（第 1 處）" title="回到正文引用處（第 1 處）">↩1</a> <a href="#fnref-laces-2" class="footnote-backref" aria-label="回到正文引用處（第 2 處）" title="回到正文引用處（第 2 處）">↩2</a></li>
 </ol>
 </section>
 

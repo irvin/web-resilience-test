@@ -116,20 +116,20 @@
 <h1 id="when-submarine-cables-go-dark-understanding-and-preparing-for-the-risks-of-taiwan39s-international-internet-disconnection">When Submarine Cables Go Dark: Understanding and Preparing for the Risks of Taiwan&#39;s International Internet Disconnection</h1>
 <h2 id="海纜斷光會怎樣認識台灣的國際網路中斷風險">海纜斷光會怎樣？認識台灣的國際網路中斷風險</h2>
 <h3 id="authors">Authors</h3>
-<p>Irvin Chen (陳心一)<br>Open Culture Foundation (<a href="https://ocf.tw">ocf.tw</a>)<br>MozTW, Mozilla Taiwan Community (<a href="https://moztw.org">moztw.org</a>)  </p>
+<p>Irvin Chen (陳心一)<br>ORCID: <a href="https://orcid.org/0009-0002-1059-7130">https://orcid.org/0009-0002-1059-7130</a><br>Open Culture Foundation (<a href="https://ocf.tw">ocf.tw</a>)<br>MozTW, Mozilla Taiwan Community (<a href="https://moztw.org">moztw.org</a>)  </p>
 <h3 id="dates">Dates</h3>
-<p>Published: 2026-05-22<br>Last Updated: 2026-05-26</p>
+<p>Published: 2026-05-22<br>Last Updated: 2026-07-22</p>
 <h3 id="acknowledgments">Acknowledgments</h3>
 <p><img src="img/APNIC-Foundation-and-ISIF-Logo-CMYK-stacked-01-a.svg" alt="" style="height: 100px;" /><br>
-This work was supported by a grant from the <a href="https://apnic.foundation/">APNIC Foundation</a>, via the <a href="https://apnic.foundation/home/isifasia/">Information Society Innovation Fund (ISIF Asia)</a>.</p>
+This work was supported by a grant from the <a href="https://apnic.foundation/">APNIC Foundation</a> (<a href="https://ror.org/01y4y6h16">ROR: 01y4y6h16</a>), via the <a href="https://apnic.foundation/home/isifasia/">Information Society Innovation Fund (ISIF Asia)</a>.</p>
 <p><a title="g0v Digital Resilience Hackathon" href="https://g0v.hackmd.io/@paulpengtw/DigiResiTh0n-home" target="_blank"><img src="img/g0v_logo.svg" alt="" style="height: 3em;"></a>
 </p>
 <p><a title="Open Culture Foundation" href="https://ocf.tw/" target="_blank"><img src="img/Logo_Compact-OCF_Purple.svg" alt="" style="height: 2em;"></a></p>
 
 <h2 id="abstract">Abstract</h2>
 <p>This study examines the availability of everyday network services, when Taiwan experiences large-scale international submarine cable outages. By observing homepage resource requests in a browser, we trace where page dependencies originate and use that as a risk indicator.</p>
-<p>The work focuses on two core questions: (1) how much Taiwanese commonly used websites depend on foreign-hosted resources, and (2) how much they depend on local (in-Taiwan) nodes of multinational cloud providers. We develop a measurement framework that turns the abstract risk of “what happens when cables go dark” into concrete dependency-structure analysis, which can inform policy and industry resilience planning.</p>
-<p>Among 1,859 Taiwanese commonly used websites tested, 47.0% are “foreign-dependent” (Category 1), with foreign resource exposure and relatively high direct failure risk under cable-outage scenarios. Another 42.3% are “cloud-dependent”: no foreign resource exposure was observed, but they rely on local nodes of multinational public clouds, so actual availability when international connectivity fails is highly uncertain.</p>
+<p>The work focuses on two core questions: (1) how much websites commonly used in Taiwan depend on foreign-hosted resources, and (2) how much they depend on local (in-Taiwan) nodes of multinational cloud providers. We develop a measurement framework that turns the abstract risk of “what happens when cables go dark” into concrete dependency-structure analysis, which can inform policy and industry resilience planning.</p>
+<p>Among 2,179 websites commonly used in Taiwan that we tested, 39.3% are “foreign-dependent” (Category 1), with foreign resource exposure and relatively high direct failure risk under cable-outage scenarios. Another 49.6% are “cloud-dependent”: no foreign resource exposure was observed, but they rely on local nodes of multinational public clouds, so actual availability when international connectivity fails is highly uncertain.</p>
 <h2 id="table-of-contents">Table of contents</h2>
 <ul>
 <li><a href="#abstract">Abstract</a></li>
@@ -262,14 +262,14 @@ Availability of all international submarine cables serving Taiwan, 2025/3/18–2
 <h3 id="building-the-site-list">Building the site list</h3>
 <p>There is no authoritative “sites Taiwanese people use” list. We merged:</p>
 <ul>
-<li><a href="https://tranco-list.eu/">Tranco List</a> — global top 1M list, we use <code>.tw</code> domains only.</li>
+<li><a href="https://tranco-list.eu/">Tranco List</a><sup class="footnote-ref"><a id="fnref-tranco" href="#fn-tranco">29</a></sup> — global top 1M list, we use <code>.tw</code> domains only.</li>
 <li><a href="https://radar.cloudflare.com/">Cloudflare Radar</a> — Taiwan traffic top 100 list</li>
 <li><a href="https://ahrefstop.com/websites/taiwan">AhrefsTop</a> — Taiwan organic search top 100 list</li>
 <li><a href="https://www.similarweb.com/top-websites/taiwan/">SimilarWeb</a> — Taiwan top 50 list</li>
 <li><a href="https://www.semrush.com/trending-websites/tw/all">Semrush</a> — Taiwan top 100 list</li>
 </ul>
-<p>The test list <a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json">merged_lists_tw.json</a> was updated 2026-01-06 with 2,109 sites, sorted by traffic to reflect importance.</p>
-<p>We also added manual sites in <a href="https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json">manual_curated_list_tw.json</a> (e.g. OCF, SITCON, g0v) for open-source and digital-resilience community cases.</p>
+<p>The test list <a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json">merged_lists_tw.json</a> was updated 2026-07-20 with 2,467 sites, sorted by traffic to reflect importance.</p>
+<p>We also use <a href="https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json">manual_curated_list_tw.json</a> to include manually selected open-source and digital-resilience community cases such as OCF, SITCON, and g0v.</p>
 <p>Lists and scripts are open source in <a href="https://github.com/irvin/top-traffic-website-list-taiwan/">top-traffic-website-list-taiwan</a>.</p>
 <h3 id="test-environment">Test environment</h3>
 <p>Tests used typical Taiwanese residential connectivity:</p>
@@ -280,7 +280,7 @@ Availability of all international submarine cables serving Taiwan, 2025/3/18–2
 <li>Environment details recorded in logs for comparison and reproduction</li>
 </ul>
 <h2 id="methods">Methods</h2>
-<p>Site availability depends not only on establishing connections, but on fetching dependent resources (JavaScript, CSS, images, APIs). Modern sites combine resources from many domains; together they determine what users see and can do. Prior work uses headless browsers to analyze request behavior and third-party dependencies<sup class="footnote-ref"><a id="fnref-dependency-analyzer" href="#fn-dependency-analyzer">29</a></sup><sup class="footnote-ref"><a id="fnref-thirdparty-centralization-2" href="#fn-thirdparty-centralization">27</a></sup>.</p>
+<p>Site availability depends not only on establishing connections, but on fetching dependent resources (JavaScript, CSS, images, APIs). Modern sites combine resources from many domains; together they determine what users see and can do. Prior work uses headless browsers to analyze request behavior and third-party dependencies<sup class="footnote-ref"><a id="fnref-dependency-analyzer" href="#fn-dependency-analyzer">30</a></sup><sup class="footnote-ref"><a id="fnref-thirdparty-centralization-2" href="#fn-thirdparty-centralization">27</a></sup>.</p>
 <p>Building on dependency-exposure analysis from resource requests, we extend it to the systematic scenario of “international connectivity failure” and its impact on service availability.</p>
 <p>Backend architecture, data paths, control planes, and internal cloud behavior are not directly observable externally. We do not attempt to map full system dependencies; we focus on observable front-end network requests and build operational metrics from them.</p>
 <h3 id="metrics-and-risk-taxonomy">Metrics and risk taxonomy</h3>
@@ -311,7 +311,7 @@ Availability of all international submarine cables serving Taiwan, 2025/3/18–2
 </ul>
 <h3 id="collecting-test-data">Collecting test data</h3>
 <p>We developed <a href="https://github.com/irvin/web-resilience-test">web-resilience-test</a> to open each target homepage site-by-site with a programmatic headless browser and record all resource connections during load.</p>
-<p>For resources of each page, the tool aggregates request domains, filters known ad domains, and uses IPinfo / headers / ping RTT to infer geographic and logical location (e.g. which public cloud provider).</p>
+<p>For resources of each page, the tool aggregates request domains, filters known ad domains, and uses IPinfo / headers / LACeS anycast API<sup class="footnote-ref"><a id="fnref-laces" href="#fn-laces">31</a></sup> / ping RTT to infer geographic and logical location (e.g. which public cloud provider).</p>
 <p>Results are aggregated into summary tables.</p>
 <h3 id="single-site-test-flow">Single-site test flow</h3>
 <p><a href="https://github.com/irvin/web-resilience-test/blob/main_w_tw_result/no-global-connection-check.js"><code>no-global-connection-check.js</code></a> tests one site:</p>
@@ -354,8 +354,9 @@ Availability of all international submarine cables serving Taiwan, 2025/3/18–2
 <li>For previous hostname list, we call IPinfo API to get geographic and logical location</li>
 <li>If result shows <code>country=TW</code>, log as domestic connection</li>
 <li>Otherwise, we check ASN to find if the request is from multinational public cloud (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft), then do further checks:<ul>
-<li>Headers: look for known location markers in response headers like <code>cf-ray</code>, <code>x-amz-cf-pop</code>, <code>x-served-by</code>.</li>
-<li>RTT: if location is unclear from headers, ping the resource 5× and take the minimum RTT; if <code>RTT &lt; 15ms</code>, categorize it as a domestic resource.</li>
+<li>Headers: look for known location markers in response headers like <code>cf-ray</code>, <code>x-amz-cf-pop</code>, <code>x-served-by</code>, <code>x-azure-ref</code>, and <code>x-msedge-ref</code> (values containing <code>TPE</code> indicate a Taiwan PoP).</li>
+<li>Anycast: if headers are inconclusive, query the <a href="https://manycast.net/api/docs">LACeS Anycast Census API</a><sup class="footnote-ref"><a id="fnref-laces-2" href="#fn-laces">31</a></sup>; if <code>locations</code> includes Taiwan and <code>confidence</code> is <code>confident</code> (or higher), classify as domestic (see <a href="https://github.com/irvin/web-resilience-test/blob/main/LACeS.md"><code>LACeS.md</code></a>).</li>
+<li>RTT: if the above methods are inconclusive, ping the resource 5× and take the minimum RTT; if <code>RTT &lt; 15ms</code>, categorize it as a domestic resource.</li>
 </ul>
 </li>
 </ul>
@@ -388,23 +389,23 @@ Availability of all international submarine cables serving Taiwan, 2025/3/18–2
 <p>We use <a href="https://github.com/irvin/web-resilience-test-profile">web-resilience-test-profile</a> to compile individual static pages and host them at <a href="https://resilience.ocf.tw/">https://resilience.ocf.tw/</a> for public lookup of each site’s resilience (e.g. <a href="https://resilience.ocf.tw/web/ocf.tw/">Will ocf.tw work if cables break?</a>).</p>
 <p>At ~2,000 sites, when running with default parallelism (4 parallel tests, 8 parallel static page compilations), it takes about 30–60 minutes to complete. The latest testing are published at <a href="https://github.com/irvin/web-resilience-test-result">web-resilience-test-result</a> and <a href="https://resilience.ocf.tw/">resilience.ocf.tw</a>.</p>
 <h2 id="results">Results</h2>
-<p>Of 2,157 sites tested, 1,859 sites completed successfully.</p>
+<p>Of 2,509 sites tested, 2,179 completed successfully.</p>
 <ul>
-<li>Data as of: 2026-04-17</li>
+<li>Data as of: 2026-07-21</li>
 <li>Testing site lists:<ul>
-<li><a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/553b50a143f52a0c189afbee6c335e846aace004/merged_lists_tw.json">merged_lists_tw.json@553b50a</a></li>
-<li><a href="https://github.com/irvin/web-resilience-test/blob/28160ed0555b6d732800517e208bef8cadc5b1eb/manual_curated_list_tw.json">manual_curated_list_tw.json@28160ed</a></li>
+<li><a href="https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json">merged_lists_tw.json@1c3a020</a></li>
+<li><a href="https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json">manual_curated_list_tw.json@42505f5</a></li>
 </ul>
 </li>
-<li>Summary of testing results: <a href="https://github.com/irvin/web-resilience-test-result/blob/39080848acd5872f97dbe3d606676c664e92ce7f/statistic.tsv">statistic.tsv@3908084</a></li>
-<li>Public cloud statistics: <a href="https://github.com/irvin/web-resilience-test-result/blob/39080848acd5872f97dbe3d606676c664e92ce7f/asn_taiwan_ratio.tsv">asn_taiwan_ratio.tsv@3908084</a></li>
+<li>Summary of testing results: <a href="https://github.com/irvin/web-resilience-test-result/blob/eb30e97278a5f5a2e9faf58e4ee248f90aedbbd2/statistic.tsv">statistic.tsv@eb30e97</a></li>
+<li>Public cloud statistics: <a href="https://github.com/irvin/web-resilience-test-result/blob/eb30e97278a5f5a2e9faf58e4ee248f90aedbbd2/asn_taiwan_ratio.tsv">asn_taiwan_ratio.tsv@eb30e97</a></li>
 </ul>
 <h3 id="overall-results">Overall results</h3>
-<p>Under our taxonomy: 47.0% are “foreign-dependent”, with foreign resource exposure and <strong>high direct failure risk</strong> under cable outage; 42.3% are “cloud-dependent”—no foreign resource exposure observed, but they rely on in-Taiwan multinational public-cloud nodes, so availability is <strong>highly uncertain</strong>; 10.7% are “locally-contained”, with no observed exposure and a higher chance of normal operation. Overall, 89.3% of sites warrant further attention as high-risk or high-uncertainty.</p>
-<p><img src="./img/overall-result.svg" alt=""></p>
+<p>Under our taxonomy: 39.3% are “foreign-dependent”, with foreign resource exposure and <strong>high direct failure risk</strong> under cable outage; 49.6% are “cloud-dependent”—no foreign resource exposure observed, but they rely on in-Taiwan multinational public-cloud nodes, so availability is <strong>highly uncertain</strong>; 11.2% are “locally-contained”, with no observed exposure and a higher chance of normal operation. Overall, 88.8% of sites warrant further attention as high-risk or high-uncertainty.</p>
+<p><img src="./img/overall-result.en.svg" alt=""></p>
 <h3 id="interpretation">Interpretation</h3>
 <!--
-Source: web-resilience-test/test-results/overall_result.tsv
+Source: web-resilience-test/test-results/overall-result.tsv
 -->
 
 <p>Foreign-dependent: sites hosted abroad or whose homepages request foreign resources—higher failure risk under cable outages.</p>
@@ -420,87 +421,105 @@ Source: web-resilience-test/test-results/overall_result.tsv
 </thead>
 <tbody><tr>
 <td>Foreign-dependent (foreign resource exposure)</td>
-<td align="right">874</td>
-<td align="right">47.0%</td>
+<td align="right">856</td>
+<td align="right">39.3%</td>
 </tr>
 <tr>
 <td>Cloud-dependent (no foreign exposure; in-Taiwan nodes exposure)</td>
-<td align="right">787</td>
-<td align="right">42.3%</td>
+<td align="right">1,080</td>
+<td align="right">49.6%</td>
 </tr>
 <tr>
 <td>Locally-contained (no observed exposure)</td>
-<td align="right">198</td>
-<td align="right">10.7%</td>
+<td align="right">243</td>
+<td align="right">11.2%</td>
 </tr>
 <tr>
 <td>Total</td>
-<td align="right">1859</td>
+<td align="right">2,179</td>
 <td align="right">100.0%</td>
 </tr>
 </tbody></table>
 <h3 id="multinational-public-cloud-dependency">Multinational public cloud dependency</h3>
 <!--
 Source: web-resilience-test/test-results/asn_taiwan_ratio.tsv
+See the “Resilience=1 public cloud summary” and “Per-provider usage” sections generated by generate_statistic.js.
 -->
 
 <p>Among Category 2 (cloud-dependent) sites, requests to different international public-cloud nodes in Taiwan break down as follows:</p>
 <ul>
-<li>Google Cloud Platform (Taiwan nodes): 726 sites depend on</li>
-<li>Cloudflare (Taiwan nodes): 251 sites</li>
-<li>Amazon Web Services (Taiwan nodes): 118 sites</li>
-<li>Akamai (Taiwan nodes): 94 sites</li>
-<li>Fastly (Taiwan nodes): 34 sites</li>
-<li>Azure (Taiwan nodes): 3 sites</li>
+<li>Google Cloud Platform (Taiwan nodes): 965 sites</li>
+<li>Cloudflare (Taiwan nodes): 480 sites</li>
+<li>Amazon Web Services (Taiwan nodes): 138 sites</li>
+<li>Akamai (Taiwan nodes): 104 sites</li>
+<li>Microsoft Azure (Taiwan nodes): 38 sites</li>
+<li>Fastly (Taiwan nodes): 4 sites</li>
 </ul>
-<p>Of 985 sites with no foreign dependency, 726 use resources from GCP Taiwan nodes (73.7%).</p>
+<p>Provider site counts are non-exclusive: one site may use more than one provider, so the rows must not be added to obtain a site total.</p>
+<p>Of 1,323 sites with no foreign dependency, 965 use resources from GCP Taiwan nodes (72.9%).</p>
 <p>If public-cloud services such as GCP cannot keep local nodes running during external network outages, the impact would be very high. Their resilience is a key factor in whether sites can continue operating during submarine-cable disruptions.</p>
 <h3 id="public-cloud-resource-locations">Public cloud resource locations</h3>
 <!--
 Source: web-resilience-test/test-results/asn_taiwan_ratio.tsv
+See the “Company totals” section generated by generate_statistic.js.
 -->
 
-<p>For sites that request resources from multinational clouds, we count the distribution of sites by domestic vs international node:</p>
+<p>For resources requested from domestic and international nodes of multinational public clouds, we found the following distribution:</p>
 <table>
 <thead>
 <tr>
 <th align="left">Provider</th>
 <th align="right">Sites (domestic nodes)</th>
 <th align="right">Sites (international nodes)</th>
+<th align="right">Requests (domestic nodes)</th>
+<th align="right">Requests (international nodes)</th>
 </tr>
 </thead>
 <tbody><tr>
 <td align="left">Google</td>
-<td align="right">1444</td>
-<td align="right">32</td>
+<td align="right">1,685</td>
+<td align="right">56</td>
+<td align="right">7,393</td>
+<td align="right">63</td>
 </tr>
 <tr>
 <td align="left">Cloudflare</td>
-<td align="right">672</td>
-<td align="right">298</td>
+<td align="right">1,016</td>
+<td align="right">17</td>
+<td align="right">3,051</td>
+<td align="right">21</td>
 </tr>
 <tr>
 <td align="left">Amazon</td>
-<td align="right">414</td>
-<td align="right">231</td>
+<td align="right">512</td>
+<td align="right">309</td>
+<td align="right">1,382</td>
+<td align="right">522</td>
 </tr>
 <tr>
 <td align="left">Akamai</td>
-<td align="right">352</td>
-<td align="right">9</td>
+<td align="right">338</td>
+<td align="right">11</td>
+<td align="right">446</td>
+<td align="right">13</td>
 </tr>
 <tr>
 <td align="left">Fastly</td>
-<td align="right">122</td>
-<td align="right">218</td>
+<td align="right">6</td>
+<td align="right">257</td>
+<td align="right">6</td>
+<td align="right">369</td>
 </tr>
 <tr>
 <td align="left">Microsoft</td>
-<td align="right">5</td>
-<td align="right">167</td>
+<td align="right">140</td>
+<td align="right">77</td>
+<td align="right">196</td>
+<td align="right">143</td>
 </tr>
 </tbody></table>
-<p>For Google cloud resources, 97.8% of resource-using sites hit domestic nodes vs. about 2.2% international. This shows the practical value of CDN-based data localization, and makes the persistence of mirrored resources on Taiwan nodes a key factor in whether ordinary sites remain available when external links are congested or cut.</p>
+<p>A site may request both domestic and international nodes from the same provider, so the two columns overlap and must not be added to obtain a provider total.</p>
+<p>For Google cloud resources, measured by request count, 7,393 of 7,456 Google requests were classified as domestic-node requests, or about 99.2%; 63 were international-node requests, or about 0.8%. This shows the practical value of CDN-based data localization, and makes the persistence of mirrored resources on Taiwan nodes a key factor in whether ordinary sites remain available when external links are congested or cut.</p>
 <p>Public-cloud services with lower domestic resource shares should be further evaluated for full in-country mirroring, cache persistence, and contingency operations.</p>
 <h3 id="resource-location-and-cloud-dependency-statistics">Resource location and cloud dependency statistics</h3>
 <!--
@@ -530,33 +549,33 @@ foreign only:    total_foreign > 0 && total_domestic = 0
 </thead>
 <tbody><tr>
 <td>Multinational public cloud</td>
-<td>1582 (85.1%)</td>
-<td>802 (43.1%)</td>
-<td>1641 (88.3%)</td>
+<td>1,881 (86.3%)</td>
+<td>754 (34.6%)</td>
+<td>1,910 (87.7%)</td>
 </tr>
 <tr>
 <td>Non-cloud</td>
-<td>1363 (73.3%)</td>
-<td>195 (10.5%)</td>
-<td>1436 (77.2%)</td>
+<td>1,623 (74.5%)</td>
+<td>245 (11.2%)</td>
+<td>1,709 (78.4%)</td>
 </tr>
 <tr>
 <td>Total</td>
-<td>1793 (96.4%)</td>
-<td>874 (47.0%)</td>
+<td>2,140 (98.2%)</td>
+<td>856 (39.3%)</td>
 <td></td>
 </tr>
 </tbody></table>
-<p>88.3% of sites depend on international cloud resources (85.1% of them are domestic nodes, 43.1% are foreign nodes).</p>
-<p>Among 874 sites with foreign resource exposure, most also use domestic resources; only 66 (3.6%) use foreign resources exclusively. This shows the practical value of CDN contributions to data localization and benefits for service resilience.</p>
+<p>87.7% of sites depend on multinational public-cloud resources: 86.3% use domestic public-cloud nodes, and 34.6% use foreign public-cloud nodes.</p>
+<p>Among the 856 sites with foreign resource exposure, most also use domestic resources; only 39 use foreign resources exclusively, accounting for just 1.8% of all 2,179 sites. This shows the practical value of CDN contributions to data localization and benefits for service resilience.</p>
 <h3 id="resource-source-distribution">Resource source distribution</h3>
 <!--
 Source: web-resilience-test/test-results/resource-distribution.tsv
 -->
 
-<p>Aggregating all resource requests by ASN shows that website dependencies are highly concentrated among large providers. Providers above 5% include Google, Cloudflare, Amazon, Chunghwa Telecom (CHT), and Facebook. Google has the highest share at 40.9%, followed by Cloudflare at 15.4% and Amazon at 10.3%.</p>
+<p>Aggregating all resource requests by ASN shows that website dependencies are highly concentrated among large providers. Providers above 5% include Google, Cloudflare, Amazon, Chunghwa Telecom (CHT), and Facebook. Google has the highest share at 39.7%, followed by Cloudflare at 16.4% and Amazon at 10.4%.</p>
 <p>Per-site inspection shows that Google resources mainly include services such as GTM, while Cloudflare provides infrastructure and services such as <a href="https://www.cloudflare.com/zh-tw/cdnjs/">cdnjs</a> JavaScript CDN and WAF. These common infrastructure services form key parts of contemporary internet-service resilience.</p>
-<p><img src="./img/resource-distribution.svg" alt=""></p>
+<p><img src="./img/resource-distribution.en.svg" alt=""></p>
 <table>
 <thead>
 <tr>
@@ -567,112 +586,112 @@ Source: web-resilience-test/test-results/resource-distribution.tsv
 </thead>
 <tbody><tr>
 <td>Google</td>
-<td align="right">6,452</td>
-<td align="right">40.9%</td>
+<td align="right">7,525</td>
+<td align="right">39.7%</td>
 </tr>
 <tr>
 <td>Cloudflare</td>
-<td align="right">2,435</td>
-<td align="right">15.4%</td>
+<td align="right">3,109</td>
+<td align="right">16.4%</td>
 </tr>
 <tr>
 <td>Amazon</td>
-<td align="right">1,627</td>
-<td align="right">10.3%</td>
+<td align="right">1,979</td>
+<td align="right">10.4%</td>
 </tr>
 <tr>
 <td>Data Communication (CHT)</td>
-<td align="right">1,234</td>
-<td align="right">7.8%</td>
+<td align="right">1,645</td>
+<td align="right">8.7%</td>
 </tr>
 <tr>
 <td>Facebook</td>
-<td align="right">1,013</td>
-<td align="right">6.4%</td>
+<td align="right">1,460</td>
+<td align="right">7.7%</td>
 </tr>
 <tr>
 <td>Akamai</td>
-<td align="right">599</td>
-<td align="right">3.8%</td>
+<td align="right">518</td>
+<td align="right">2.7%</td>
 </tr>
 <tr>
 <td>Fastly</td>
-<td align="right">442</td>
-<td align="right">2.8%</td>
-</tr>
-<tr>
-<td>Taiwan Academic (TANet)</td>
-<td align="right">285</td>
-<td align="right">1.8%</td>
+<td align="right">375</td>
+<td align="right">2.0%</td>
 </tr>
 <tr>
 <td>Microsoft</td>
-<td align="right">284</td>
+<td align="right">346</td>
 <td align="right">1.8%</td>
 </tr>
 <tr>
+<td>Taiwan Academic (TANet)</td>
+<td align="right">321</td>
+<td align="right">1.7%</td>
+</tr>
+<tr>
+<td>Yahoo</td>
+<td align="right">115</td>
+<td align="right">0.6%</td>
+</tr>
+<tr>
 <td>Oracle</td>
-<td align="right">95</td>
+<td align="right">110</td>
+<td align="right">0.6%</td>
+</tr>
+<tr>
+<td>Taiwan Fixed Network</td>
+<td align="right">107</td>
 <td align="right">0.6%</td>
 </tr>
 <tr>
 <td>New Century</td>
 <td align="right">93</td>
-<td align="right">0.6%</td>
-</tr>
-<tr>
-<td>Taiwan Fixed Network</td>
-<td align="right">79</td>
 <td align="right">0.5%</td>
 </tr>
 <tr>
+<td>OVH SAS</td>
+<td align="right">81</td>
+<td align="right">0.4%</td>
+</tr>
+<tr>
 <td>Automattic</td>
-<td align="right">59</td>
-<td align="right">0.4%</td>
-</tr>
-<tr>
-<td>Yahoo</td>
-<td align="right">58</td>
-<td align="right">0.4%</td>
-</tr>
-<tr>
-<td>Incapsula</td>
-<td align="right">56</td>
-<td align="right">0.4%</td>
-</tr>
-<tr>
-<td>Baidu</td>
-<td align="right">54</td>
+<td align="right">66</td>
 <td align="right">0.3%</td>
 </tr>
 <tr>
 <td>Zenlayer</td>
-<td align="right">53</td>
+<td align="right">60</td>
 <td align="right">0.3%</td>
 </tr>
 <tr>
-<td>Sony</td>
-<td align="right">47</td>
+<td>Incapsula</td>
+<td align="right">54</td>
 <td align="right">0.3%</td>
 </tr>
 <tr>
-<td>internet content provider (yahoo jp)</td>
+<td>Yuan-Jhen Info</td>
 <td align="right">44</td>
-<td align="right">0.3%</td>
-</tr>
-<tr>
-<td>Byteplus</td>
-<td align="right">34</td>
 <td align="right">0.2%</td>
 </tr>
 <tr>
 <td>Magnite</td>
-<td align="right">33</td>
+<td align="right">40</td>
 <td align="right">0.2%</td>
 </tr>
 <tr>
-<td>AboveNet</td>
-<td align="right">25</td>
+<td>Datacamp</td>
+<td align="right">37</td>
+<td align="right">0.2%</td>
+</tr>
+<tr>
+<td>Sony</td>
+<td align="right">36</td>
+<td align="right">0.2%</td>
+</tr>
+<tr>
+<td>Byteplus</td>
+<td align="right">32</td>
 <td align="right">0.2%</td>
 </tr>
 </tbody></table>
@@ -683,8 +702,8 @@ Source: web-resilience-test/test-results/asn_taiwan_ratio.tsv
 
 <p>To assess the resilience of government and education sites, we first looked only at foreign resource connectivity:</p>
 <ul>
-<li>Among the tested sites, 200 were government sites (<code>gov.tw</code> and <code>*.gov.tw</code>); 20 had foreign connectivity, or 10.0%.</li>
-<li>225 were education sites (<code>*.edu.tw</code>); 37 had foreign connectivity, or 16.4%.</li>
+<li>Among the test results, 235 were government sites (<code>gov.tw</code> and <code>*.gov.tw</code>); 16 had foreign connectivity, or 6.8%.</li>
+<li>255 were education sites (<code>*.edu.tw</code>); 34 had foreign connectivity, or 13.3%.</li>
 </ul>
 <table>
 <thead>
@@ -697,27 +716,27 @@ Source: web-resilience-test/test-results/asn_taiwan_ratio.tsv
 </thead>
 <tbody><tr>
 <td>Government</td>
-<td align="right">200</td>
-<td align="right">20</td>
-<td align="right">10.0%</td>
+<td align="right">235</td>
+<td align="right">16</td>
+<td align="right">6.8%</td>
 </tr>
 <tr>
 <td>Education</td>
-<td align="right">225</td>
-<td align="right">37</td>
-<td align="right">16.4%</td>
+<td align="right">255</td>
+<td align="right">34</td>
+<td align="right">13.3%</td>
 </tr>
 <tr>
 <td>All</td>
-<td align="right">1859</td>
-<td align="right">874</td>
-<td align="right">47.0%</td>
+<td align="right">2,179</td>
+<td align="right">856</td>
+<td align="right">39.3%</td>
 </tr>
 </tbody></table>
-<p>Government and education sites show lower foreign dependencies than the overall 47%, suggesting a stronger local-availability baseline in public-sector and academic-network environments. Full service resilience still requires checking backend dependencies and real usage workflows.</p>
+<p>Government and education sites depend less on foreign resources than the overall population. This suggests that public-sector and academic-network environments have a stronger baseline for local availability, although full service resilience still requires checking backend dependencies and real usage workflows.</p>
 <h2 id="recommendations">Recommendations</h2>
 <p>Based on this study’s findings, we identify the following policy and technical recommendations to improve the resilience of Taiwan’s overall digital services.</p>
-<p>Overall, the main risk for commonly used Taiwanese websites does not come only from a small number of fully foreign-hosted services. It is more widely embedded in dependency structures involving foreign resources and Taiwan-based nodes of multinational public clouds. Resilience strategies should therefore go beyond asking whether a service is “in Taiwan,” and further examine whether its resource supply chain, cloud control planes, and critical user journeys can continue operating locally.</p>
+<p>Overall, the main risk for websites commonly used in Taiwan does not come only from a small number of fully foreign-hosted services. It is more widely embedded in dependency structures involving foreign resources and Taiwan-based nodes of multinational public clouds. Resilience strategies should therefore go beyond asking whether a service is “in Taiwan,” and further examine whether its resource supply chain, cloud control planes, and critical user journeys can continue operating locally.</p>
 <h3 id="policy-recommendations">Policy Recommendations</h3>
 <ol>
 <li>Support related research to continuously monitor the resilience of commonly used and critical services, and routinely publish both aggregate and per-service results.</li>
@@ -739,7 +758,7 @@ Source: web-resilience-test/test-results/asn_taiwan_ratio.tsv
 <ol>
 <li><p>This study observes the source locations of website requests, not full network paths such as traceroute, nor routes from abroad via VPN. Whether “domestic” resources or pages are anycast/CDN nodes still needs further testing.</p>
 </li>
-<li><p>“Foreign dependency” and “cloud dependency” here refer to front-end observable exposure, not full backend architecture. Even sites with all observed front-end resources in Taiwan may still rely on foreign databases, APIs, or backend services. The ~11% locally contained by front-end metrics cannot be assumed to remain available during external outages.</p>
+<li><p>“Foreign dependency” and “cloud dependency” here refer to front-end observable exposure, not full backend architecture. Even locally-contained sites by front-end metrics may still rely on foreign databases, APIs, or backend services. The 11.2% locally-contained group cannot be assumed to remain available during external outages.</p>
 </li>
 <li><p>Resources hosted on multinational clouds’ Taiwan nodes do not guarantee standalone operation during submarine-cable outages. Availability may still depend on foreign control planes, foreign origins, cache hit ratio and persistence, authentication/session mechanisms, and other factors.</p>
 </li>
@@ -781,7 +800,7 @@ Source: web-resilience-test/test-results/asn_taiwan_ratio.tsv
 <li id="fn-twnic-bandwidth">TWNIC, <em>bandwidth registration checking system</em> (in Chinese), <a href="https://map.twnic.tw/main02.php">https://map.twnic.tw/main02.php</a> <a href="#fnref-twnic-bandwidth" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
 <li id="fn-deloitte-report">Cary Stier, <em>The economic impact of disruptions to Internet connectivity</em> (Deloitte, Oct 2016), <a href="https://www.deloitte.com/content/dam/assets-shared/legacy/docs/perspectives/2022/economic-impact-disruptions-to-internet-connectivity-deloitte.pdf">https://www.deloitte.com/content/dam/assets-shared/legacy/docs/perspectives/2022/economic-impact-disruptions-to-internet-connectivity-deloitte.pdf</a> <a href="#fnref-deloitte-report" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
 <li id="fn-dns-paper-1">David Conrad, <em>Towards Improving DNS Security, Stability, and Resiliency</em>, <a href="https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf">https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf</a> <a href="#fnref-dns-paper-1" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
-<li id="fn-dns-paper-2">Lars Kröhnke, Jelte Jansen, Harald Vranken, <em>Resilience of the Domain Name System: A Case Study of the .nl-domain</em>, <a href="https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf">https://www.internetsociety.org/wp-content/uploads/2021/01/bp-dnsresiliency-201201-en_0.pdf</a> <a href="#fnref-dns-paper-2" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
+<li id="fn-dns-paper-2">Lars Kröhnke, Jelte Jansen, Harald Vranken, <em>Resilience of the Domain Name System: A Case Study of the .nl-domain</em>, <a href="https://doi.org/10.1016/j.comnet.2018.04.015">https://doi.org/10.1016/j.comnet.2018.04.015</a> <a href="#fnref-dns-paper-2" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
 <li id="fn-routing-paper-1">Jian Wu, Ying Zhang, Z. Morley Mao, Kang G. Shin, <em>Internet Routing Resilience to Failures: Analysis and Implications</em>, <a href="https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf">https://conferences.sigcomm.org/co-next/2007/papers/papers/paper25.pdf</a> <a href="#fnref-routing-paper-1" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
 <li id="fn-routing-paper-2">Dan Pei, Lixia Zhang (UCLA), Dan Massey (USC/ISI), <em>A Framework for Resilient Internet Routing Protocols</em>, <a href="https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf">https://web.cs.ucla.edu/~lixia/papers/04IEEENetwork.pdf</a> <a href="#fnref-routing-paper-2" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
 <li id="fn-csis-cables">Erin L. Murphy, <em>Redundancy, Resiliency, and Repair: Securing Subsea Cable Infrastructure</em>, Center for Strategic and International Studies, <a href="https://www.csis.org/analysis/redundancy-resiliency-and-repair-securing-subsea-cable-infrastructure">https://www.csis.org/analysis/redundancy-resiliency-and-repair-securing-subsea-cable-infrastructure</a> <a href="#fnref-csis-cables" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
@@ -790,7 +809,9 @@ Source: web-resilience-test/test-results/asn_taiwan_ratio.tsv
 <li id="fn-africa-thirdparty">Aqsa Kashaf, Jiachen Dou, Margarita Belova, Maria Apostolaki, Yuvraj Agarwal, Vyas Sekar, <em>A First Look at Third-Party Service Dependencies of Web Services in Africa</em>, Carnegie Mellon University, Princeton University, <a href="https://netsyn.princeton.edu/sites/g/files/toruqf3201/files/documents/pam23_0.pdf">https://netsyn.princeton.edu/sites/g/files/toruqf3201/files/documents/pam23_0.pdf</a> <a href="#fnref-africa-thirdparty" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
 <li id="fn-thirdparty-centralization">Rashna Kumar, Sana Asif, Elise Lee, Fabián E. Bustamante, <em>Third-party Service Dependencies and Centralization Around the World</em>, Northwestern University, <a href="https://arxiv.org/abs/2111.12253">https://arxiv.org/abs/2111.12253</a> <a href="#fnref-thirdparty-centralization" class="footnote-backref" aria-label="Back to reference 1 in text" title="Back to reference 1 in text">↩1</a> <a href="#fnref-thirdparty-centralization-2" class="footnote-backref" aria-label="Back to reference 2 in text" title="Back to reference 2 in text">↩2</a></li>
 <li id="fn-thirdparty-dependencies">Aqsa Kashaf, Vyas Sekar, Yuvraj Agarwal, <em>Analyzing Third Party Service Dependencies in Modern Web Services: Have We Learned from the Mirai-Dyn Incident?</em>, <a href="https://doi.org/10.1145/3419394.3423664">https://doi.org/10.1145/3419394.3423664</a> <a href="#fnref-thirdparty-dependencies" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
+<li id="fn-tranco">Victor Le Pochat, Tom Van Goethem, Samaneh Tajalizadehkhoob, Maciej Korczyński, and Wouter Joosen, <em>Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation</em>, Proceedings of the 26th Annual Network and Distributed System Security Symposium (NDSS 2019), <a href="https://doi.org/10.14722/ndss.2019.23386">https://doi.org/10.14722/ndss.2019.23386</a> <a href="#fnref-tranco" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
 <li id="fn-dependency-analyzer">Yasin Alhamwy, Paul Mertens, Oliver Hohlfeld, <em>Poster: Web Dependency Analyzer to Identify Resource Dependencies and their Impact on Rendering</em>, <a href="https://doi.org/10.1145/3646547.3689683">https://doi.org/10.1145/3646547.3689683</a> <a href="#fnref-dependency-analyzer" class="footnote-backref" aria-label="Back to reference in text" title="Back to reference in text">↩</a></li>
+<li id="fn-laces">Remi Hendriks, Matthew Luckie, Mattijs Jonker, Raffaele Sommese, and Roland van Rijswijk-Deij, <em>LACeS: An Open, Fast, Responsible and Efficient Longitudinal Anycast Census System</em>, Proceedings of the 2025 ACM Internet Measurement Conference (IMC &#39;25), <a href="https://doi.org/10.1145/3730567.3764484">https://doi.org/10.1145/3730567.3764484</a> <a href="#fnref-laces" class="footnote-backref" aria-label="Back to reference 1 in text" title="Back to reference 1 in text">↩1</a> <a href="#fnref-laces-2" class="footnote-backref" aria-label="Back to reference 2 in text" title="Back to reference 2 in text">↩2</a></li>
 </ol>
 </section>
 
