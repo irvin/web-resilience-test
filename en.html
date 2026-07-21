@@ -158,6 +158,7 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 <li><a href="#implementation-and-data-processing">Implementation and data processing</a><ul>
 <li><a href="#collecting-test-data">Collecting test data</a></li>
 <li><a href="#single-site-test-flow">Single-site test flow</a></li>
+<li><a href="#rtt-classification-coverage-and-threshold-sensitivity">RTT classification coverage and threshold sensitivity</a></li>
 <li><a href="#batch-test-flow">Batch test flow</a></li>
 <li><a href="#per-site-result-pages">Per-site result pages</a></li>
 </ul>
@@ -383,6 +384,145 @@ Availability of all international submarine cables serving Taiwan, 2025/3/18–2
 </ul>
 </li>
 </ol>
+<h3 id="rtt-classification-coverage-and-threshold-sensitivity">RTT classification coverage and threshold sensitivity</h3>
+<!-- `generate_statistic.js` computes these values from `test-results/*.json` and writes `test-results/rtt-summary.tsv`, `test-results/rtt-distribution.tsv`, and `test-results/rtt-threshold-sensitivity.tsv`; `export-rtt-csv.js` writes the observation-level RTT fallback records to `rtt.csv`. -->
+
+<p>RTT is the final stage of location classification: a public-cloud resource enters RTT only when IPinfo, response headers, and LACeS cannot determine its location. The test tool pings the resource five times and uses the minimum RTT; below 15 ms, it is classified as an international public-cloud node in Taiwan.</p>
+<p>Across 2,179 successfully tested websites, the browser recorded 262,926 raw HTTP requests. After excluding advertising and other filtered items and deduplicating hostnames within each site, 19,046 resources remained for classification. Of these, 1,243 sites entered the RTT stage, covering 976 distinct hostnames and 3,640 observations; details are in the table below.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Metric</th>
+<th align="right">Count</th>
+<th>Share</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Sites tested</td>
+<td align="right">2,179</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">Sites with RTT fallback</td>
+<td align="right">1,243</td>
+<td>57.0% of sites tested</td>
+</tr>
+<tr>
+<td align="left">Resources to classify</td>
+<td align="right">19,046</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">Entered RTT stage</td>
+<td align="right">3,640</td>
+<td>19.1% of resources to classify</td>
+</tr>
+<tr>
+<td align="left">RTT measured</td>
+<td align="right">3,064</td>
+<td>84.2% of RTT-stage resources</td>
+</tr>
+<tr>
+<td align="left">Min RTT &lt; 15 ms</td>
+<td align="right">2,394</td>
+<td>78.1% of measured RTTs</td>
+</tr>
+<tr>
+<td align="left">Min RTT ≥ 15 ms</td>
+<td align="right">670</td>
+<td>21.9% of measured RTTs</td>
+</tr>
+</tbody></table>
+<p>The distribution of the 3,064 measured RTTs is shown below. Each point is one successful measurement; the horizontal axis is an observation index, and the vertical axis is logarithmic. Values are bimodal; the 10–30 ms transition range holds 130 observations (4.2%).</p>
+<p>Based on this distribution, we use a relatively conservative <code>&lt; 15 ms</code> threshold within the sparse interval to classify a resource as domestic, reducing the risk of misclassifying a foreign resource as domestic.</p>
+<table>
+<thead>
+<tr>
+<th>RTT range</th>
+<th align="right">Count</th>
+<th align="right">Share</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0–&lt;5 ms</td>
+<td align="right">206</td>
+<td align="right">6.7%</td>
+</tr>
+<tr>
+<td>5–&lt;10 ms</td>
+<td align="right">2,090</td>
+<td align="right">68.2%</td>
+</tr>
+<tr>
+<td>10–&lt;15 ms</td>
+<td align="right">98</td>
+<td align="right">3.2%</td>
+</tr>
+<tr>
+<td>15–&lt;20 ms</td>
+<td align="right">12</td>
+<td align="right">0.4%</td>
+</tr>
+<tr>
+<td>20–&lt;30 ms</td>
+<td align="right">20</td>
+<td align="right">0.7%</td>
+</tr>
+<tr>
+<td>30–&lt;50 ms</td>
+<td align="right">270</td>
+<td align="right">8.8%</td>
+</tr>
+<tr>
+<td>50–&lt;100 ms</td>
+<td align="right">247</td>
+<td align="right">8.1%</td>
+</tr>
+<tr>
+<td>100–&lt;200 ms</td>
+<td align="right">100</td>
+<td align="right">3.3%</td>
+</tr>
+<tr>
+<td>≥200 ms</td>
+<td align="right">21</td>
+<td align="right">0.7%</td>
+</tr>
+</tbody></table>
+<p><img src="./img/rtt-scatter-plot.en.svg" alt="RTT distribution"></p>
+<p>Changing the threshold to 10 ms or 20 ms affects only 32 website classifications: at 10 ms, 27 sites move from cloud-dependent to foreign-dependent; at 20 ms, 5 move from foreign-dependent to cloud-dependent. The number of locally-contained sites is unchanged.</p>
+<table>
+<thead>
+<tr>
+<th>RTT threshold</th>
+<th>Foreign-dependent</th>
+<th>Cloud-dependent</th>
+<th>Locally-contained</th>
+<th>Sites reclassified</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>10 ms</td>
+<td>883 (40.5%)</td>
+<td>1,053 (48.3%)</td>
+<td>243 (11.2%)</td>
+<td>27 (1.2%)</td>
+</tr>
+<tr>
+<td>15 ms</td>
+<td>856 (39.3%)</td>
+<td>1,080 (49.6%)</td>
+<td>243 (11.2%)</td>
+<td></td>
+</tr>
+<tr>
+<td>20 ms</td>
+<td>851 (39.1%)</td>
+<td>1,085 (49.8%)</td>
+<td>243 (11.2%)</td>
+<td>5 (0.2%)</td>
+</tr>
+</tbody></table>
 <h3 id="batch-test-flow">Batch test flow</h3>
 <p><a href="https://github.com/irvin/web-resilience-test/blob/main_w_tw_result/batch-test.js"><code>batch-test.js</code></a> runs single-site tests over the list and writes <code>test-results/statistic.tsv</code>. From that batch output we derive overall foreign-dependency rates and per-resource resilience status.</p>
 <h3 id="per-site-result-pages">Per-site result pages</h3>
