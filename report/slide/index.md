@@ -188,7 +188,7 @@ Websites commonly used in Taiwan
 
 Latest dataset:
 
-- **2,509** sites tested
+- **2,507** unique sites tested
 - **2,179** sites completed
 - Data as of **2026-07-21**
 
@@ -197,7 +197,7 @@ We tested websites commonly used in Taiwan. This is not the same as testing only
 
 If people in Taiwan rely on Google, Gmail, social platforms, e-commerce, news, government services, or community sites, they are part of the resilience picture.
 
-In the latest dataset, we tested 2,509 sites, and 2,179 tests completed successfully. The data is from July 21.
+In the latest dataset, we tested 2,507 unique sites, and 2,179 tests completed successfully. The data is from July 21.
 
 For now, the unit is the website homepage. It is not a full service test yet, but it gives us a repeatable starting point.
 -->

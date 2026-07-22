@@ -24,7 +24,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ## Abstract
 
-This study examines the availability of everyday network services, when Taiwan experiences large-scale international submarine cable outages. By observing homepage resource requests in a browser, we trace where page dependencies originate and use that as a risk indicator.
+This study examines the availability of everyday network services when Taiwan experiences large-scale international submarine cable outages. By observing homepage resource requests in a browser, we trace where page dependencies originate and use that as a risk indicator.
 
 The work focuses on two core questions: (1) how much websites commonly used in Taiwan depend on foreign-hosted resources, and (2) how much they depend on local (in-Taiwan) nodes of multinational cloud providers. We develop a measurement framework that turns the abstract risk of “what happens when cables go dark” into concrete dependency-structure analysis, which can inform policy and industry resilience planning.
 
@@ -136,7 +136,7 @@ Taiwan–Matsu 2 and 3 total about 1 Tbps. After 2023, microwave was expanded to
 
 At the beginning of the 2006 incident, Chunghwa Telecom reallocated capacity on the ST-1 communications satellite to support international telephone service, briefly restoring partial availability for international voice calls. If a similar-scale incident happened today, could satellites still serve as a substitute?
 
-Under Taiwan Space Agency (TASA)'s “B5G LEO communications satellite program”[^b5g-satellite], Taiwan plans to launch two experimental LEO satellites before 2030 with a three-year design life.
+Under the Taiwan Space Agency’s (TASA) “B5G LEO communications satellite program”[^b5g-satellite], Taiwan plans to launch two experimental LEO satellites before 2030 with a three-year design life.
 
 Former TASA chair Tsung-Tsong Wu estimated that 24/7 nationwide LEO coverage would require at least 120 satellites, with roughly 40 replacements per year for a three-year lifetime—far above current plans, so it is hard to build substantive backup connectivity on that scale[^taiwan-satellite].
 
@@ -148,9 +148,9 @@ Even summing current LEO satellite bandwidth (Gbps class) cannot replace transoc
 
 In 2006, the main economic impact of lost international connectivity was disrupted international telephone service—finance and select industries—with overseas internet services affecting only a minority of users.
 
-In twenty years, dependence on the Internet has grown sharply. Taiwan’s international bandwidth grew from 147.7 Gbps in 2006 to 10.6 Tbps in 2026—nearly 70×[^twnic-bandwidth]. In the mean time, average cable damage in Taiwan is about 5.1 times per year versus a global average of 0.1–0.2—roughly 25–50× higher risk[^cna-cables].
+In twenty years, dependence on the Internet has grown sharply. Taiwan’s international bandwidth grew from 147.7 Gbps in 2006 to 10.6 Tbps in 2026—nearly 70×[^twnic-bandwidth]. Meanwhile, average cable damage in Taiwan is about 5.1 times per year versus a global average of 0.1–0.2—roughly 25–50× higher risk[^cna-cables].
 
-Deloitte (2016) estimated that a full national Internet outage in a highly digitalized country could cost about USD 23.6 million GDP per day per ten million people—roughly USD 55 million per day for Taiwan, or about USD 1.7 billion per month, before counting in semiconductor supply chain and cross-border finance spillovers[^deloitte-report].
+Deloitte (2016) estimated that a full national Internet outage in a highly digitalized country could cost about USD 23.6 million in GDP per day per ten million people—roughly USD 55 million per day for Taiwan, or about USD 1.7 billion per month, before accounting for semiconductor supply-chain and cross-border finance spillovers[^deloitte-report].
 
 The same work notes that even partial outages or bandwidth reduction hurt productivity, transactions, information access, and confidence.
 
@@ -186,7 +186,7 @@ Under severely congested or broken international links, repairing or rebuilding 
 
 Impact cannot be judged only by “how many spare cables remain.” Services may fail due to routing, DNS, congestion, cloud dependencies, or unreachable external assets even when the physical network is not fully down. Beyond connectivity, we need user-facing service availability measurements.
 
-Without understanding real impact, we cannot prepare. This study turns “what happens when cables go dark” into measurable, comparable technical questions—filling an application-layer gap in resilience discourse. Through a test framework, it observes how commonly used services load, degrade, or fail when foreign connectivity is lost, providing evidence for backup design, resilience investment, and policy and social readiness.
+Without understanding real impact, we cannot prepare. This study turns “what happens when cables go dark” into measurable, comparable technical questions—filling an application-layer gap in resilience discourse. Through a test framework, it estimates how commonly used services may load, degrade, or fail when foreign connectivity is lost, providing evidence for backup design, resilience investment, and policy and social readiness.
 
 ## Research questions
 
@@ -244,7 +244,7 @@ Tests used typical Taiwanese residential connectivity:
 
 Site availability depends not only on establishing connections, but on fetching dependent resources (JavaScript, CSS, images, APIs). Modern sites combine resources from many domains; together they determine what users see and can do. Prior work uses headless browsers to analyze request behavior and third-party dependencies[^dependency-analyzer][^thirdparty-centralization].
 
-Building on dependency-exposure analysis from resource requests, we extend it to the systematic scenario of “international connectivity failure” and its impact on service availability.
+Building on dependency-exposure analysis from resource requests, we extend it to the systematic scenario of “international connectivity failure” and its potential impact on service availability.
 
 Backend architecture, data paths, control planes, and internal cloud behavior are not directly observable externally. We do not attempt to map full system dependencies; we focus on observable front-end network requests and build operational metrics from them.
 
@@ -260,7 +260,7 @@ Two core metrics:
 
 These describe “dependency exposure structure” at the homepage front-end resource layer, not full system architecture or actual failure modes.
 
-We can classify sites into three categories based on above metrics:
+We can classify sites into three categories based on the above metrics:
 
 1. Foreign-dependent  
    Foreign resource exposure: homepage load directly depends on foreign resources. Most likely to be affected immediately when external connectivity fails—highest direct risk.
@@ -314,18 +314,18 @@ Finally, the tool aggregates all test results into statistical tables. The detai
        - Drop `blob:` requests
        - Exclude unparsable requests
        - Apply the configured adblock domain list to remove advertisements and related unnecessary resources
-       - Exclude hostnames on the manual exclusion list. This study lists only the web-font hostname `fonts.gstatic.com`, because failure to load it should not affect core website functionality. Future studies can use the same mechanism to add other exclusions
+       - Exclude hostnames on the manual exclusion list. This study lists only the web-font hostname `fonts.gstatic.com`, because its failure is less likely to affect core website functionality than failures of scripts, APIs, or content resources. Future studies can use the same mechanism to add other exclusions
        - Deduplicate requests by hostname; each unique website-hostname pair is one observation
 
   5. Domain location
      - For each hostname in the preceding list, call the IPinfo API to obtain its geographic and logical location
      - If the result shows `country=TW`, record it as a domestic connection
-     - Otherwise, we check ASN to find if the request is from multinational public cloud (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft), then do further checks:
+     - Otherwise, use ASN information to determine whether the request belongs to a selected multinational public-cloud or CDN provider (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft); if so, apply the following checks:
        - Headers: look for known location markers in response headers like `cf-ray`, `x-amz-cf-pop`, `x-served-by`, `x-azure-ref`, and `x-msedge-ref` (values containing `TPE` indicate a Taiwan PoP).
        - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces]; if `locations` includes Taiwan and `confidence` is `confident`, classify as domestic (see [`LACeS.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.md)).
        - RTT: if the above methods are inconclusive, ping the resource 5× and take the minimum RTT. Reclassify the endpoint as domestic only if `RTT < 15 ms`; otherwise, keep it classified as foreign.
 
-     Note: we also built [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) from full request data for ASN mapping, open-sourced for other research and projects.
+     Note: we also built [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) from the full request data for ASN mapping and open-sourced it for other research and projects.
 
   6. Classification and resilience metrics
      - Based on the preceding information, classify each unique website-hostname observation as one of: `domestic/cloud`, `domestic/direct`, `foreign/cloud`, `foreign/direct`
@@ -391,11 +391,11 @@ Changing the threshold to 10 ms or 20 ms affects only 32 website classifications
 
 We use [web-resilience-test-profile](https://github.com/irvin/web-resilience-test-profile) to compile individual static pages and host them at [https://resilience.ocf.tw/](https://resilience.ocf.tw/) for public lookup of each site’s resilience (e.g. [Will ocf.tw work if cables break?](https://resilience.ocf.tw/web/ocf.tw/)).
 
-At ~2,000 sites, when running with default parallelism (4 parallel tests, 8 parallel static page compilations), it takes about 30–60 minutes to complete. The latest testing are published at [web-resilience-test-result](https://github.com/irvin/web-resilience-test-result) and [resilience.ocf.tw](https://resilience.ocf.tw/).
+At ~2,000 sites, when running with default parallelism (4 parallel tests, 8 parallel static page compilations), it takes about 30–60 minutes to complete. The latest test results are published at [web-resilience-test-result](https://github.com/irvin/web-resilience-test-result) and [resilience.ocf.tw](https://resilience.ocf.tw/).
 
 ## Results
 
-Of 2,509 sites tested, 2,179 completed successfully.
+Of 2,507 unique sites tested, 2,179 completed successfully.
 
 - Data as of: 2026-07-21
 - Testing site lists:
@@ -492,7 +492,7 @@ foreign/total:   total_foreign > 0
 foreign only:    total_foreign > 0 && total_domestic = 0
 -->
 
-For this comparison, **global cloud** includes the multinational public-cloud and CDN providers compiled for this study, while **other/local** covers the remaining local providers. A website is counted in a cell when at least one of its observations belongs to that group:
+For this comparison, **global cloud** includes the multinational public-cloud and CDN providers compiled for this study, while **other/local** covers all other providers. A website is counted in a cell when at least one of its observations belongs to that group:
 
 | Unit: sites & adoption rate | Domestic      | Foreign     | Any           |
 |-----------------------------|---------------|-------------|---------------|
@@ -574,7 +574,7 @@ Overall, the main risk for websites commonly used in Taiwan does not come only f
 
 1. Support related research to continuously monitor the resilience of commonly used and critical services, and routinely publish both aggregate and per-service results.
 2. Support follow-up research to develop deeper resilience testing frameworks for user journeys such as login, transactions, browsing, and search, in order to conduct further availability testing.
-3. For heavily depended-on locally-based international public clouds such as Google, Cloudflare, Amazon, and Akamai, provide policy requirements and budget support to verify and improve service availability during external network outages.
+3. For Taiwan nodes of heavily used international public-cloud providers such as Google, Cloudflare, Amazon, and Akamai, provide policy requirements and budget support to verify and improve service availability during external network outages.
 4. Provide policy requirements and budget support to reduce critical domestic services’ dependence on foreign resources and improve their local resilience.
 5. Encourage or require critical domestic services to establish local backup mechanisms or recovery plans, and conduct periodic disconnection drills.
 6. Based on local-availability validation, define resilience tiers, such as A: fully usable; B: degraded but usable; C: homepage loads but interactions fail; D: immediate failure, and include them in procurement and acceptance criteria for government and public services.
