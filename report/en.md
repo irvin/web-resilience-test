@@ -60,7 +60,7 @@ Among 2,179 websites commonly used in Taiwan that we tested, 39.3% are “foreig
   - [Interpretation](#interpretation)
   - [Multinational public cloud dependency](#multinational-public-cloud-dependency)
   - [Public cloud resource locations](#public-cloud-resource-locations)
-  - [Resource location and cloud dependency statistics](#resource-location-and-cloud-dependency-statistics)
+  - [Resource location and cloud-platform dependency statistics](#resource-location-and-cloud-platform-dependency-statistics)
   - [Resource source distribution](#resource-source-distribution)
   - [Public-sector aggregate risk](#public-sector-aggregate-risk)
 - [Recommendations](#recommendations)
@@ -284,9 +284,11 @@ Tools and projects:
 
 We developed [web-resilience-test](https://github.com/irvin/web-resilience-test) to open each target homepage site-by-site with a programmatic headless browser and record all resource connections during load.
 
-For resources of each page, the tool aggregates request domains, filters known ad domains, and uses IPinfo / headers / LACeS anycast API[^laces] / ping RTT to infer geographic and logical location (e.g. which public cloud provider).
+Next, the tool processes all resource requests collected during page loading. It excludes `blob:` and other unparsable requests, as well as requests matching the ad-filter rules or the manual exclusion list. It then deduplicates the requests, retaining only one request per hostname within each website; each unique website-hostname pair constitutes one observation.
 
-Results are aggregated into summary tables.
+The tool then uses IPinfo, provider-specific response headers, the LACeS anycast API[^laces], and ping RTT to determine the geographic location and classification of each observation.
+
+Finally, the tool aggregates all test results into statistical tables. The detailed workflow follows.
 
 ### Single-site test flow
 
@@ -308,25 +310,27 @@ Results are aggregated into summary tables.
      - If all four variants still fail, log the error and skip to the next site
 
   4. Request cleanup
-     - For requests data of each page, we do following cleanups:
+     - For each page's request data, perform the following cleanup:
        - Drop `blob:` requests
-       - Apply adblock domain list to filter out ads and other unnecessary resources
-       - Deduplicate hostnames to get unique request servers
+       - Exclude unparsable requests
+       - Apply the configured adblock domain list to remove advertisements and related unnecessary resources
+       - Exclude hostnames on the manual exclusion list. This study lists only the web-font hostname `fonts.gstatic.com`, because failure to load it should not affect core website functionality. Future studies can use the same mechanism to add other exclusions
+       - Deduplicate requests by hostname; each unique website-hostname pair is one observation
 
   5. Domain location
-     - For previous hostname list, we call IPinfo API to get geographic and logical location
-     - If result shows `country=TW`, log as domestic connection
+     - For each hostname in the preceding list, call the IPinfo API to obtain its geographic and logical location
+     - If the result shows `country=TW`, record it as a domestic connection
      - Otherwise, we check ASN to find if the request is from multinational public cloud (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft), then do further checks:
        - Headers: look for known location markers in response headers like `cf-ray`, `x-amz-cf-pop`, `x-served-by`, `x-azure-ref`, and `x-msedge-ref` (values containing `TPE` indicate a Taiwan PoP).
-       - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces]; if `locations` includes Taiwan and `confidence` is `confident` (or higher), classify as domestic (see [`LACeS.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.md)).
-       - RTT: if the above methods are inconclusive, ping the resource 5× and take the minimum RTT; if `RTT < 15ms`, categorize it as a domestic resource.
+       - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces]; if `locations` includes Taiwan and `confidence` is `confident`, classify as domestic (see [`LACeS.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.md)).
+       - RTT: if the above methods are inconclusive, ping the resource 5× and take the minimum RTT. Reclassify the endpoint as domestic only if `RTT < 15 ms`; otherwise, keep it classified as foreign.
 
      Note: we also built [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) from full request data for ASN mapping, open-sourced for other research and projects.
 
   6. Classification and resilience metrics
-     - Based on previous information, we classify each domain into one of: `domestic/cloud`, `domestic/direct`, `foreign/cloud`, `foreign/direct`
+     - Based on the preceding information, classify each unique website-hostname observation as one of: `domestic/cloud`, `domestic/direct`, `foreign/cloud`, `foreign/direct`
        - “cloud” means the ASN in IPinfo `org` is listed in `cloud_providers_tw.json` under `providers_intl` or `providers_intl_without_known_taiwan_region/pop`
-     - Count request domains per category per site and save to `test-results/<site>.json`
+     - Count the total observations in each category for every website and save the results to `test-results/<site>.json`
 
   7. Errors
      - Failures are logged to `test-results/_error/<site>.error.json`
@@ -339,17 +343,17 @@ Results are aggregated into summary tables.
 
 <!-- `generate_statistic.js` computes these values from `test-results/*.json` and writes `test-results/rtt-summary.tsv`, `test-results/rtt-distribution.tsv`, and `test-results/rtt-threshold-sensitivity.tsv`; `export-rtt-csv.js` writes the observation-level RTT fallback records to `rtt.csv`. -->
 
-RTT is the final stage of location classification: a public-cloud resource enters RTT only when IPinfo, response headers, and LACeS cannot determine its location. The test tool pings the resource five times and uses the minimum RTT; below 15 ms, it is classified as an international public-cloud node in Taiwan.
+RTT is the final stage of location classification: a target cloud or CDN endpoint enters RTT only when IPinfo, provider-specific response headers, and LACeS cannot determine its location. The test tool pings the endpoint five times and uses the minimum RTT. It is reclassified as an international public-cloud node in Taiwan only when the minimum RTT is below 15 ms; otherwise, it remains classified as foreign.
 
-Across 2,179 successfully tested websites, the browser recorded 262,926 raw HTTP requests. After excluding advertising and other filtered items and deduplicating hostnames within each site, 19,046 resources remained for classification. Of these, 1,243 sites entered the RTT stage, covering 976 distinct hostnames and 3,640 observations; details are in the table below.
+Across 2,179 successfully tested websites, the browser recorded 262,926 raw HTTP requests. The filtering described above and within-site hostname deduplication produced 19,046 unique website-hostname observations for classification. Of these, 3,640 observations from 976 distinct hostnames across 1,243 websites entered the RTT fallback stage; details are in the table below.
 
 | Metric                 |  Count | Share                          |
 |:-----------------------|-------:|--------------------------------|
 | Sites tested           |  2,179 |                                |
-| Sites with RTT fallback|  1,243 | 57.0% of sites tested          |
-| Resources to classify  | 19,046 |                                |
-| Entered RTT stage      |  3,640 | 19.1% of resources to classify |
-| RTT measured           |  3,064 | 84.2% of RTT-stage resources   |
+| Sites with RTT fallback |  1,243 | 57.0% of sites tested           |
+| Observations to classify | 19,046 |                                 |
+| Entered RTT stage       |  3,640 | 19.1% of observations           |
+| RTT measured            |  3,064 | 84.2% of RTT-stage observations |
 | Min RTT < 15 ms        |  2,394 | 78.1% of measured RTTs         |
 | Min RTT ≥ 15 ms        |    670 | 21.9% of measured RTTs         |
 
@@ -471,32 +475,32 @@ For Google cloud resources, measured by request count, 7,393 of 7,456 Google req
 
 Public-cloud services with lower domestic resource shares should be further evaluated for full in-country mirroring, cache persistence, and contingency operations.
 
-### Resource location and cloud dependency statistics
+### Resource location and cloud-platform dependency statistics
 
 <!--
 Source: web-resilience-test/test-results/dependency-breakdown.tsv
 
 Counts:
-cloud/domestic:  results_domestic_cloud > 0
-cloud/foreign:   results_foreign_cloud > 0
-cloud/total:     total_cloud > 0
-direct/domestic: results_domestic_direct > 0
-direct/foreign:  results_foreign_direct > 0
-direct/total:    total_direct > 0
+global cloud/domestic: results_domestic_cloud > 0
+global cloud/foreign:  results_foreign_cloud > 0
+global cloud/total:    total_cloud > 0
+other/local domestic:  results_domestic_direct > 0
+other/local foreign:   results_foreign_direct > 0
+other/local total:     total_direct > 0
 domestic/total:  total_domestic > 0
 foreign/total:   total_foreign > 0
 foreign only:    total_foreign > 0 && total_domestic = 0
 -->
 
-We analyzed commonly used sites’ domestic/foreign and cloud/non-cloud resource use, counting a site if it made at least one request of that type:
+For this comparison, **global cloud** includes the multinational public-cloud and CDN providers compiled for this study, while **other/local** covers the remaining local providers. A website is counted in a cell when at least one of its observations belongs to that group:
 
-| Unit: sites & adoption rate | Domestic      | Foreign     | Total         |
+| Unit: sites & adoption rate | Domestic      | Foreign     | Any           |
 |-----------------------------|---------------|-------------|---------------|
-| Multinational public cloud  | 1,881 (86.3%) | 754 (34.6%) | 1,910 (87.7%) |
-| Non-cloud                   | 1,623 (74.5%) | 245 (11.2%) | 1,709 (78.4%) |
-| Total                       | 2,140 (98.2%) | 856 (39.3%) |               |
+| Global cloud                | 1,881 (86.3%) | 754 (34.6%) | 1,910 (87.7%) |
+| Other/local                 | 1,623 (74.5%) | 245 (11.2%) | 1,709 (78.4%) |
+| Total                       | 2,140 (98.2%) | 856 (39.3%) | 2,179 (100.0%) |
 
-87.7% of sites depend on multinational public-cloud resources: 86.3% use domestic public-cloud nodes, and 34.6% use foreign public-cloud nodes.
+87.7% of sites depend on global-cloud resources: 86.3% depend on resources from domestic global-cloud endpoints, and 34.6% depend on resources from foreign global-cloud endpoints.
 
 Among the 856 sites with foreign resource exposure, most also use domestic resources; only 39 use foreign resources exclusively, accounting for just 1.8% of all 2,179 sites. This shows the practical value of CDN contributions to data localization and benefits for service resilience.
 
@@ -506,7 +510,7 @@ Among the 856 sites with foreign resource exposure, most also use domestic resou
 Source: web-resilience-test/test-results/resource-distribution.tsv
 -->
 
-Aggregating all resource requests by ASN shows that website dependencies are highly concentrated among large providers. Providers above 5% include Google, Cloudflare, Amazon, Chunghwa Telecom (CHT), and Facebook. Google has the highest share at 39.7%, followed by Cloudflare at 16.4% and Amazon at 10.4%.
+Among the 18,969 unique website-hostname observations with provider information from IPinfo, dependencies are highly concentrated among large providers. Provider labels are normalized from IPinfo ASN organization data. Providers above 5% include Google, Cloudflare, Amazon, Chunghwa Telecom (CHT), and Facebook. Google has the highest observation share at 39.7%, followed by Cloudflare at 16.4% and Amazon at 10.4%.
 
 Per-site inspection shows that Google resources mainly include services such as GTM, while Cloudflare provides infrastructure and services such as [cdnjs](https://www.cloudflare.com/zh-tw/cdnjs/) JavaScript CDN and WAF. These common infrastructure services form key parts of contemporary internet-service resilience.
 
@@ -556,11 +560,15 @@ To assess the resilience of government and education sites, we first looked only
 
 Government and education sites depend less on foreign resources than the overall population. This suggests that public-sector and academic-network environments have a stronger baseline for local availability, although full service resilience still requires checking backend dependencies and real usage workflows.
 
+<!-- TODO: Add analysis of failed test samples -->
+
 ## Recommendations
 
 Based on this study’s findings, we identify the following policy and technical recommendations to improve the resilience of Taiwan’s overall digital services.
 
 Overall, the main risk for websites commonly used in Taiwan does not come only from a small number of fully foreign-hosted services. It is more widely embedded in dependency structures involving foreign resources and Taiwan-based nodes of multinational public clouds. Resilience strategies should therefore go beyond asking whether a service is “in Taiwan,” and further examine whether its resource supply chain, cloud control planes, and critical user journeys can continue operating locally.
+
+<!-- TODO: Group policy recommendations by audience: government procurement and regulators, critical-infrastructure operators, and website developers -->
 
 ### Policy Recommendations
 
@@ -584,13 +592,20 @@ Main limitations:
 
 1. This study observes the source locations of website requests, not full network paths such as traceroute, nor routes from abroad via VPN. Whether “domestic” resources or pages are anycast/CDN nodes still needs further testing.
 
-2. “Foreign dependency” and “cloud dependency” here refer to front-end observable exposure, not full backend architecture. Even locally-contained sites by front-end metrics may still rely on foreign databases, APIs, or backend services. The 11.2% locally-contained group cannot be assumed to remain available during external outages.
+2. The 15 ms RTT cutoff is a fallback heuristic, not physical proof of endpoint location. Routing changes, congestion, or nearby foreign nodes can affect individual measurements, although the threshold sensitivity analysis shows limited aggregate impact.
 
-3. Resources hosted on multinational clouds’ Taiwan nodes do not guarantee standalone operation during submarine-cable outages. Availability may still depend on foreign control planes, foreign origins, cache hit ratio and persistence, authentication/session mechanisms, and other factors.
+3. “Foreign dependency” and “cloud dependency” here refer to front-end observable exposure, not full backend architecture. Even locally-contained sites by front-end metrics may still rely on foreign databases, APIs, or backend services. The 11.2% locally-contained group cannot be assumed to remain available during external outages.
 
-4. This study does not perform live “cable-outage simulation” through VPN/DNS fault injection. It is a large-scale structural survey that estimates potential risk from dependency patterns, not an observation of actual degradation under forced isolation.
+4. Resources and webpages hosted on Taiwan nodes of multinational public-cloud services do not guarantee that the service can operate independently during submarine-cable or international connectivity outages. Observing a Taiwan endpoint shows only that some front-end resources can be obtained domestically. Actual availability may still depend on:
+   - Whether control-plane services, including authoritative DNS, configuration, and logging, rely on foreign systems
+   - Whether the origin and dynamic content are located abroad
+   - Whether cache hit ratio, cache persistence, and cache revalidation require international connectivity
+   - Whether identity and access management, token validation, session handling, and other authentication processes rely on foreign services
+   - Other foreign dependencies that may affect service availability
 
-5. This study tests homepages only, not full user journeys such as login, transactions, browsing, or search. Results should therefore be treated as “initial availability” indicators.
+5. This study does not perform fault-injection tests that simulate a loss of international connectivity, such as using VPN or DNS techniques to make foreign resources unreachable. As a broad survey of many websites, it estimates potential risk from dependency structures rather than directly observing service degradation during a forced connectivity outage.
+
+6. This study tests homepages only, not full user journeys such as login, transactions, browsing, or search. Results should therefore be treated as “initial availability” indicators.
 
 Suggested follow-ups:
 
@@ -599,9 +614,9 @@ Suggested follow-ups:
    - Use traceroute to analyze full resource paths.
    - Analyze the usage and node distribution of common front-end libraries and frameworks, such as jQuery, Bootstrap, Tailwind, React, and Vue, to identify shared foreign-service single points of failure.
    - Compare dependency patterns by resource type, such as document, script, image, XHR, font, and stylesheet.
-   - Compare resilience across site types, such as news, e-commerce, social media, and search.
    - Identify high-traffic, low-resilience sites.
    - Add more Taiwan traffic data, such as the Chrome CrUX user experience dataset.
+   - Develop a service-criticality framework that classifies services into categories such as government, finance, communications, video streaming, news, e-commerce, social media, and search engines; weights them by security, economic, and social importance; compares resilience across categories; and calculates an overall resilience index.
 
 ## References
 
