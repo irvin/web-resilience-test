@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { chromium } = require('playwright');
 const {
   collectRttStatistics,
@@ -20,6 +21,12 @@ const RTT_DISTRIBUTION_TSV = path.join(DIR, 'rtt-distribution.tsv');
 const RTT_SENSITIVITY_TSV = path.join(DIR, 'rtt-threshold-sensitivity.tsv');
 const GRAPH_DIR = path.resolve(__dirname, 'graphs');
 const PUBLISHED_REPORT_IMG_DIR = path.resolve(__dirname, 'report', 'img');
+const MANUSCRIPT_FIGURES_DIR = path.resolve(
+  __dirname,
+  'report',
+  'manuscript',
+  'figures',
+);
 const MERGED_LISTS_PATH = path.resolve(
   __dirname,
   'top-traffic-list-taiwan',
@@ -364,7 +371,8 @@ function renderRttScatterPlotSvg(stats, snapshotDate, options = {}) {
   const isEnglish = locale === 'en';
   const width = options.width || 1200;
   const height = options.height || 700;
-  const margin = { top: 94, right: 62, bottom: 82, left: 96 };
+  // Sized so labels remain ~8--10pt after scaling to a 3.33in ACM column.
+  const margin = { top: 28, right: 36, bottom: 96, left: 118 };
   const plotWidth = width - margin.left - margin.right;
   const plotHeight = height - margin.top - margin.bottom;
   const logMin = Math.log10(2);
@@ -382,21 +390,18 @@ function renderRttScatterPlotSvg(stats, snapshotDate, options = {}) {
   const xTicks = [0, 500, 1000, 1500, 2000, 2500, 3000].filter(
     (tick) => tick <= values.length,
   );
-  const title = 'RTT distribution';
-  const subtitle = isEnglish
-    ? `${values.length.toLocaleString('en-US')} successful minimum-RTT observations from the current dataset`
-    : `目前資料中 ${values.length.toLocaleString('en-US')} 筆成功取得的最小 RTT observation`;
   const xLabel = isEnglish ? 'RTT observation index' : 'RTT observation 序號';
   const yLabel = isEnglish
-    ? 'Minimum RTT (ms, logarithmic scale)'
+    ? 'Minimum RTT (ms, log scale)'
     : '最小 RTT（ms，對數尺度）';
-  const dataLabel = isEnglish ? 'Data snapshot' : '資料日期';
+  const tickFontSize = 32;
+  const axisFontSize = 34;
   const grid = yTicks
     .map((tick) => {
       const y = yFor(tick);
       return [
-        `<line x1="${margin.left}" y1="${y}" x2="${width - margin.right}" y2="${y}" stroke="#D1D5DB" stroke-width="1" stroke-dasharray="4 6" />`,
-        `<text x="${margin.left - 16}" y="${y + 6}" text-anchor="end" font-family="Arial, sans-serif" font-size="18" fill="#4B5563">${tick}</text>`,
+        `<line x1="${margin.left}" y1="${y}" x2="${width - margin.right}" y2="${y}" stroke="#9CA3AF" stroke-width="1.25" stroke-dasharray="4 6" />`,
+        `<text x="${margin.left - 14}" y="${y + 10}" text-anchor="end" font-family="Arial, sans-serif" font-size="${tickFontSize}" fill="#111827">${tick}</text>`,
       ].join('');
     })
     .join('');
@@ -404,29 +409,28 @@ function renderRttScatterPlotSvg(stats, snapshotDate, options = {}) {
     .map((tick) => {
       const x = margin.left + (tick / Math.max(1, values.length)) * plotWidth;
       return [
-        `<line x1="${x}" y1="${height - margin.bottom}" x2="${x}" y2="${height - margin.bottom + 8}" stroke="#6B7280" />`,
-        `<text x="${x}" y="${height - margin.bottom + 32}" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#4B5563">${tick.toLocaleString('en-US')}</text>`,
+        `<line x1="${x}" y1="${height - margin.bottom}" x2="${x}" y2="${height - margin.bottom + 10}" stroke="#374151" stroke-width="1.5" />`,
+        `<text x="${x}" y="${height - margin.bottom + 42}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${tickFontSize}" fill="#111827">${tick.toLocaleString('en-US')}</text>`,
       ].join('');
     })
     .join('');
   const points = values
     .map((value, index) => {
-      return `<circle cx="${xFor(index).toFixed(2)}" cy="${yFor(value).toFixed(2)}" r="2.25" fill="#2563EB" fill-opacity="0.42" />`;
+      return `<circle cx="${xFor(index).toFixed(2)}" cy="${yFor(value).toFixed(2)}" r="2.8" fill="#0F172A" fill-opacity="0.78" />`;
     })
     .join('');
+  const yLabelX = 36;
+  const yLabelY = margin.top + plotHeight / 2;
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
     '<rect width="100%" height="100%" fill="#FFFFFF" />',
-    `<text x="${margin.left}" y="42" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="30" font-weight="600" fill="#111827">${escapeSvgText(title)}</text>`,
-    `<text x="${margin.left}" y="72" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="18" fill="#6B7280">${escapeSvgText(subtitle)}</text>`,
     grid,
     points,
-    `<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#374151" stroke-width="1.5" />`,
-    `<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#374151" stroke-width="1.5" />`,
+    `<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#111827" stroke-width="2" />`,
+    `<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#111827" stroke-width="2" />`,
     xAxisTicks,
-    `<text x="${margin.left + plotWidth / 2}" y="${height - 18}" text-anchor="middle" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="19" fill="#374151">${escapeSvgText(xLabel)}</text>`,
-    `<text x="25" y="${margin.top + plotHeight / 2}" transform="rotate(-90 25 ${margin.top + plotHeight / 2})" text-anchor="middle" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="19" fill="#374151">${escapeSvgText(yLabel)}</text>`,
-    `<text x="${width - margin.right}" y="${height - 18}" text-anchor="end" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="16" fill="#9CA3AF">${escapeSvgText(dataLabel)}: ${snapshotDate}</text>`,
+    `<text x="${margin.left + plotWidth / 2}" y="${height - 24}" text-anchor="middle" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="${axisFontSize}" fill="#111827">${escapeSvgText(xLabel)}</text>`,
+    `<text x="${yLabelX}" y="${yLabelY}" transform="rotate(-90 ${yLabelX} ${yLabelY})" text-anchor="middle" font-family="'Noto Sans TC','PingFang TC',Arial,sans-serif" font-size="${axisFontSize}" fill="#111827">${escapeSvgText(yLabel)}</text>`,
     '</svg>',
   ].join('');
 }
@@ -768,6 +772,28 @@ async function writeRttCharts(stats, snapshotDate, { writeLatest }) {
     'utf8',
   );
   console.log(`Synced RTT charts to: ${PUBLISHED_REPORT_IMG_DIR}`);
+
+  await fs.promises.mkdir(MANUSCRIPT_FIGURES_DIR, { recursive: true });
+  const manuscriptSvgPath = path.join(
+    MANUSCRIPT_FIGURES_DIR,
+    'rtt-distribution.svg',
+  );
+  const manuscriptPdfPath = path.join(
+    MANUSCRIPT_FIGURES_DIR,
+    'rtt-distribution.pdf',
+  );
+  await fs.promises.writeFile(manuscriptSvgPath, enSvg, 'utf8');
+  const convert = spawnSync(
+    'rsvg-convert',
+    ['-f', 'pdf', '-o', manuscriptPdfPath, manuscriptSvgPath],
+    { encoding: 'utf8' },
+  );
+  if (convert.status !== 0) {
+    throw new Error(
+      `Failed to write ${manuscriptPdfPath}: ${convert.stderr || convert.error}`,
+    );
+  }
+  console.log(`Wrote chart: ${manuscriptPdfPath}`);
 
   await fs.promises.mkdir(GRAPH_DIR, { recursive: true });
   const graphSvgPath = path.join(GRAPH_DIR, 'rtt_scatter-plot.svg');
