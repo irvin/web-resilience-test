@@ -226,6 +226,13 @@ ${LANG_SWITCHER_CSS}
       padding: 0.1em 0.35em;
       border-radius: 6px;
       background: color-mix(in srgb, CanvasText 8%, Canvas);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    /* Keep fenced blocks scrollable; wrapping is for inline code only. */
+    pre code {
+      overflow-wrap: normal;
+      word-break: normal;
     }
     sup.footnote-ref {
       font-size: 0.74em;
