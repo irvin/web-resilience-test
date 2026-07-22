@@ -11,7 +11,7 @@ MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))
 ### 更新日期
 
 Published: 2026-03-23  
-Last Updated: 2026-07-22
+Last Updated: 2026-07-23
 
 ### 誌謝
 
@@ -24,11 +24,13 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ## 摘要
 
-本研究探討當台灣發生大規模國際海底電纜中斷時，日常常用網路服務的可用性。透過瀏覽器觀測網站首頁資源請求，追蹤頁面依賴資源的來源，作為風險評估指標。
+本研究探討當台灣發生大規模國際海底電纜中斷時，日常常用網路服務的可用情形。透過觀測網站首頁資源請求，追蹤頁面載入時依賴資源的來源位置，以評估網站在國際網路中斷時的可用性，作為風險評估指標。
 
-本研究聚焦兩項核心議題：（一）台灣常用網站對境外資源的依賴程度；（二）台灣常用網站對跨國雲服務境內節點的依賴程度。研究並發展量測方法框架，將抽象的「海纜斷光的斷網風險」轉化為具體的服務依賴結構分析，結果可作為政策與產業韌性規劃的基礎。
+研究聚焦兩項核心議題：（一）台灣常用網站對境外資源的依賴程度；（二）台灣常用網站對跨國公有雲服務境內節點的依賴程度，發展量測方法框架，將抽象的「海纜斷光的斷網風險」，轉化為具體的服務依賴結構分析。
 
-經檢測 2,179 個台灣常用網站，結果顯示，39.3% 的網站為第一類「境外依賴型」，存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 49.6% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點資源，在境外連線中斷時的實際可用性，存在高度不確定。
+經檢測 2,179 個台灣常用網站連線資料，結果顯示，39.3% 的網站為第一類「境外依賴型」，存在境外資源依賴暴露，在海纜斷光情境下，具有較高的直接失效風險。另有 49.6% 的網站為「雲端依賴型」，雖未觀測到境外資源請求，但依賴跨國公有雲或 CDN 在台節點，在境外連線中斷時的實際可用性，存在高度不確定。
+
+本研究提出一套可擴充且可重現的量測方法，用於量化網站的可觀測境外依賴，並比較不同網站的依賴結構。結果可作為政策與產業韌性規劃的基礎，並用於持續追蹤韌性改善情形。
 
 ## 目錄<!-- omit in toc -->
 
@@ -190,7 +192,7 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ## 研究問題
 
-當高度仰賴國際網路的島嶼型國家（例如台灣），失去其對外海纜連線，亦即失去國際網際網路時，其國內主要數位服務運作、退化或失效的程度。
+當高度仰賴國際網路的島嶼型國家（例如台灣），其對外海纜連線嚴重退化、不穩定或部分中斷，因而失去國際網際網路時，國內常用網站運作、退化或失效的程度。
 
 本研究希望發展一套方式，針對資訊服務運作時所需的境外元件——例如 CDN、第三方 API、雲端平台、與外部程式庫，進行系統化的測試統計，以描繪出社會常用的數位服務，在境外網路隔離情境下的依賴結構與潛在可用性風險。
 
@@ -199,15 +201,15 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 本研究關注兩項核心議題：
 
 1. 網站對境外資源的依賴程度  
-2. 網站對跨國雲服務在台灣節點的依賴程度，以及此類依賴反映的韌性意涵
-
-需要強調的是，本研究並不直接驗證網站完整後端架構或雲端服務之控制介面依賴，而是以程式化瀏覽器檢視網站載入過程中可觀測的資源請求作為分析基礎，將資源來源分布視為依賴結構的代理指標。
+2. 網站對跨國公有雲與 CDN 在台灣節點的依賴程度，以及此類依賴反映的韌性意涵
 
 以下為本研究回答的三個具體問題：
 
-1. 在「台灣對外連線大幅受阻或中斷」的情境下，台灣人**常用網站中，有多少比例在首頁層級會立刻受影響？**
-2. 風險是否**集中在特定雲端服務生態**？
-3. 不同屬性的網站（例如`.gov.tw`政府網站、`.edu.tw`教育網站、與一般服務），其**本地韌性是否存在系統性差異？**
+1. 在「台灣對外連線大幅受阻或中斷」的情境下，台灣人**常用網站中，有多少比例在首頁層級呈現境外資源依賴暴露？**
+2. 跨國公有雲與 CDN 本地節點依賴是否**集中在特定服務生態**？
+3. 不同屬性的網站（例如 `.gov.tw` 政府網站、`.edu.tw` 教育網站與一般服務），其**境外資源依賴比例是否存在系統性差異？**
+
+需要強調的是，本研究使用程式化瀏覽器，觀測各網站首頁載入時的資源請求分布。首頁是使用者接觸服務的第一個可見步驟，涵蓋基本畫面與互動所需的部分前端資源；我們將其視為便於跨大量網站比較依賴暴露的擴充代理指標。但此觀測未包含完整後端架構，或雲端控制介面依賴，因此不能直接解讀為整體服務可用性。
 
 ## 研究標的與環境
 
@@ -219,17 +221,17 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 目前尚無「台灣人常用網站」的權威清單，因此本研究整併以下多個來源，整理出不重複的測試網站清單。
 
-- [Tranco List](https://tranco-list.eu/)[^tranco] - 全球前 100 萬網站排名，取 .tw 的網站。
+- [Tranco List](https://tranco-list.eu/)[^tranco] - 全球前 100 萬網站排名，取其中 2,510 筆以 `.tw` 結尾的網站。
 - [Cloudflare Radar](https://radar.cloudflare.com/) - Cloudflare 的台灣流量排名（前 100 名）
 - [AhrefsTop](https://ahrefstop.com/websites/taiwan) - Ahrefs 的台灣 Organic Search 流量排名（前 100 名）
 - [SimilarWeb](https://www.similarweb.com/top-websites/taiwan/) - SimilarWeb 的台灣網站流量排名（前 50 名）
 - [Semrush](https://www.semrush.com/trending-websites/tw/all) - Semrush 的台灣網站流量排名（前 100 名）
 
-測試清單 [merged_lists_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json) 更新於 2026 年 7 月 20 日，共納入 2,467 個網站，並依照流量高低先後排序，可用以衡量特定網站重要性。
+本次測試使用各來源於 2026 年 7 月 20 日的排名快照。合併清單時，先將 hostname 轉為小寫並移除開頭的 `www.`（但保留其他子網域）並去除重複；相同 hostname 只保留一筆，同時保留各來源提供的個別排名。處理後的 [merged_lists_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json) 共納入 2,467 個網站。
 
-本研究另透過 [manual_curated_list_tw.json](https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json) 加入 OCF、SITCON、g0v 等數個手動指定測試站點，以涵蓋台灣開源與數位韌性社群關注個案。
+本研究另透過 [manual_curated_list_tw.json](https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json) 加入 42 個手動指定站點，包括 OCF、SITCON、g0v 等開源與數位韌性社群關注個案。其中 2 個 hostname 與自動排名清單重複。
 
-相關清單與 script 開源於 [top-traffic-website-list-taiwan](https://github.com/irvin/top-traffic-website-list-taiwan/) 專案。
+兩者合計共 2,507 個不重複網站。清單與 script 開源於 [top-traffic-website-list-taiwan](https://github.com/irvin/top-traffic-website-list-taiwan/) 專案。
 
 ### 測試環境
 
@@ -256,20 +258,20 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
    指網站 requests 中是否存在境外資源請求，用以衡量網站在資源取得層面，對境外網路的依賴暴露。
 
 2. 跨國雲本地節點依賴暴露（Cloud Local Endpoint Exposure）  
-   指網站 requests 中是否存在跨國雲端服務在台灣節點的請求，用以衡量網站是否直接位於、或對跨國雲在地節點有依賴暴露。
+   指網站 requests 中是否存在對跨國公有雲或 CDN 在台灣節點的請求，用以衡量網站是否直接位於跨國雲在地節點，或對其有資源依賴暴露。
 
 此兩項指標，反映的是網站在首頁前端資源層的「依賴暴露結構」，而非完整系統架構與實際故障行為。
 
 基於上述兩項指標，本研究進一步將網站區分為三種類型：
 
 1. 境外依賴型（Foreign-dependent）  
-   存在境外資源依賴暴露：網站首頁載入直接依賴境外資源。於境外連線中斷情境下，較可能立即受影響，屬於直接風險最高的類型。
+   存在境外資源依賴暴露：網站首頁載入直接依賴境外資源，因此在境外連線嚴重退化或中斷時，會直接暴露於資源無法取得的狀況，較可能立即受影響，屬於直接風險最高的類型。
 
 2. 雲端依賴型（Cloud-dependent）  
-   無境外資源依賴暴露，但存在跨國雲本地節點依賴暴露：網站首頁載入無直接請求境外資源，但有跨國雲在台節點提供的資源。此類網站具備一定程度的在地化，但其實際可用性取決於雲端控制介面、來源架構與快取持續能力，因此屬於「表面具在地樣態、實際仍可能有跨境依賴」的狀況，具有較高的不確定性。
+   無境外資源依賴暴露，但存在跨國雲本地節點依賴暴露：網站首頁載入未觀測到境外資源請求，但有取用跨國雲在台節點及 CDN 提供的資源。此類網站具備一定程度的在地化，但其實際可用性取決於雲端控制介面、來源架構與快取持續能力，屬於「表面具在地樣態、實際仍可能有跨境依賴」的狀況，具有較高的不確定性。
 
 3. 本地型（Locally-contained）  
-   無境外資源依賴暴露，亦無跨國雲在台節點依賴暴露：網站前端可觀測範圍無依賴境外資源，也無依賴跨國雲在台節點。呈現相對較高的本地運作可能性，但仍不代表其完整系統在境外網路中斷時，必然持續可用。
+   無境外資源依賴暴露，亦無跨國雲本地節點依賴暴露：網站呈現相對較高的本地運作可能性，但仍不代表其完整系統在境外網路中斷時，必然持續可用。
 
 ## 研究實作與資料處理
 
@@ -313,19 +315,23 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
      - 針對個別網站的 request 資訊，進行以下清理：
        - 過濾掉所有的 `blob:` 請求
        - 排除無法解析的請求
-       - 套用設定的 adblock domain 清單，以排除廣告等相關不必要資源
+       - 比對指定的 adblock domain 清單，以排除廣告等相關不必要資源
+         - 本次量測使用 [LowTechFilter hosts ABP](https://filter.futa.gg/hosts_abp.txt) 2026.0720.1 版，以及 [AdGuard DNS Filter](https://github.com/AdguardTeam/AdGuardSDNSFilter) 2026/7/20 快照。兩份清單合計含括 158,521 條不重複的網域。
+       - 當測試目標網站 hostname 就包含在上述清單內時，其具上、下層關係 hostname 的請求將保留，避免誤擋網站本身的資源
        - 排除手動指定清單中列出的 hostname。本研究僅指定網頁字型 hostname `fonts.gstatic.com`，因相較於 script、API 或內容資源，其載入失敗較不影響網站核心功能。此清單機制亦可供後續研究納入其他排除項目
        - 依 hostname 去除重複請求；每組不重複的「網站－hostname」配對為一筆觀測標的
 
   5. 判定網域位置
-     - 針對前述 hostname 清單，呼叫 IPinfo API，取得其位置資料
+     - 針對前述觀測標的的 hostname，呼叫 [IPinfo API](https://ipinfo.io/developers)，取得其地理位置與 ASN 資料
      - 如果查詢的資料顯示 `country=TW`，則紀錄為境內連線
-     - 若查詢的結果顯示 `country` 非 `TW`，則根據連線的 ASN，判定是否來自國際公有雲節點（Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft），並進入下一步的進階判定：
-       - Header 判定：檢查連線的 response header，是否包含 `cf-ray`、`x-amz-cf-pop`、`x-served-by`、`x-azure-ref`、`x-msedge-ref` 等雲端系統已知的位置標記（內容含 `TPE` 即視為台灣節點）。
-       - Anycast 判定：若 header 無法判定，查詢 [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces]；若 `locations` 含台灣且 `confidence` 為 `confident`，則判斷為台灣境內資源（詳見 [`LACeS.zh-TW.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.zh-TW.md)）。
-       - RTT 判定：若前述方法皆無法判定，則針對該資源進行 `ping` 5 次，取最小 RTT。只有在 `RTT < 15 ms` 時才重新判斷為台灣境內資源；否則維持境外分類。
+     - 比對 `cloud_providers_tw.json` 0.1.0 版（2026/1/5）的 ASN registry 清單，判定是否屬於國際公有雲。清單包含 30 家國際公有雲、CDN 與 hosting 供應商，不包含台灣本地供應商
+     - 若查詢的結果顯示 `country` 非 `TW`，且 ASN 包含在以下六家提供台灣本地節點的供應商，則進入下一步的進階判定：
+       - Google（AS15169、AS396982、AS19527）、Cloudflare（AS13335、AS209242）、Amazon（AS16509、AS14618）、Fastly（AS54113）、Akamai（AS16625、AS20940、AS32787）或 Microsoft（AS8075）
+     - Header 判定：檢查連線的 response header，是否包含 `cf-ray`、`x-amz-cf-pop`、`x-served-by`、`x-azure-ref`、`x-msedge-ref` 等雲端系統的已知位置標記。如內容含 `TPE` 即視為台灣節點
+     - Anycast 判定：若 header 無法判定，查詢 [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces] 確認其是否為本地 Anycast 資源；若 `locations` 含台灣且 `confidence` 為 `confident`，則判斷為台灣境內資源
+     - RTT 判定：若前述方法皆無法判定，則針對該資源進行 `ping` 5 次，取最小 RTT。在 `RTT < 15 ms` 時判斷為台灣境內資源；否則維持境外分類
 
-     註：本研究另參酌測試過程的完整 request 資料，建立公有雲的對應 ASN 清單 [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json)，除供判定使用外，也同步開源供其他研究與專案參考。
+     註：本研究參酌早期測試過程的完整 request 資料，建立上述公有雲 ASN registry 清單 [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json)，除供本研究判定使用外，也同步開源供其他研究與專案參考。
 
   6. 分類資源，建立韌性指標數據
      - 根據上述資訊，將每筆不重複的「網站－hostname」觀測標的，分為以下四類之一：`domestic/cloud`、`domestic/direct`、`foreign/cloud`、`foreign/direct`。
@@ -408,7 +414,7 @@ RTT 是位置判定的最後一層：當 IPinfo、供應商特定 response heade
 
 ### 整體結果
 
-在本研究的分類框架下，39.3% 的網站為「境外依賴型」，呈現境外資源依賴暴露，顯示其在海纜斷光情境下，**具有較高的直接失效風險**；另有 49.6% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲在台節點提供的資源，其實際可用性**具有高度不確定性**，僅有 11.2% 的網站為「本地型」，無呈現依賴暴露，維持正常運作的可能性較高。整體而言，共有 88.8% 的網站屬於需進一步關注的高風險或高不確定性類型。
+在本研究的分類框架下，檢測結果中 39.3% 的網站為「境外依賴型」，呈現境外資源依賴暴露，顯示其在海纜斷光情境下，**具有較高的直接失效風險**；另有 49.6% 的網站為「雲端依賴型」，雖未觀測到境外資源依賴，但依賴跨國公有雲或 CDN 在台節點提供的資源，其實際可用性**具有高度不確定性**。僅有 11.2% 的網站屬於「本地型」，無呈現依賴暴露，維持正常運作的可能性較高。整體而言，共有 88.8% 的網站，屬於需進一步關注的高風險或高不確定性類型。
 
 ![](./img/overall-result.zh-TW.svg)
 
@@ -418,11 +424,11 @@ RTT 是位置判定的最後一層：當 IPinfo、供應商特定 response heade
 資料出處：web-resilience-test/test-results/overall-result.tsv
 -->
 
-境外依賴型：網站本身就來自境外，或開啟時有擷取境外資源，故存在高度失效風險。
+境外依賴型：網站本身來自境外，或開啟時有擷取境外資源，暴露於國際連線退化或中斷的問題，存在高度失效風險。
 
 雲端依賴型：雖未直接連向境外資源，但其開啟時所擷取的資源，來自跨國公有雲在台灣的節點。這些節點在網路拓樸上雖位於台灣，但其控制介面、來源架構、身分驗證或快取持續能力，仍可能依賴境外系統。屬於「雖具在地落點但可用性不確定」的類型。
 
-本地型：無呈現依賴暴露，表示其網站本身位於境內，且未呼叫境外資源，故能維持正常運作的可能性較高。
+本地型：可觀測的前端資源未呈現依賴暴露，表示其網站本身位於境內、並非位於國際公有雲上，且未呼叫境外或境內國際雲資源，故能維持正常運作的可能性較高。此分類並未考慮完整後端依賴，也無法直接斷定服務可持續運作。
 
 | 類型                                                     | 網站數 | 百分比 |
 |----------------------------------------------------------|-------:|-------:|
@@ -607,7 +613,7 @@ RTT 是位置判定的最後一層：當 IPinfo、供應商特定 response heade
 
 5. 本研究未進行實際「模擬國際連線中斷」的故障注入測試（即透過 VPN 或 DNS 等方式，模擬境外資源無法存取的環境）。本研究之目的為針對大量網站作一概括性測試，故採用依賴結構推估潛在風險，未直接操作並觀察服務在連線中斷情境下的實際退化行為。
 
-6. 本研究以網站首頁為測試目標，未涵蓋登入、交易、瀏覽、搜尋等完整使用流程，因此本結果應視為「初始可用性」評估指標。
+6. 本研究以網站首頁為測試目標，未涵蓋登入、交易、瀏覽、搜尋等完整使用流程，因此本結果應視為初始可用性，即以「初始服務存取所涉及資源」作為依賴暴露指標。不屬於完整服務可用性的測量。
  
 綜合上述研究限制，我們建議後續可進一步探討下述方向，以建立更完整的數位服務韌性評估框架：
 

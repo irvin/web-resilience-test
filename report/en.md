@@ -11,7 +11,7 @@ MozTW, Mozilla Taiwan Community ([moztw.org](https://moztw.org))
 ### Dates
 
 Published: 2026-05-22  
-Last Updated: 2026-07-22
+Last Updated: 2026-07-23
 
 ### Acknowledgments
 
@@ -24,11 +24,13 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 ## Abstract
 
-This study examines the availability of everyday network services when Taiwan experiences large-scale international submarine cable outages. By observing homepage resource requests in a browser, we trace where page dependencies originate and use that as a risk indicator.
+This study examines how everyday network services may remain available when Taiwan experiences large-scale international submarine cable outages. By observing homepage resource requests and tracing the locations of resources used during page loading, we assess potential website availability during international connectivity outages and use the results as a risk indicator.
 
-The work focuses on two core questions: (1) how much websites commonly used in Taiwan depend on foreign-hosted resources, and (2) how much they depend on local (in-Taiwan) nodes of multinational cloud providers. We develop a measurement framework that turns the abstract risk of “what happens when cables go dark” into concrete dependency-structure analysis, which can inform policy and industry resilience planning.
+The work focuses on two core questions: (1) how much websites commonly used in Taiwan depend on foreign-hosted resources, and (2) how much they depend on local (in-Taiwan) nodes of multinational public-cloud providers. We develop a measurement framework that turns the abstract risk of “what happens when cables go dark” into concrete dependency-structure analysis.
 
-Among 2,179 websites commonly used in Taiwan that we tested, 39.3% are “foreign-dependent” (Category 1), with foreign resource exposure and relatively high direct failure risk under cable-outage scenarios. Another 49.6% are “cloud-dependent”: no foreign resource exposure was observed, but they rely on local nodes of multinational public clouds, so actual availability when international connectivity fails is highly uncertain.
+We collected connection data from 2,179 websites commonly used in Taiwan. The results show that 39.3% are “foreign-dependent,” with foreign resource exposure and relatively high direct failure risk under cable-outage scenarios. Another 49.6% are “cloud-dependent”: no foreign resource requests were observed, but they rely on local nodes of multinational public clouds or CDNs, so their actual availability when international connectivity fails is highly uncertain.
+
+This study provides a scalable, reproducible measurement method for quantifying observable foreign dependencies and comparing dependency structures across websites. The results can inform policy and industry resilience planning and support continued tracking of resilience improvements.
 
 ## Table of contents<!-- omit in toc -->
 
@@ -190,7 +192,7 @@ Without understanding real impact, we cannot prepare. This study turns “what h
 
 ## Research questions
 
-When an island nation highly dependent on international networks (e.g. Taiwan) loses submarine cable connectivity—and thus much of the global Internet—how much do major domestic digital services continue to operate, degrade, or fail?
+When an island nation highly dependent on international networks, such as Taiwan, experiences severe degradation, instability, or partial interruption of its external submarine-cable connectivity—and thus loses access to much of the global Internet—to what extent do commonly used domestic websites continue to operate, degrade, or fail?
 
 We aim to systematically test and count international-facing components in service operation—CDNs, third-party APIs, cloud platforms, external libraries—and map dependency structure and potential availability risk for commonly used services under foreign-network isolation.
 
@@ -199,15 +201,15 @@ The work should give government, industry, and civil society concrete evidence o
 Two core themes:
 
 1. Degree of dependence on foreign-hosted resources
-2. Degree of dependence on local nodes of multinational cloud services, and what that implies for resilience
-
-We do not directly verify full backend architecture or cloud control-plane dependencies. Analysis is based on observable resource requests during programmatic browser page loads; resource source distribution is a proxy for dependency structure.
+2. Degree of dependence on Taiwan nodes of multinational public clouds and CDNs, and what that implies for resilience
 
 Three concrete questions:
 
-1. Under “Taiwan external connectivity severely impaired or cut,” what **share of commonly used sites** are affected at the **homepage** level immediately?
-2. Is risk **concentrated in specific cloud ecosystems**?
-3. Do different site types (e.g. `.gov.tw` government websites, `.edu.tw` education websites, and general services) show **systematic differences** in local resilience?
+1. Under “Taiwan external connectivity severely impaired or cut,” what **share of commonly used sites** exhibit foreign resource dependency exposure at the **homepage** level?
+2. Is dependency on local nodes of multinational public clouds and CDNs **concentrated in specific service ecosystems**?
+3. Do different site types, such as `.gov.tw` government websites, `.edu.tw` education websites, and general services, show **systematic differences** in foreign-resource dependency rates?
+
+This study uses a programmatic browser to observe the distribution of resource requests generated while loading each homepage. A homepage is the first user-visible point of interaction with a service and includes some of the front-end resources required for basic rendering and interaction. We treat this observation as a scalable proxy indicator for comparing dependency exposure across a large number of websites. However, it does not include the complete backend architecture or cloud control-plane dependencies and therefore cannot be interpreted directly as overall service availability.
 
 ## Targets and test environment
 
@@ -219,17 +221,17 @@ The unit of study is “websites” (Web), not direct equivalence to app availab
 
 There is no authoritative “sites Taiwanese people use” list. We merged:
 
-- [Tranco List](https://tranco-list.eu/)[^tranco] — global top 1M list, we use `.tw` domains only.
+- [Tranco List](https://tranco-list.eu/)[^tranco] — global top 1M list, from which we use 2,510 entries ending in `.tw`.
 - [Cloudflare Radar](https://radar.cloudflare.com/) — Taiwan traffic top 100 list
 - [AhrefsTop](https://ahrefstop.com/websites/taiwan) — Taiwan organic search top 100 list
 - [SimilarWeb](https://www.similarweb.com/top-websites/taiwan/) — Taiwan top 50 list
 - [Semrush](https://www.semrush.com/trending-websites/tw/all) — Taiwan top 100 list
 
-The test list [merged_lists_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json) was updated 2026-07-20 with 2,467 sites, sorted by traffic to reflect importance.
+This campaign used ranking snapshots obtained from each source on 2026-07-20. Before merging, hostnames were lowercased and a leading `www.` was removed, while other subdomains were preserved. Duplicate hostnames were merged into one entry while retaining the source-specific rankings. The resulting [merged_lists_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/1c3a020c82ae64f66810e67115660c10dd3603bc/merged_lists_tw.json) contains 2,467 sites.
 
-We also use [manual_curated_list_tw.json](https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json) to include manually selected open-source and digital-resilience community cases such as OCF, SITCON, and g0v.
+We also use [manual_curated_list_tw.json](https://github.com/irvin/web-resilience-test/blob/42505f5526a4ac00a2a459bad005ec2aa61cdbe5/manual_curated_list_tw.json) to include 42 manually selected open-source and digital-resilience community cases, including OCF, SITCON, and g0v. Two hostnames overlap with the automatically ranked list.
 
-Lists and scripts are open source in [top-traffic-website-list-taiwan](https://github.com/irvin/top-traffic-website-list-taiwan/).
+Together, the two lists contain 2,507 unique websites. The lists and scripts are open source in [top-traffic-website-list-taiwan](https://github.com/irvin/top-traffic-website-list-taiwan/).
 
 ### Test environment
 
@@ -256,20 +258,20 @@ Two core metrics:
    Whether homepage requests include foreign-hosted resources—exposure to foreign networks at the resource layer.
 
 2. Cloud Local Endpoint Exposure  
-   Whether requests hit in-Taiwan nodes of multinational cloud providers—exposure to sites hosted on, or dependent on, domestic endpoints of global clouds.
+   Whether requests hit Taiwan nodes of multinational public-cloud or CDN providers—exposure to sites hosted on, or dependent on, their local endpoints.
 
 These describe “dependency exposure structure” at the homepage front-end resource layer, not full system architecture or actual failure modes.
 
 We can classify sites into three categories based on the above metrics:
 
 1. Foreign-dependent  
-   Foreign resource exposure: homepage load directly depends on foreign resources. Most likely to be affected immediately when external connectivity fails—highest direct risk.
+   Foreign resource exposure: homepage load directly depends on foreign resources. Such sites are directly exposed to unavailable resources when external connectivity is severely degraded or interrupted, making them the most likely to be affected immediately and the category with the highest direct risk.
 
 2. Cloud-dependent  
-   No foreign resource exposure, but cloud local endpoint exposure: homepage loads do not directly request foreign resources, yet use resources from multinational clouds’ Taiwan nodes. Sites appear localized, but availability still depends on control planes, origins, authentication, and cache persistence—“surface-local, cross-border uncertainty”.
+   No foreign resource exposure, but cloud local endpoint exposure: homepage loads show no foreign resource requests, yet use resources from Taiwan nodes of multinational public-cloud or CDN providers. Sites appear localized, but availability still depends on control planes, origins, authentication, and cache persistence—“surface-local, cross-border uncertainty”.
 
 3. Locally-contained  
-   No foreign resource exposure and no multinational-cloud Taiwan-node exposure in observable front-end requests. Higher chance of local operation, but not guaranteed full-system availability during external outages.
+   No foreign resource exposure and no multinational-cloud local-endpoint exposure. Such sites have a higher chance of local operation, but full-system availability during external outages is not guaranteed.
 
 ## Implementation and data processing
 
@@ -313,19 +315,23 @@ Finally, the tool aggregates all test results into statistical tables. The detai
      - For each page's request data, perform the following cleanup:
        - Drop `blob:` requests
        - Exclude unparsable requests
-       - Apply the configured adblock domain list to remove advertisements and related unnecessary resources
+       - Match requests against the configured adblock domain lists to remove advertisements and related unnecessary resources
+         - This campaign used [LowTechFilter hosts ABP](https://filter.futa.gg/hosts_abp.txt) version 2026.0720.1 and a 2026-07-20 snapshot of the [AdGuard DNS Filter](https://github.com/AdguardTeam/AdGuardSDNSFilter). Together, the two lists contained 158,521 distinct domain rules
+       - If the target website's hostname appears in the lists, requests to hostnames with a parent or child relationship to the target are retained to avoid blocking the website's own resources
        - Exclude hostnames on the manual exclusion list. This study lists only the web-font hostname `fonts.gstatic.com`, because its failure is less likely to affect core website functionality than failures of scripts, APIs, or content resources. Future studies can use the same mechanism to add other exclusions
        - Deduplicate requests by hostname; each unique website-hostname pair is one observation
 
   5. Domain location
-     - For each hostname in the preceding list, call the IPinfo API to obtain its geographic and logical location
+     - For each observation's hostname, call the [IPinfo API](https://ipinfo.io/developers) to obtain its geographic location and ASN information
      - If the result shows `country=TW`, record it as a domestic connection
-     - Otherwise, use ASN information to determine whether the request belongs to a selected multinational public-cloud or CDN provider (Google / Cloudflare / Amazon / Fastly / Akamai / Microsoft); if so, apply the following checks:
-       - Headers: look for known location markers in response headers like `cf-ray`, `x-amz-cf-pop`, `x-served-by`, `x-azure-ref`, and `x-msedge-ref` (values containing `TPE` indicate a Taiwan PoP).
-       - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces]; if `locations` includes Taiwan and `confidence` is `confident`, classify as domestic (see [`LACeS.md`](https://github.com/irvin/web-resilience-test/blob/main/LACeS.md)).
-       - RTT: if the above methods are inconclusive, ping the resource 5× and take the minimum RTT. Reclassify the endpoint as domestic only if `RTT < 15 ms`; otherwise, keep it classified as foreign.
+     - Compare the ASN against `cloud_providers_tw.json` registry version 0.1.0, dated 2026-01-05, to determine whether it belongs to the multinational cloud/CDN category. The registry contains 30 international public-cloud, CDN, and hosting providers and excludes Taiwan-only providers
+     - If the result shows a `country` other than `TW` and its ASN belongs to one of the following six providers with local Taiwan nodes, apply the advanced classification steps:
+       - Google (AS15169, AS396982, AS19527), Cloudflare (AS13335, AS209242), Amazon (AS16509, AS14618), Fastly (AS54113), Akamai (AS16625, AS20940, AS32787), or Microsoft (AS8075)
+     - Headers: inspect response headers such as `cf-ray`, `x-amz-cf-pop`, `x-served-by`, `x-azure-ref`, and `x-msedge-ref` for known cloud location markers. A value containing `TPE` indicates a Taiwan node
+     - Anycast: if headers are inconclusive, query the [LACeS Anycast Census API](https://manycast.net/api/docs)[^laces] to determine whether the endpoint is a local anycast resource; if `locations` includes Taiwan and `confidence` is `confident`, classify it as domestic
+     - RTT: if the preceding methods are inconclusive, ping the resource 5× and take the minimum RTT. Classify it as domestic when `RTT < 15 ms`; otherwise, retain the foreign classification
 
-     Note: we also built [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) from the full request data for ASN mapping and open-sourced it for other research and projects.
+     Note: we built the [cloud_providers_tw.json](https://github.com/irvin/top-traffic-website-list-taiwan/blob/16dbb8bbdeb5e27397961556c7aa9ae54767742d/cloud_providers_tw.json) ASN registry using complete request data from earlier tests. It is open source for use by other research and projects.
 
   6. Classification and resilience metrics
      - Based on the preceding information, classify each unique website-hostname observation as one of: `domestic/cloud`, `domestic/direct`, `foreign/cloud`, `foreign/direct`
@@ -406,7 +412,7 @@ Of 2,507 unique sites tested, 2,179 completed successfully.
 
 ### Overall results
 
-Under our taxonomy: 39.3% are “foreign-dependent”, with foreign resource exposure and **high direct failure risk** under cable outage; 49.6% are “cloud-dependent”—no foreign resource exposure observed, but they rely on in-Taiwan multinational public-cloud nodes, so availability is **highly uncertain**; 11.2% are “locally-contained”, with no observed exposure and a higher chance of normal operation. Overall, 88.8% of sites warrant further attention as high-risk or high-uncertainty.
+Within the measured results, 39.3% are “foreign-dependent,” with foreign resource exposure and **high direct failure risk** under cable outages; 49.6% are “cloud-dependent”—no foreign resource exposure was observed, but they rely on in-Taiwan nodes of multinational public clouds or CDNs, so availability is **highly uncertain**. Only 11.2% are “locally-contained,” with no observed exposure and a higher chance of normal operation. Overall, 88.8% of sites warrant further attention as high-risk or high-uncertainty.
 
 ![](./img/overall-result.en.svg)
 
@@ -416,11 +422,11 @@ Under our taxonomy: 39.3% are “foreign-dependent”, with foreign resource exp
 Source: web-resilience-test/test-results/overall-result.tsv
 -->
 
-Foreign-dependent: sites hosted abroad or whose homepages request foreign resources—higher failure risk under cable outages.
+Foreign-dependent: sites hosted abroad or whose homepages request foreign resources. They are exposed to international connectivity degradation or interruption and face high failure risk.
 
-Cloud-dependent: no direct foreign resource exposure, but loading pulls resources from multinational public clouds’ Taiwan nodes. Topologically domestic, yet control planes, origins, authentication, or cache persistence may still depend on foreign systems—“localized in appearance, uncertain in availability”.
+Cloud-dependent: no direct foreign resource exposure, but loading pulls resources from Taiwan nodes of multinational public-cloud or CDN providers. Topologically domestic, yet control planes, origins, authentication, or cache persistence may still depend on foreign systems—“localized in appearance, uncertain in availability”.
 
-Locally-contained: no observed exposure; the site appears domestic and does not request foreign resources—higher chance of continued operation.
+Locally-contained: no dependency exposure was observed among front-end resources. The site itself appears to be domestic and not hosted on a multinational public cloud, and it does not request foreign resources or resources from domestic nodes of multinational clouds. It therefore has a higher chance of continued operation, although this category does not account for complete backend dependencies and cannot establish that the service will continue operating.
 
 | Category                                                        | Sites |  Share |
 |-----------------------------------------------------------------|------:|-------:|
@@ -605,7 +611,7 @@ Main limitations:
 
 5. This study does not perform fault-injection tests that simulate a loss of international connectivity, such as using VPN or DNS techniques to make foreign resources unreachable. As a broad survey of many websites, it estimates potential risk from dependency structures rather than directly observing service degradation during a forced connectivity outage.
 
-6. This study tests homepages only, not full user journeys such as login, transactions, browsing, or search. Results should therefore be treated as “initial availability” indicators.
+6. This study tests homepages only, not full user journeys such as login, transactions, browsing, or search. Results should therefore be treated as “initial availability” indicators based on dependency exposure among resources involved in initial service access, not as measurements of complete service availability.
 
 Suggested follow-ups:
 
