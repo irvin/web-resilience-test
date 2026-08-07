@@ -125,7 +125,7 @@
 <h3 id="authors">Authors</h3>
 <p>Irvin Chen (陳心一)<br>ORCID: <a href="https://orcid.org/0009-0002-1059-7130">https://orcid.org/0009-0002-1059-7130</a><br>Open Culture Foundation (<a href="https://ocf.tw">ocf.tw</a>)<br>MozTW, Mozilla Taiwan Community (<a href="https://moztw.org">moztw.org</a>)  </p>
 <h3 id="dates">Dates</h3>
-<p>Published: 2026-05-22<br>Last Updated: 2026-07-23</p>
+<p>Published: 2026-05-22<br>Last Updated: 2026-08-07</p>
 <h3 id="acknowledgments">Acknowledgments</h3>
 <p><img src="img/APNIC-Foundation-and-ISIF-Logo-CMYK-stacked-01-a.svg" alt="" style="height: 100px;" /><br>
 This work was supported by a grant from the <a href="https://apnic.foundation/">APNIC Foundation</a> (<a href="https://ror.org/01y4y6h16">ROR: 01y4y6h16</a>), via the <a href="https://apnic.foundation/home/isifasia/">Information Society Innovation Fund (ISIF Asia)</a>.</p>
@@ -507,36 +507,39 @@ Availability of all international submarine cables serving Taiwan, 2025/3/18–2
 </tr>
 </tbody></table>
 <p><img src="./img/rtt-scatter-plot.en.svg" alt="RTT distribution"></p>
-<p>Changing the threshold to 10 ms or 20 ms affects only 32 website classifications: at 10 ms, 27 sites move from cloud-dependent to foreign-dependent; at 20 ms, 5 move from foreign-dependent to cloud-dependent. The number of locally-contained sites is unchanged.</p>
+<p>Without RTT correction (equivalent to a 0 ms threshold), every resource entering RTT fallback retains its foreign classification, producing 1,370 foreign-dependent websites and 566 cloud-dependent websites. Applying the 15 ms threshold reclassifies 514 websites (23.6%) from foreign-dependent to cloud-dependent, resulting in 856 and 1,080 websites in the two categories, respectively.</p>
+<p>The table further tests sensitivity to the selected RTT threshold. Relative to the 15 ms baseline used in this study, a 10 ms threshold moves only 27 websites (1.2%) from cloud-dependent to foreign-dependent, while a 20 ms threshold moves only five websites (0.2%) from foreign-dependent to cloud-dependent. The locally-contained count is unchanged. The aggregate classification therefore differs only slightly across the 10, 15, and 20 ms thresholds.</p>
 <table>
 <thead>
 <tr>
 <th>RTT threshold</th>
 <th>Foreign-dependent</th>
 <th>Cloud-dependent</th>
-<th>Locally-contained</th>
-<th>Sites reclassified</th>
+<th>Sites reclassified vs. 15 ms</th>
 </tr>
 </thead>
 <tbody><tr>
+<td>No RTT (0 ms)</td>
+<td>1,370 (62.9%)</td>
+<td>566 (26.0%)</td>
+<td>—</td>
+</tr>
+<tr>
 <td>10 ms</td>
 <td>883 (40.5%)</td>
 <td>1,053 (48.3%)</td>
-<td>243 (11.2%)</td>
 <td>27 (1.2%)</td>
 </tr>
 <tr>
 <td>15 ms</td>
 <td>856 (39.3%)</td>
 <td>1,080 (49.6%)</td>
-<td>243 (11.2%)</td>
-<td></td>
+<td>—</td>
 </tr>
 <tr>
 <td>20 ms</td>
 <td>851 (39.1%)</td>
 <td>1,085 (49.8%)</td>
-<td>243 (11.2%)</td>
 <td>5 (0.2%)</td>
 </tr>
 </tbody></table>

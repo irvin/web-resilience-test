@@ -125,7 +125,7 @@
 <h3 id="作者">作者</h3>
 <p>陳心一 Irvin Chen<br>ORCID: <a href="https://orcid.org/0009-0002-1059-7130">https://orcid.org/0009-0002-1059-7130</a><br>開放文化基金會 Open Culture Foundation (<a href="https://ocf.tw">ocf.tw</a>)<br>MozTW, Mozilla 台灣社群 (<a href="https://moztw.org">moztw.org</a>)  </p>
 <h3 id="更新日期">更新日期</h3>
-<p>Published: 2026-03-23<br>Last Updated: 2026-07-23</p>
+<p>Published: 2026-03-23<br>Last Updated: 2026-08-07</p>
 <h3 id="誌謝">誌謝</h3>
 <p><img src="img/APNIC-Foundation-and-ISIF-Logo-CMYK-stacked-01-a.svg" alt="" style="height: 100px;" /><br>
 This work was supported by a grant from the <a href="https://apnic.foundation/">APNIC Foundation</a> (<a href="https://ror.org/01y4y6h16">ROR: 01y4y6h16</a>), via the <a href="https://apnic.foundation/home/isifasia/">Information Society Innovation Fund (ISIF Asia)</a>.</p>
@@ -507,36 +507,39 @@ This work was supported by a grant from the <a href="https://apnic.foundation/">
 </tr>
 </tbody></table>
 <p><img src="./img/rtt-scatter-plot.zh-TW.svg" alt="RTT distribution"></p>
-<p>若將門檻改為 10 ms 或 20 ms，僅影響 32 個網站的分類：10 ms 時有 27 站由雲端依賴型改為境外依賴型；20 ms 時有 5 站由境外依賴型改為雲端依賴型。本地型網站數不受影響。</p>
+<p>若完全不使用 RTT 校正（相當於採用 0 ms 門檻），所有進入 RTT fallback 的資源都維持境外判定，此時共有 1,370 個境外依賴型網站與 566 個雲端依賴型網站。採用 15 ms 門檻後，其中 514 個網站（23.6%）由境外依賴型改判為雲端依賴型，使兩類網站數分別變為 856 與 1,080。</p>
+<p>下表進一步檢驗 RTT 門檻選定的敏感度。以本研究採用的 15 ms 為基準，若改採 10 ms，僅有 27 個網站（1.2%）由雲端依賴型改判為境外依賴型；若改採 20 ms，僅有 5 個網站（0.2%）由境外依賴型改判為雲端依賴型，共影響 32 個網站。本地型網站數不受影響。此結果顯示，在 10、15、20 ms 三種門檻下，整體分類結果差異有限。</p>
 <table>
 <thead>
 <tr>
 <th>RTT 門檻</th>
 <th>境外依賴型</th>
 <th>雲端依賴型</th>
-<th>本地型</th>
-<th>判定變更網站數</th>
+<th>相較 15 ms 改判網站數</th>
 </tr>
 </thead>
 <tbody><tr>
+<td>未經過 RTT 校正</td>
+<td>1,370 (62.9%)</td>
+<td>566 (26.0%)</td>
+<td>—</td>
+</tr>
+<tr>
 <td>10 ms</td>
 <td>883 (40.5%)</td>
 <td>1,053 (48.3%)</td>
-<td>243 (11.2%)</td>
 <td>27 (1.2%)</td>
 </tr>
 <tr>
 <td>15 ms</td>
 <td>856 (39.3%)</td>
 <td>1,080 (49.6%)</td>
-<td>243 (11.2%)</td>
-<td></td>
+<td>—</td>
 </tr>
 <tr>
 <td>20 ms</td>
 <td>851 (39.1%)</td>
 <td>1,085 (49.8%)</td>
-<td>243 (11.2%)</td>
 <td>5 (0.2%)</td>
 </tr>
 </tbody></table>
