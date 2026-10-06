@@ -5,7 +5,7 @@ theme: default
 class: invert
 paginate: true
 size: 16:9
-title: "Public Information, Government Transparency, and Digital Resilience"
+title: "When Submarine Cables Go Dark: From Public Fear to Internet Governance through Open Research and Community Engagement"
 author: "Irvin Chen"
 date: "2026-10"
 ---
@@ -193,30 +193,23 @@ section.closing-slide .takeaway {
 
 <!-- _class: invert lead-slide -->
 
-# Why Does Taiwan Publish Cable Status?
+## When Submarine Cables Go Dark
+# From Public Fear to Governance through Open Research and Community Engagement
 
 ![bg right:52% contain Original MODA cable disruption table in Chinese](img/moda-fault-table.png)
 
-- Which cables are damaged
-- Alternative routes
-- Expected repair dates
+<!-- - MODA, Minister of Digital Affairs, Taiwan, publish the cable disruption status since September 2025 -->
 
-<p class="source"><a href="https://moda.gov.tw/major-policies/subseacable/fault/1749">MODA disruption table</a> (Chinese original)<br>Table dated 3 Oct 2026</p>
+<p class="source"><a href="https://moda.gov.tw/major-policies/subseacable/fault/1749">Cable obstacle information, MODA</a> Oct 3 2026 (Machine translated, original in Chinese)</p>
 
 <!--
 Time: 1:15 (75 seconds).
 
-Hello everyone. I am Irvin Chen from the Open Culture Foundation and the MozTW community.
+Hello everyone. I am Irvin Chen from the Open Culture Foundation and the Mozilla Taiwan Community.
 
-Today I want to start with a simple question: why does Taiwan's government publish cable status?
+Today I want to start with a table: This table is from the Ministry of Digital Affairs, or MODA, Taiwan government department. It shows the current status of 16 cable systems connected Taiwan to the global internet. Which cables are damaged, the incident date, status, and expected repairs date.
 
-This table is from the Ministry of Digital Affairs, or MODA. It shows which cables are damaged, when the problems started, and when repairs are expected. It also shows the alternative routes used to keep traffic moving.
-
-The page is in Chinese, but anyone can open it and check these details. Taiwan is one of the few countries that publishes cable status in this way.
-
-So why did the government decide to do this?
-
-We will come back to this table. First, let us look at what happened in Matsu.
+The table were published in September 2025 and keep updating until now. I had checked yesterday, Taiwan remain one of the few countries - actually the only country I can found, that publishes cable status in this way. Today, I would like to share the community story behind it.
 
 Sources (reference only, not spoken):
 MODA, cable disruption status page. The screenshot shows a table dated 3 Oct 2026.
@@ -231,26 +224,33 @@ https://www.taipeitimes.com/News/taiwan/archives/2026/03/19/2003854094
 
 ## When Both Cables Failed
 
-![Schematic of the disrupted cable links between Matsu and Taiwan](img/matsu-cable-diagram.en.svg)
+![People gather in 1am midnight winder, around the only working wifi in front of center telecom office to get some connecting. src https://www.facebook.com/wen1949/posts/1139994237492633/](img/480569942_1162017188623671_7461313213930473244_n.jpg)
 
-- **Matsu, 2023:** both cables failed
-- About **2 Gbps** of initial microwave backup
-- Internet access disrupted for about **50 days**
-- Can people still use the services they need?
+- **Matsu, 2023:** both cables failed within one week
+- microwave backup has only **2 Gbps** bandwidth, about 25% of average traffic 
+- No internet for about **50 days**
 
 <p class="source">Schematic only. Cable routes are illustrative.</p>
 
 <!--
 Time: 1:30 (90 seconds).
 
-Matsu is a group of Taiwanese islands near the coast of China. Two submarine cables connected Matsu to Taiwan.
+The stories began from Matsu, a group of Taiwanese islands in northern west of taiwan mainland, right next to the coast of China, with 13 thousand residents, most serve in tourist industry.
 
-In February 2023, both cables failed within a week.
+There are two submarine cables connected Matsu to Taiwan, date backed to 2000 and 2014. 
+In February 2023, both cables failed within a week, due to China fishing and freight vessel's "human accidents".
 
-There was microwave backup, but the initial capacity was only about two gigabits per second. Much of it had to support essential communications. It was not enough for people's normal Internet use.
+There was microwave backup connections, but the capacity was only about 2 gigabits per second, compared to the average traffic of 9.5 gigabits per second, and the result is that it took about 20 mins to send out a mobile text message.
 
-One cable was repaired in late March. Residents had spent about fifty days with seriously disrupted Internet access.
+One of the cable was repaired until late March. About fifty days of internet blackout for 13 thousand people's daily life. It's serious hurt the travel industry, which was highly rely on online communication. And I can imagine that nobody would like to visiting a islad without any connections for travel. (consider it a digital detox trip, maybe?)
 
+The incident alert everyone in the internet community. We mostly forgot about them all the time, when we discuss infrastructure of internet, we often look at the cloud, the cell tower, the data center, and rarely talk about the cables.
+
+And when we starting to talk about cables, soon we find out that it is a topic that government don't like to discuss. They don't want and don't think people should worry about it. But the Matsu incident gave us a reason to fear: when fragile cable become a digital society's single point of falure, we only connected with 14 cabl systems, what would our life like if they all break?
+
+And government keep saying like "don't need to worry", but as an website engineer, I do understanding how fragile the whole society was build on.
+
+---
 We often talk about how many cables are broken and how fast they can be repaired. These questions matter. For users, the question is more direct: can I still use the services I need?
 
 Matsu showed how cable failures can affect daily life for weeks. It gave people a reason to ask what we should prepare before the next outage.
@@ -269,42 +269,23 @@ Image: English adaptation of the deck's existing Matsu schematic. It does not re
 
 <!-- _class: invert map-slide -->
 
-## Making Cable Status Visible
+## Making Cable Status Visible with Civil-Tech
 
 ![Original Taiwan Submarine Cable Map interface in Chinese](img/map-20260103.png)
 
-- Public information was scattered
-- g0v Digital Resilience Hackathon
-- Cable locations and faults in one map
-- Information people can check and discuss
+- g0v community "Digital Resilience Hackathon"
+- Screenshot of Jan 14 2026 shows half of cable were demated by an undersea earthquake in north-east Taiwan
 
 <p class="source"><a href="https://smc.peering.tw/">smc.peering.tw</a><br>Original interface, captured 14 Jan 2026</p>
 
 <!--
 Time: 2:00 (120 seconds).
 
-The technical community started discussing how we should prepare. To do that, we first needed to understand the current situation.
+The technical community and civil society start gathering and discussing what should we do. On g0v "Digital Resilience Hackathon" Nov 4, 2023, we started to plan and work on various projects. 
 
-Which cables are working? Which ones are damaged? Where can we find the latest information?
+The "Submarine cable map" was one of them. Build by seadog007, a civil tech hacker, publish on mid 2025. He collecting latest status of cable systems from their friends of different internet companies, and update the map in about real time when any cable demage happened and someone in NOG community notice it. You can find it at smc dot peering dot tw.
 
-Some information was public, but it was spread across different sources. It was hard for most people to get the full picture.
-
-Members of g0v, Taiwan's civic tech community, brought this information together at digital resilience hackathons. The result was this public submarine cable map. You can find it at smc dot peering dot tw.
-
-This map shows the cables around Taiwan. The reports on the right describe individual faults. People can open the map, check the reports, and follow changes over time.
-
-Most of the time, a cable failure does not disconnect Taiwan because traffic can be rerouted. The details help us understand how much connectivity remains and what needs repair.
-
-Open information gives people something they can check. It also gives the community and government specific questions to discuss.
-
-For me, this led to another question: if several major cables fail at the same time, what still works?
-
-Sources (reference only, not spoken):
-Taiwan Submarine Cable Map: https://smc.peering.tw/
-The timestamp visible in the supplied screenshot is 14 Jan 2026. This is an interface example, not a current status report.
-g0v Digital Resilience Hackathon: https://g0v.hackmd.io/@paulpengtw/DigiResiTh0n-home
-Alternative routing and the distinction between partial cable damage and overall connectivity: Taipei Times, 19 Mar 2026.
-https://www.taipeitimes.com/News/taiwan/archives/2026/03/19/2003854094
+The current map shows a incidents late last year, an undersea earthquake in north-east Taiwan damaged half of the cable system and it took more than 4 months to repare them all. Ther is another case back to 2006, another earthquake in southern west part damaged 4 of the 6 cable system at that time, seriousy interrupt the connection between most asia countries to USA, and took 50 days to fix.
 -->
 
 ---
@@ -315,43 +296,35 @@ https://www.taipeitimes.com/News/taiwan/archives/2026/03/19/2003854094
 
 ![bg right:48% contain Website dependency categories: 39.3 percent foreign dependent, 49.6 percent cloud dependent, and 11.2 percent locally contained](img/overall-result.en.svg)
 
-If major cables fail in both<br>northern and southern Taiwan:
+If major cables failed, Which and how many services will be affected:
 
-<p class="result-key">89% of tested sites<br>need attention</p>
+<p class="result-key"></p>
 
-- Foreign-dependent: resources abroad
-- Cloud-dependent: local cloud nodes
-
-<p class="source">Homepage test: 2,179 sites, 21 July 2026<br>Full services still need outage tests</p>
-
-<p class="credit">Supported by APNIC Foundation<br>through ISIF Asia</p>
+- Homepage test: 2,179 sites (21 July 2026)
+  - 40% are Foreign-dependent: resources abroad
+  - 50% are Cloud-dependent: local cloud nodes
+  - 90% of tested sites need attention
+- Supported by APNIC Foundation through [Information Society Innovation Fund](https://apnic.foundation/grants/isif-asia/).
 
 <!--
+
+This work was supported by a grant from the [APNIC Foundation](https://apnic.foundation/) ([ROR: 01y4y6h16](https://ror.org/01y4y6h16)), via the [Information Society Innovation Fund (ISIF Asia)](https://apnic.foundation/home/isifasia/).
+
 Time: 3:15 (195 seconds).
 
-This is the question behind my research. Suppose earthquakes damage major cables in both northern and southern Taiwan. International connectivity becomes severely reduced, or stops working. Can people still open the websites and services they need?
+I also bring come up with a question from hackathon: what will happens when major cables fail? How manys sites would still usable. 
 
-We tested websites commonly used in Taiwan. This includes global platforms, news, public services, and community sites that people in Taiwan often use.
+Supporting by APNIC Foundation ISIF Asia fund on 2025, this is the overall result.
 
-For each site, we open the homepage in a browser and record the resources loaded by that page. We then check where those resources are served from and which providers operate them.
+ Can people still use the services they need?
 
-We successfully measured 2,179 websites on July 21, 2026. The headline result is this: 88.8 percent, or about 89 percent, need attention.
+We tested 2,179 websites commonly used in Taiwan. For each site, we open the homepage in a browser, record the resources and analtsis it's dependency to foreign resources.
 
-39.3 percent are foreign-dependent. They load at least one resource from outside Taiwan.
+The result is that we found out of 2179 sites, 39 percent of them are foreign-dependent. They request at least one resource from outside Taiwan. 50 percent are cloud-dependent. The observed resources are served from Taiwan, but they rely on local nodes of multinational cloud providers or content delivery networks.
 
-49.6 percent are cloud-dependent. The observed resources are served from Taiwan, but they rely on local nodes of multinational cloud providers or content delivery networks.
+This is an initial risk map. It does not mean that all these websites will fail. It means we should test them before a real outage, including the functions people actually use.
 
-Local nodes are valuable. They keep resources close to users. But we still need to know whether they can keep running when international connectivity is lost. They may need overseas systems for authentication, management, or content.
-
-Only 11.2 percent are locally-contained. This means that all observed homepage resources appear local and do not use those multinational cloud nodes.
-
-The database may still be outside Taiwan. Login, payment, search, and forms may use other services that we do not see when we open the homepage.
-
-So this is an initial risk map. It does not mean that all these websites will fail. It means we should test them before a real outage, including the functions people actually use.
-
-I want to thank the APNIC Foundation for supporting this work through ISIF Asia.
-
-The results help us see what needs further work. Now, let us return to the question we started with: why should this information be public?
+You can reach the result and report at resilience.ocf.tw/web/report.
 
 Sources (reference only, not spoken):
 This repository's report/index.md and report/en.md, "When Submarine Cables Go Dark: Understanding and Preparing for the Risks of Taiwan's International Internet Disconnection," results and limitations sections.
@@ -362,48 +335,33 @@ Funding: https://apnic.foundation/home/isifasia/
 
 ---
 
-<!-- _class: invert closing-slide -->
+## Open Information Force the Government to React
 
-## Open Information Helps Us Prepare
+- [Charles Mok](https://charlesmok.substack.com/p/taiwan-is-a-shining-example-of-undersea): Information gaps let rumors spread. Taiwan is a shining example of undersea cable incidents transparency.
+- [Global Taiwan Institute](https://globaltaiwan.org/2026/05/trust-as-infrastructure/): Transparency Can Save Taiwan's Digital Livfeline - credits the civic projects pushing government disclosure.
+- [MODA in Taipei Times](https://www.taipeitimes.com/News/taiwan/archives/2026/03/19/2003854094): Broadcasting cable status beneficial, MODA says. Public information helps people understand cable status.
 
-![Original MODA cable disruption table in Chinese, revisiting the opening slide](img/moda-fault-table.png)
+![bg right:40% contain](img/moda-report.png)
 
-- **[Charles Mok](https://charlesmok.substack.com/p/taiwan-is-a-shining-example-of-undersea)**: Information gaps let rumors spread.
-- **[Liu I-chen / GTI](https://globaltaiwan.org/2026/05/trust-as-infrastructure/)** credits the civic map with pushing government disclosure.
-- **[MODA in Taipei Times](https://www.taipeitimes.com/News/taiwan/archives/2026/03/19/2003854094)**: Public information helps people understand cable status.
+---
 
-<p class="takeaway">Our goal is to make the risks clear enough<br>that we can prepare for them.</p>
+## Contact
+
+`t.me/irvin` . `irvin @ moztw.org` . `@irvin`
 
 <!--
 Time: 2:00 (120 seconds).
 
-Now we are back at the MODA table.
+Ministry decided to publish the cable status in September 2025, in response to the community's map which bring a massive reaction from society and report of cables incidents on media.
 
-We have seen what a cable outage can do to daily life. We have also seen how the community collects information and studies the services that people use.
+The initiative earn positive feedback from both professional researcher and think-tank institute. 
 
-What happens when this information becomes public?
+Charles Mok points out that Information gaps allow rumors to spread, and Taiwan's directions is a shining example of undersea cable transarency. Global Taiwan Institute credits the civic map pushing government to disclose cable status, which strengthern the infrastructure by increasing public trust.
 
-Charles Mok points out that information gaps allow rumors to spread. He suggests that the cable-cut rumors in 2025 pushed the government to publish more details.
+And in the end, MODA eventiallu admired that making the status public helps people understand what is happening and is indeed benefic. 
 
-Liu I-chen, writing for the Global Taiwan Institute, credits the civic map with pushing government agencies to disclose cable status. That is the author's analysis of the community's influence.
+And this is the story for you today. Thank you.
 
-MODA's own explanation, in the Taipei Times interview, is direct: public information helps people understand what is happening.
+Now we can take some questions, if any. Please raise your hand if you have any questions. Krishna at venue please see if anyone present had questions, and also please raise your hand for online participation. 
 
-MODA launched its public status system in September 2025. My research in 2026 continues this work by asking what happens to the services people need.
-
-Open information gives people specific questions to ask. Government can respond with facts about damage, alternative routes, and repair dates.
-
-People can see what is known and what still needs work. This leaves less room for rumors and gives us a better basis for deciding what to prepare.
-
-Our goal is to make the risks clear enough that we can prepare for them.
-
-Sources (reference only, not spoken):
-Charles Mok, "Taiwan is a Shining Example of Undersea Cable Incidents Transparency," 10 Jan 2026.
-https://charlesmok.substack.com/p/taiwan-is-a-shining-example-of-undersea
-Liu I-chen, Global Taiwan Institute, "Trust as Infrastructure: How Transparency Can Save Taiwan's Digital Lifeline," 6 May 2026. Its claim about the civic map influencing government disclosure cites Charles Mok's article.
-https://globaltaiwan.org/2026/05/trust-as-infrastructure/
-Chiu Chiao-jen and Shelley Shan, Taipei Times, "Broadcasting cable status beneficial, MODA says," 19 Mar 2026. Reports MODA's stated objectives and the September 2025 launch date.
-https://www.taipeitimes.com/News/taiwan/archives/2026/03/19/2003854094
-Image: MODA cable disruption status page. The table is dated 3 Oct 2026.
-https://moda.gov.tw/major-policies/subseacable/fault/1749
 -->
