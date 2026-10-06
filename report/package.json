@@ -7,6 +7,7 @@
     "init-worktree": "node tools/init-report-worktree.js",
     "build": "node tools/build-report-root.js",
     "build:slide": "marp slide/index.md --html --allow-local-files --no-stdin -o slide/index.html",
+    "build:slide:aprigf": "marp slide/aprigf.md --html --allow-local-files --no-stdin -o slide/aprigf.html",
     "publish": "node tools/publish-report.js"
   },
   "devDependencies": {

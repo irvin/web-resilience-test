@@ -339,18 +339,24 @@ function copyDirRecursive(src, dest) {
 
 function syncSlideAssets(worktreeDir) {
   const sourceSlideHtml = path.join(sourceSlideDir, "index.html");
+  const sourceAprigfHtml = path.join(sourceSlideDir, "aprigf.html");
   const sourceSlideImgDir = path.join(sourceSlideDir, "img");
   const outSlideDir = path.join(worktreeDir, "slide");
 
   fs.rmSync(outSlideDir, { recursive: true, force: true });
 
-  if (!fs.existsSync(sourceSlideHtml)) {
-    console.log("report/slide/index.html not found, skipped slide sync");
+  if (!fs.existsSync(sourceSlideHtml) && !fs.existsSync(sourceAprigfHtml)) {
+    console.log("report/slide/*.html not found, skipped slide sync");
     return;
   }
 
   fs.mkdirSync(outSlideDir, { recursive: true });
-  fs.copyFileSync(sourceSlideHtml, path.join(outSlideDir, "index.html"));
+  if (fs.existsSync(sourceSlideHtml)) {
+    fs.copyFileSync(sourceSlideHtml, path.join(outSlideDir, "index.html"));
+  }
+  if (fs.existsSync(sourceAprigfHtml)) {
+    fs.copyFileSync(sourceAprigfHtml, path.join(outSlideDir, "aprigf.html"));
+  }
 
   if (fs.existsSync(sourceSlideImgDir)) {
     copyDirRecursive(sourceSlideImgDir, path.join(outSlideDir, "img"));
