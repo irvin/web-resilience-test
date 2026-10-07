@@ -259,17 +259,27 @@ Image: screenshots of the three articles above, compiled for this slide.
 
 ---
 
+![bg right:38% contain](img/qrcode-resilience.ocf.tw.png)
+
 ## Contact
 
-<a href="https://t.me/irvin">t.me/irvin</a> · <a href="mailto:irvin@moztw.org">irvin@moztw.org</a> · @irvin
+- Check English report and data at [`resilience.ocf.tw/web`](https://resilience.ocf.tw/web) →
 
-Full report: [resilience.ocf.tw/web/report/en](https://resilience.ocf.tw/web/report/en)
+- Meet us at AINTEC poster session in early Dec
+
+- [t.me/irvin](https://t.me/irvin) · [irvin@ocf.tw](mailto:irvin@moztw.org) · @irvinfly on SNS
 
 <!--
-Time: 0:30 (30 seconds).
 
 That's the story I wanted to share. Thank you. The full report is linked here.
 
 We have time for questions. Please raise your hand, whether you're in the room or online. Krishna, could you help take questions from the room?
 
+The results are published at resilience dot ocf dot tw. You can look up your sites, read the report, and fork the source code.
+
+Our goal is to make resilience visible enough that we can improve it.
+
+This work started from g0v digital resilience hackathons, and we will continue the follow-up work there.
+
+We will also be at AINTEC in Taipei in Dec. If you will be there, please come talk to us.
 -->
