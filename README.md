@@ -357,7 +357,7 @@ This reads `test-results/*.json` and writes `test-results/asn_taiwan_ratio.tsv` 
 
 ### Supplement: Report build / publish
 
-To build publishable HTML from `report/index.md` and `report/en.md`, or publish to the `report` branch, see [`report/README.md`](report/README.md) (Traditional Chinese: [`report/README.zh-TW.md`](report/README.zh-TW.md)). Published URLs: `/web/report/` (zh-TW) and `/web/report/en.html` (English).
+To build publishable HTML from `report/index.md` and `report/en.md`, compile decks under `report/slide/`, or publish to the `report` branch, see [`report/README.md`](report/README.md) (Traditional Chinese: [`report/README.zh-TW.md`](report/README.zh-TW.md)). Published URLs: `/web/report/` (zh-TW), `/web/report/en.html` (English), and `/web/report/slide/` for slides.
 
 **Chart output (`report/img`) and date rules:**
 - Also outputs:

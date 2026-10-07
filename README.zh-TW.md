@@ -361,7 +361,7 @@ node asn_taiwan_ratio.js
 
 ### 補充：報告 build / publish
 
-若要將 `report/index.md` 與 `report/en.md` 建成可發布的 HTML，或將內容發布到 `report` branch，請參考 `report/README.zh-TW.md` 的正式流程說明。發布後網址為 `/web/report/`（繁中）與 `/web/report/en.html`（英文）。
+若要將 `report/index.md` 與 `report/en.md` 建成可發布的 HTML、編譯 `report/slide/` 簡報，或將內容發布到 `report` branch，請參考 `report/README.zh-TW.md` 的正式流程說明。發布後網址為 `/web/report/`（繁中）、`/web/report/en.html`（英文），簡報在 `/web/report/slide/`。
 
 **圖表輸出（`report/img`）與日期規則：**
 - 會同步輸出：

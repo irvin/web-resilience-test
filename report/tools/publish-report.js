@@ -14,7 +14,6 @@ function main() {
 
   // Step 1: Build latest slide and report artifacts into report branch worktree
   run("npm run build:slide", reportDir);
-  run("npm run build:slide:aprigf", reportDir);
   run("node tools/build-report-root.js", reportDir);
 
   // Step 2: Commit and push if changed

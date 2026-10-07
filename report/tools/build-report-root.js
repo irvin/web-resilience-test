@@ -338,31 +338,32 @@ function copyDirRecursive(src, dest) {
 }
 
 function syncSlideAssets(worktreeDir) {
-  const sourceSlideHtml = path.join(sourceSlideDir, "index.html");
-  const sourceAprigfHtml = path.join(sourceSlideDir, "aprigf.html");
   const sourceSlideImgDir = path.join(sourceSlideDir, "img");
   const outSlideDir = path.join(worktreeDir, "slide");
+  const slideHtmlFiles = fs.existsSync(sourceSlideDir)
+    ? fs
+        .readdirSync(sourceSlideDir, { withFileTypes: true })
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".html"))
+        .map((entry) => entry.name)
+    : [];
 
   fs.rmSync(outSlideDir, { recursive: true, force: true });
 
-  if (!fs.existsSync(sourceSlideHtml) && !fs.existsSync(sourceAprigfHtml)) {
+  if (slideHtmlFiles.length === 0) {
     console.log("report/slide/*.html not found, skipped slide sync");
     return;
   }
 
   fs.mkdirSync(outSlideDir, { recursive: true });
-  if (fs.existsSync(sourceSlideHtml)) {
-    fs.copyFileSync(sourceSlideHtml, path.join(outSlideDir, "index.html"));
-  }
-  if (fs.existsSync(sourceAprigfHtml)) {
-    fs.copyFileSync(sourceAprigfHtml, path.join(outSlideDir, "aprigf.html"));
+  for (const name of slideHtmlFiles) {
+    fs.copyFileSync(path.join(sourceSlideDir, name), path.join(outSlideDir, name));
   }
 
   if (fs.existsSync(sourceSlideImgDir)) {
     copyDirRecursive(sourceSlideImgDir, path.join(outSlideDir, "img"));
   }
 
-  console.log(`Synced ${outSlideDir} from report/slide`);
+  console.log(`Synced ${outSlideDir} from report/slide (${slideHtmlFiles.join(", ")})`);
 }
 
 function buildLocaleReport(locale, worktreeDir) {

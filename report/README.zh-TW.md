@@ -2,7 +2,7 @@
 
 英文文件請見 [`README.md`](README.md)。
 
-這個目錄是獨立的報告編譯工具，用來把 `report/index.md` 與 `report/en.md` 建成可發布的 HTML，並同步 `report/img` 到 `report` branch 的 worktree。
+這個目錄是獨立的報告編譯工具，用來把 `report/index.md` 與 `report/en.md` 建成可發布的 HTML，同步 `report/img`，並編譯／同步 `report/slide/` 下的 Marp 簡報到 `report` branch 的 worktree。
 
 ## 日常流程
 
@@ -52,12 +52,19 @@ npm run report:publish
 - 若尚未建立，會在預設路徑 `report/publish` 建立 `report` branch worktree
 - 若 `report` branch 尚不存在，會一併建立 branch
 
+### `npm run build:slide`
+
+- 以 Marp 編譯 `report/slide/` 目錄下**所有** `.md`（例如 `index.md`、`aprigf.md`）
+- 輸出同名 HTML 到 `report/slide/`（例如 `index.html`、`aprigf.html`）
+- 只更新本機 `report/slide/`，不會寫入 worktree，也不會 `commit` 或 `push`
+
 ### `npm run build`
 
 - 將 `report/index.md` 編譯成 `index.html`（繁中，`/web/report/`）
 - 將 `report/en.md` 編譯成 `en.html`（英文，`/web/report/en.html`）
 - 語言切換介面與主站 `/web/` 相同（`lang-switcher` / `lang-switcher-btn` 膠囊按鈕）
 - 將 `report/img` 同步到目標 worktree 的 `img/`（兩種語言共用）
+- 將 `report/slide/*.html` 與 `report/slide/img/` 同步到目標 worktree 的 `slide/`（不重新編譯簡報；請先跑 `build:slide` 或走 `publish`）
 - 預設輸出到 `report` branch 對應的 worktree
 - 只更新輸出內容，不會 `commit` 或 `push`
 - 若找不到 worktree，會提示先執行 `npm run init-worktree`
@@ -65,7 +72,7 @@ npm run report:publish
 ### `npm run publish`
 
 - 若尚未建立 report worktree，會先自動建立
-- 執行 build，把最新 HTML 與圖片同步到 report worktree
+- 先執行 `build:slide` 編譯所有簡報，再執行 `build`，把最新報告 HTML、圖片與簡報同步到 report worktree
 - 進入 report worktree 檢查變更
 - 若有變更，自動 `git add .`、`git commit`、`git push`
 - 若無變更，直接結束
@@ -100,15 +107,40 @@ npm run build
 建議從 repo root 執行：
 
 ```bash
-REPORT_COMMIT_MESSAGE="Publish 2026-03-24 report" npm run report:publish
+npm run report:publish
 ```
 
 或在 `report/` 目錄內執行：
 
 ```bash
 cd report
-REPORT_COMMIT_MESSAGE="Publish 2026-03-24 report" npm run publish
+npm run publish
 ```
+
+不必手動設定 commit 訊息；有變更時，腳本會使用預設的 `Update report` 建立 commit 並 push 到 `report` branch。沒有變更時，不會建立 commit。
+
+若需要自訂訊息，可選擇從 repo root 執行：
+
+```bash
+REPORT_COMMIT_MESSAGE="Update APRIGF slides" npm run report:publish
+```
+
+## 簡報（`report/slide/`）
+
+來源與產物：
+
+- 來源：`report/slide/*.md`，圖片放 `report/slide/img/`
+- 本機編譯：`npm run build:slide` → 同目錄產生對應 `.html`
+- 發布同步：`npm run build`（或 `publish`）把所有 `slide/*.html` 與 `slide/img/` 複製到 worktree 的 `slide/`
+
+新增另一份獨立簡報（例如 `new-talk.md`）：
+
+1. 在 `report/slide/` 新增 Markdown（與需要的圖片）
+2. 執行 `npm run build:slide` 預覽，或直接 `npm run publish` 上站
+3. 不必再改 `package.json`、白名單編譯指令，或硬編碼要複製的 HTML 檔名
+4. 若希望訪客從站內點得到，仍須在報告頁或其他入口自行加連結
+
+發布後網址形如 `/web/report/slide/index.html`、`/web/report/slide/aprigf.html`。
 
 ## 輸出內容
 
@@ -117,8 +149,9 @@ REPORT_COMMIT_MESSAGE="Publish 2026-03-24 report" npm run publish
 - `index.html`（繁中）
 - `en.html`（英文）
 - `img/`
+- `slide/`（已編譯的簡報 HTML 與圖片）
 
-也就是說，`report/index.md`、`report/en.md` 與 `report/img/` 是來源，`report` branch worktree 則是發布輸出。若你只執行 `build`，這些輸出變更會保留在 worktree 中，直到你執行 `publish` 或手動處理為止。
+也就是說，`report/index.md`、`report/en.md`、`report/img/` 與 `report/slide/` 是來源，`report` branch worktree 則是發布輸出。若你只執行 `build`，這些輸出變更會保留在 worktree 中，直到你執行 `publish` 或手動處理為止。注意：`build` 本身不會編譯簡報 Markdown；要更新簡報內容請先跑 `build:slide`，或使用會一併編譯的 `publish`。
 
 ## 可用環境變數
 
@@ -132,7 +165,7 @@ REPORT_COMMIT_MESSAGE="Publish 2026-03-24 report" npm run publish
 ```bash
 REPORT_WORKTREE_PATH=report/publish npm run init-worktree
 REPORT_WORKTREE_PATH=report/publish npm run build
-REPORT_WORKTREE_PATH=report/publish REPORT_COMMIT_MESSAGE="Publish 2026-03-24 report" npm run publish
+REPORT_WORKTREE_PATH=report/publish npm run publish
 ```
 
 ## 常見錯誤
