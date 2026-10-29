@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { isHttpErrorStatus } = require('./http-status');
 
 // Target ASNs (international public cloud only)
 const TARGET_ASNS = {
@@ -116,6 +117,8 @@ async function main() {
       console.error(`Failed to read or parse JSON: ${file}`, err.message);
       continue;
     }
+
+    if (isHttpErrorStatus(data.httpStatus)) continue;
 
     const websiteDomain = extractWebsiteDomain(file, data);
     // Classify site type from original test URL, not canonical redirect target
