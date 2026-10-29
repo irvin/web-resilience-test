@@ -64,6 +64,7 @@ npm run report:publish
 - Compiles `report/en.md` to `en.html` (English, `/web/report/en.html`)
 - Language switcher uses the same pill-style UI as the main `/web/` site (`lang-switcher` / `lang-switcher-btn`)
 - Syncs `report/img` to `img/` in the target worktree (shared by both locales)
+- Syncs public paper PDFs and their edition notes from `report/papers/` to `papers/`
 - Syncs every `report/slide/*.html` plus `report/slide/img/` into the worktree `slide/` directory (does not recompile decks; run `build:slide` first, or use `publish`)
 - Default output is the worktree for the `report` branch
 - Updates output only; does not `commit` or `push`
@@ -149,6 +150,7 @@ After `build`, the target worktree contains:
 - `index.html` (Traditional Chinese)
 - `en.html` (English)
 - `img/` (shared assets)
+- `papers/` (public paper PDFs and edition notes)
 - `slide/` (compiled slide HTML and images)
 
 Sources are `report/index.md`, `report/en.md`, `report/img/`, and `report/slide/`; the `report` branch worktree is the publish output. If you only run `build`, changes stay in the worktree until you run `publish` or handle them manually. Note: `build` does not compile slide Markdown; run `build:slide` first to refresh deck content, or use `publish`, which compiles slides as part of the flow.

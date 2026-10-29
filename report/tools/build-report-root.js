@@ -6,6 +6,7 @@ const { resolveReportWorktreeDir } = require("./report-worktree");
 const reportDir = path.resolve(__dirname, "..");
 const sourceImgDir = path.join(reportDir, "img");
 const sourceSlideDir = path.join(reportDir, "slide");
+const sourcePaperDir = path.join(reportDir, "papers");
 
 const REPORT_BASE = "https://resilience.ocf.tw/web/report";
 const REPORT_PATH_ZH = "/web/report/";
@@ -406,6 +407,13 @@ function main() {
     console.log(`Synced ${outImgDir} from report/img`);
   } else {
     console.log("report/img not found, skipped image sync");
+  }
+
+  if (fs.existsSync(sourcePaperDir)) {
+    const outPaperDir = path.join(worktreeDir, "papers");
+    fs.rmSync(outPaperDir, { recursive: true, force: true });
+    copyDirRecursive(sourcePaperDir, outPaperDir);
+    console.log(`Synced ${outPaperDir} from report/papers`);
   }
 
   syncSlideAssets(worktreeDir);
