@@ -11,7 +11,7 @@ MozTW, Mozilla 台灣社群 ([moztw.org](https://moztw.org))
 ### 更新日期
 
 Published: 2026-03-23  
-Last Updated: 2026-08-07
+Last Updated: 2026-10-29
 
 ### 誌謝
 
@@ -32,9 +32,18 @@ This work was supported by a grant from the [APNIC Foundation](https://apnic.fou
 
 本研究提出一套可擴充且可重現的量測方法，用於量化網站的可觀測境外依賴，並比較不同網站的依賴結構。結果可作為政策與產業韌性規劃的基礎，並用於持續追蹤韌性改善情形。
 
+## 完整論文
+
+本研究的英文完整論文由 Irvin Chen（開放文化基金會 Open Culture Foundation）撰寫，整理網站依賴量測方法、端點定位流程與研究結果。以下提供 AINTEC 2026 technical paper 投稿稿件的具名公開版。
+
+*Measuring Observable Web Dependency Exposure under International Connectivity Disruption: A Request-Level Analysis of Websites Used in Taiwan*
+
+[閱讀／下載完整英文論文（PDF）](papers/aintec2026-full-paper.pdf)
+
 ## 目錄<!-- omit in toc -->
 
 - [摘要](#摘要)
+- [完整論文](#完整論文)
 - [研究背景](#研究背景)
   - [台灣是網路高度普及的社會](#台灣是網路高度普及的社會)
   - [日常網路服務如何依賴國際連線](#日常網路服務如何依賴國際連線)

@@ -64,6 +64,7 @@ npm run report:publish
 - 將 `report/en.md` 編譯成 `en.html`（英文，`/web/report/en.html`）
 - 語言切換介面與主站 `/web/` 相同（`lang-switcher` / `lang-switcher-btn` 膠囊按鈕）
 - 將 `report/img` 同步到目標 worktree 的 `img/`（兩種語言共用）
+- 將 `report/papers/` 的論文公開版 PDF 與版本說明同步到目標 worktree 的 `papers/`
 - 將 `report/slide/*.html` 與 `report/slide/img/` 同步到目標 worktree 的 `slide/`（不重新編譯簡報；請先跑 `build:slide` 或走 `publish`）
 - 預設輸出到 `report` branch 對應的 worktree
 - 只更新輸出內容，不會 `commit` 或 `push`

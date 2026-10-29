@@ -11,7 +11,7 @@ MozTW, Mozilla Taiwan Community ([moztw.org](https://moztw.org))
 ### Dates
 
 Published: 2026-05-22  
-Last Updated: 2026-08-07
+Last Updated: 2026-10-29
 
 ### Acknowledgments
 
@@ -32,9 +32,18 @@ We collected connection data from 2,179 websites commonly used in Taiwan. The re
 
 This study provides a scalable, reproducible measurement method for quantifying observable foreign dependencies and comparing dependency structures across websites. The results can inform policy and industry resilience planning and support continued tracking of resilience improvements.
 
+## Full paper
+
+The full English paper by Irvin Chen (Open Culture Foundation) describes the web dependency measurement method, endpoint location workflow, and research findings. The PDF is the public author version of the AINTEC 2026 technical paper submission.
+
+*Measuring Observable Web Dependency Exposure under International Connectivity Disruption: A Request-Level Analysis of Websites Used in Taiwan*
+
+[Read / download the full paper (PDF)](papers/aintec2026-full-paper.pdf)
+
 ## Table of contents<!-- omit in toc -->
 
 - [Abstract](#abstract)
+- [Full paper](#full-paper)
 - [Background](#background)
   - [Taiwan as a highly connected society](#taiwan-as-a-highly-connected-society)
   - [How everyday services depend on international connectivity](#how-everyday-services-depend-on-international-connectivity)
