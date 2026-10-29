@@ -1,3 +1,4 @@
+const { isHttpErrorStatus } = require('./http-status');
 const DEFAULT_RTT_THRESHOLD = 15;
 const SENSITIVITY_THRESHOLDS = [10, 15, 20];
 
@@ -54,6 +55,7 @@ function collectRttStatistics(
   thresholds = SENSITIVITY_THRESHOLDS,
   baselineThreshold = DEFAULT_RTT_THRESHOLD,
 ) {
+  const includedRecords = records.filter(({ data }) => !isHttpErrorStatus(data.httpStatus));
   const observations = [];
   const sitesWithRtt = new Set();
   const sitesWithMeasuredRtt = new Set();
@@ -63,7 +65,7 @@ function collectRttStatistics(
   let rawHttpRequests = 0;
   let domainObservations = 0;
 
-  for (const record of records) {
+  for (const record of includedRecords) {
     const { file = '', data } = record;
     const siteKey = data.url || file;
     rawHttpRequests += Number(data.requestCount) || 0;
@@ -161,7 +163,7 @@ function collectRttStatistics(
   }));
 
   return {
-    totalSites: records.length,
+    totalSites: includedRecords.length,
     rawHttpRequests,
     domainObservations,
     sitesWithRtt: sitesWithRtt.size,

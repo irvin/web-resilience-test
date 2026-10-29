@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { chromium } = require('playwright');
+const { isHttpErrorStatus } = require('./http-status');
 const {
   collectRttStatistics,
   renderRttDistributionTsv,
@@ -936,6 +937,7 @@ async function main() {
   const dataMap = new Map();
   const jsonDataMap = new Map();
   const jsonDataset = [];
+  const excludedHttpErrors = [];
 
   for (const file of jsonFiles) {
     const fullPath = path.join(DIR, file);
@@ -944,6 +946,10 @@ async function main() {
     try {
       const content = await fs.promises.readFile(fullPath, 'utf8');
       data = JSON.parse(content);
+      if (isHttpErrorStatus(data.httpStatus)) {
+        excludedHttpErrors.push([file, data.url || '', data.httpStatus]);
+        continue;
+      }
       jsonDataset.push(data);
     } catch (err) {
       console.error(`Failed to read or parse JSON: ${file}`, err.message);
@@ -1057,6 +1063,13 @@ async function main() {
   }
 
   await fs.promises.writeFile(OUTPUT, lines.join('\n'), 'utf8');
+  await fs.promises.writeFile(
+    path.join(DIR, 'excluded-http-errors.tsv'),
+    [['file', 'url', 'http_status'], ...excludedHttpErrors]
+      .map((row) => row.join('\t')).join('\n') + '\n',
+    'utf8',
+  );
+  console.log(`Excluded ${excludedHttpErrors.length} homepage HTTP 4xx/5xx result(s); raw JSON files were retained.`);
   console.log(`Wrote TSV: ${OUTPUT}`);
   console.log(`Processed ${allData.length} row(s)`);
 

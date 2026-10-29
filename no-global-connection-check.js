@@ -19,6 +19,7 @@ const crypto = require('crypto');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+const { isHttpErrorStatus } = require('./http-status');
 
 // Create ipinfo client
 // const ipinfo = new IPinfoWrapper(process.env.IPINFO_TOKEN || undefined);
@@ -815,8 +816,8 @@ async function collectHARAndCanonical(url, options = {}) {
         // HTTP status code
         const httpStatus = response ? response.status() : null;
 
-        // Reject 4xx responses
-        if (httpStatus && httpStatus >= 400 && httpStatus < 500) {
+        // Reject homepage client/server error responses, not subresource errors.
+        if (isHttpErrorStatus(httpStatus)) {
             const statusText = response.statusText();
             throw new Error(`HTTP ${httpStatus} ${statusText}`);
         }

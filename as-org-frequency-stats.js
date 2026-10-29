@@ -4,6 +4,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { isHttpErrorStatus } = require('./http-status');
 
 const baseDir = process.argv[2] || "./test_results";
 const outputPath = process.argv[3] || "./test_results/as-org-frequency-stats-result.tsv";
@@ -51,7 +52,7 @@ for (const filePath of jsonFiles) {
   } catch (err) {
     continue;
   }
-  if (data && typeof data === "object" && data.domainDetails !== undefined) {
+  if (data && typeof data === "object" && !isHttpErrorStatus(data.httpStatus) && data.domainDetails !== undefined) {
     walk(data.domainDetails);
   }
 }
